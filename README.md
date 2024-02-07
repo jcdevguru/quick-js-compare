@@ -1,93 +1,164 @@
-# quick-js-compare
-Compare two Javascript values and report differences
+# Quick JS Compare
 
-// diffObjs: return differences between JavaScript values
-//
-// Function:
-//
-//    Compare two JavaScript values, and return a two-element
-//    array that contains a minimal representation of the difference
-//    between the two.
-//
-//    Values may be scalar (e.g., string, integer, boolean) or objects,
-//    including arrays.  When the two values match exactly, that is,
-//    if the '===' operator between the two would return 'true', we return NULL.
-//    
-//    When the result contains an object or array, only data, not references,
-//    are copied from the arguments.  This makes for a large size result
-//    but one whose manipulation will not affect the original arguments.
-//
-// Args:
-//    v1, v2: values to compare
-//
-// Specific behaviors:
-//
-//    *Return NULL if v1 === v2*
-//
-//    This happens when two scalar (non-object) values match, or when the same
-//    object or array is passed in both arguments.
-//    e.g.,
-//        
-//        var my_obj = { member1: 0, member1: 'dog' };
-//        var my_array = [ 1, 'cat' ];
-//        var my_int = 7;
-//        var no_val = null;
-//
-//        diffObjs(my_int, my_int)        ==> NULL
-//        diffObjs(1, 1)                  ==> NULL
-//        diffObjs(my_obj, my_obj)        ==> NULL
-//        diffObjs({x:1,y:2}, {x:1,y:2})  ==> NULL
-//        diffObjs(my_array, my_array)    ==> NULL
-//        diffObjs([1,'a'], [1,'1'])      ==> NULL
-//        diffObjs(null, null)            ==> NULL
-//        diffObjs(no_val, null)          ==> NULL
-//
-//    *Return copies of v1 and v2 on type mismatch*:
-//
-//    When type of v1 and v2 are different or one is an array and the other
-//    is an object, the result array will contain exect copies of both
-//    v1 and v2.
-//
-//    *Return minimal representation of differences among non-array objects*:
-//
-//    Otherwise, when two objects are passed in, element 0
-//    in the result array contains the members and their values
-//    that exist in v1 but not v2, or members that exist in both
-//    v1 and v2 that have different values.  Element 1 contains
-//    the same but with respect to v2, that is members and their
-//    values that exist in v2 but not v1, or members that exist in
-//    both v1 and v2 that have different values.
-//    
-//    Note: The members are represented in the result objects only when
-//    they are specific to the object of the corresponding value argument
-//    or when the members exist in both and have different values.  The
-//    caller therefore can tell whether the object mismatch exists 
-//    because of specificity of a member to one object vs. a mismatch
-//    in values where one is null and the other is not.
-//
-//    Examples:
-//        diffObjs({a:10, b:"dog"}, {a:1, b:"dog"}    ==> [ {a:10}, {a:1} ]
-//        diffObjs({a:10},          {a:10, b:"dog"}   ==> [ {}, {b:"dog"} ]
-//        diffObjs({a:10, c:null},  {a:10, b:"dog"}   ==> [ {c:null}, {b:"dog"} ]
-//        diffObjs({a:[1], b:"cat"},{a:1, b:"dog"}    ==> [ {a:[1], b:"cat"}, {a:1, b:"dog"} ]
-//        diffObjs(
-//            {a:{ m1:"x", m2:"y"}, b:3 },
-//            {a:{ m1:"x", m2:"z", m3:1 }, b:3 } )    ==> [ {a:{m2:"y"}}, {a:{m2:"z",m3:1}} ]
-//
-//    *Return copies of compared arrays when differing by position or value*
-//
-//    If the two arguments arrays, the results in elements 0 and 1
-//    will contain results in array form that do not match with respect
-//    to both value and order.  If two positionally corresponding
-//    elements in the array arguments have identical value (e.g., two
-//    scalars with matching values or two references to the same object), 
-//    the corresponding values in the array will be null.  The
-//    cardinality of the arrays within the result array will therefore
-//    always match that of the corresponding arguments.
-//
-//    Examples:
-//        diffObjs([1,2],        [1,2])   ==> [ [null,null], [null,null] ]
-//        diffObjs([1,2],        [2,1])   ==> [ [1,2], [2,1] ]
-//        diffObjs([1,2],        [1,2,3]) ==> [ [1,2,null], [2,1,3] ]
-//        diffObjs([1,1,2,3],    [1,2,3]) ==> [ [null,1,2,3], [null,2,3] ]
-//
+Comparing two values in JavaScript is a common task, but issues with circular references, strict vs conventional comparisons, key ordering, and performance can make the task surprisingly complicated and easy to get wrong.  For example, automated tests will often pass or fail based on inadequate comparison between expected and actual results, with differences rendered as long JSON strings that need to be sorted through manually.
+
+Quick JS Compare is a utility library for performing quick comparisons between two values in JavaScript or TypeScript. It directly supports comparison of primitive types, objects, Maps, and Sets, but can be tailored to compare any sort of data in any way. Flexibility is provided through an options structure that accepts both parameters and callback functions, permitting you to specify comparison in any way that is needed.
+
+Most of all, it's quick and lightweight.  Care is taken in the implementation to avoid redundant operations, excessive object storage, or unnecessary recursion.  It also does not use JSON serialization or parsing in any place.
+
+For now, this is a WIP.  Feel free to give feedback on any topic from this README.
+
+## Usage
+
+- Use Yarn or NPM to install Quick JS Compare.
+- In TypeScript or JavaScript, access the base method from the module:
+
+```js
+import { compare } from 'quick-js-compare'; // TypeScript, NodeJS
+```
+or
+```js
+const { compare } = require('quick-js-compare'); // Other JS
+```
+
+The method can be invoked as follows:
+
+```javascript
+const value1 = 'hello';
+const value2 = 'world';
+
+const result = compare(value1, value2);
+```
+
+The result object will contain the following:
+
+- `left`: data in first parameter not matched by the second
+- `right`: data in the second parameter not matched by the first
+- `status`: `true` if parameters compared equal, `false` otherwise
+
+If there were no differences, the `left` and `right` values will have the value `null` and `status` will be `true`.
+
+### Primitives
+
+A simple use case shows its default behavior (no options):
+
+```js
+const value1 = 'hello';
+const value2 = 'world';
+
+const result = compare(value1, value2);
+console.log(JSON.stringfy(result, null, 2));
+```
+
+will result in:
+
+```js
+{
+  "left": "hello",
+  "right": "world",
+  "status": false
+}
+```
+
+### Objects (Property/Value)
+
+The default behavior for the comparison of two objects will be to compare keys/value pairs, without respect to order of keys.
+
+```js
+const value1 = { a: 1, b: 'abc', x: 5, c: 'def' details: { title: 'Shopping list', cost: 2.14 }};
+const value2 = { b: 'abc', a: 2, c: 'def', details: { title: 'Shopping list', cost: 2.9 }}; }
+
+const result = compare(value1, value2);
+console.log(JSON.stringfy(result, null, 2));
+```
+
+will result in:
+
+```js
+{
+  "left": {
+    "a": 1,
+    "x": 5,
+    "details": {
+      "cost": 2.14
+    }
+  },
+  "right": {
+    "a": 2,
+    "details": {
+      "cost": 2.9
+    }
+  },
+  "status": false
+}
+```
+
+## Options
+
+Quick JS Compare accepts an options structure to customize the comparison behavior. Available options include:
+
+  * `compare`: "`Strict`" | "`General`"* | options | function
+  * `compareValue`: "`strict`"* | "`abstract`" | "`ignore`" | function
+  * `compareObject`: "`reference`" | "`keyValueOrder`" | "`keyValue`"* | "`keyOrder`" | "`keyOnly`" | "`valueOnly`" | "`ignore`" | function
+  * `compareCollection`: "`reference`" | "`valueOrder`" | "`valueOnly`"* | "`sizeOnly`" | "`ignore`" | function
+
+
+### Explanations
+
+* Strict
+  * - compare using `===` for primitives (i.e., type and value)
+  * - compare by type, order, values for object
+  * - compare by index, value for collection
+
+  * compare
+  * `compareValue`: "`strict`"
+  * `compareObject`: "`keyValueOrder`"
+  * `compareCollection`: "`indexValue`"
+
+* General (default)
+  * - compare using `==` for primitives (can compare only in value)
+  * - compare by key/value for object (order insignificant)
+  * - compare by order, value for collection
+
+  * `compareValue`: "`abstract`"
+  * `compareObject`: "`keyValue`"
+  * `compareCollection`: "`valueOnly`"
+
+* `Structure`:
+  * `compareValue`: "`ignore`"
+  * `compareObject`: "`keyOnly`"
+  * `compareCollection`: "`sizeOnly`"
+
+
+* `render`: "`Standard`" | "`Verbose`" | options | function
+
+* `Standard`:
+  * `mapAsObject`: true
+  * `setAsArray`: true
+  * `maxDepth`: 0
+  * `same`: false
+  * `report`: false
+
+* `Verbose`:
+  * `mapAsObject`: true
+  * `setAsArray`: true
+  * `maxDepth`: 0
+  * `same`: true
+  * `report`: true
+
+
+## Examples (TBD)
+
+Here are some examples demonstrating various comparison scenarios:
+
+```javascript
+// Add examples here
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
