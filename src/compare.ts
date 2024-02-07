@@ -4,7 +4,6 @@ import {
   type KeyCompareResult,
   type ObjCompareResult,
   type NonPrimitive,
-  type ArraySegment,
 } from './types';
 
 export const comparePrimitivesStrict = (a: unknown, b: unknown) => a === b;
@@ -15,147 +14,66 @@ export const compareObjectsReference = (a: NonPrimitive, b: NonPrimitive) => a !
 
 // compareObject
 // -------------
+const sparseIndexes = (arr: Array<unknown>) => Object
+  .values(arr.map((v, i, a) => (v === undefined ? a[i] : i)) as Array<number>);
 
 // option: keyOnly, keyValue
-export const findUnmatchedKeyBlocks = (base: StdObject, comparator: StdObject): Array<ArraySegment> => {
+export const findMissingKeys = (base: StdObject, comparator: StdObject): Array<string> => {
   const comparatorKeySet = new Set(Object.keys(comparator));
-  let addBucket = true;
-  const rVal = Object.keys(base)
-    .reduce((acc, k, idx) => {
-      if (comparatorKeySet.has(k)) {
-        addBucket = true;
-        return acc;
-      }
-      if (addBucket) {
-        acc.push([idx, 0]);
-        addBucket = false;
-      }
-      acc[acc.length - 1][1] += 1;
-      return acc;
-    }, [] as Array<ArraySegment>);
-  return rVal;
-};
-
-const blocksToKeys = (base: StdObject, blocks: Array<ArraySegment>): Array<string> => {
-  const keys = Object.keys(base);
-  return blocks.map(([index, len]) => keys.slice(index, index + len - 1)).flat();
+  return Object.keys(base).map((v, i, arr) => (comparatorKeySet.has(v) ? arr[i] : v));
 };
 
 export const compareKeysByName = (leftOp: StdObject, rightOp: StdObject): KeyCompareResult => {
-  const left = blocksToKeys(leftOp, findUnmatchedKeyBlocks(leftOp, rightOp));
-  const right = blocksToKeys(rightOp, findUnmatchedKeyBlocks(rightOp, leftOp));
+  const left = Object.values(findMissingKeys(leftOp, rightOp));
+  const right = Object.values(findMissingKeys(rightOp, leftOp));
   const status = !left.length && !right.length;
   return { left, right, status };
 };
 
 // option: keyOrder
-// export const findUnmatchedKeys = (base: StdObject, comparator: StdObject): Array<string> => {
-//   const unmatchedKeyBlocks = findUnmatchedKeyBlocks(base, comparator);
-
-//   const baseKeys = Object.keys(base);
-//   const comparatorKeys = Object.keys(comparator);
-//   const result = [];
-//   let baseIndex = 0;
-//   let blockIndex = 0;
-
-// };
-
-// export const compareKeysByNameOrder = (leftOp: StdObject, rightOp: StdObject): KeyCompareResult => {
-//   const left = findUnmatchedKeys(leftOp, rightOp);
-//   const right = findUnmatchedKeys(rightOp, leftOp);
-//   const status = !left.length && !right.length;
-//   return { left, right, status };
-// };
-
-// option: keyValueOrder
-export const compareObjects = (leftOp: StdObject, rightOp: StdObject): ObjCompareResult => {
-  const keyComparison = compareKeysByNameOrder(leftOp, rightOp);
-  const unmatchedRightKeySet = new Set(keyComparison.left);
-  const unmatchedLeftKeySet = new Set(keyComparison.right);
-  let { status } = keyComparison;
-
-  const leftItr = Object.keys(leftOp)[Symbol.iterator]();
-  const rightItr = Object.keys(rightOp)[Symbol.iterator]();
-
-  let leftIteration = leftItr.next();
-  let rightIteration = rightItr.next();
-  let leftKey: string;
-  let rightKey: string;
-
-  const left: StdObject = {};
-  const right: StdObject = {};
-
-  while (!leftIteration.done && !rightIteration.done) {
-    leftKey = leftIteration.value;
-    rightKey = rightIteration.value;
-
-    while (!leftIteration.done && unmatchedRightKeySet.has(leftKey)) {
-      left[leftKey] = leftOp[leftKey];
-      leftIteration = leftItr.next();
-      if (!leftIteration.done) {
-        leftKey = leftIteration.value;
-      }
+export const findUnmatchedKeys = (base: StdObject, comparator: StdObject): Array<string> => {
+  const unmatchedKeys = findMissingKeys(base, comparator);
+  const indicesToCompare = sparseIndexes(unmatchedKeys);
+  const baseKeys = Object.keys(base);
+  const comparatorKeys = Object.keys(comparator);
+  let ci = 0;
+  indicesToCompare.every((baseIndex) => {
+    if (ci >= comparatorKeys.length) {
+      return false;
     }
-
-    while (!rightIteration.done && unmatchedLeftKeySet.has(rightKey)) {
-      right[rightKey] = rightOp[rightKey];
-      rightIteration = rightItr.next();
-      if (!rightIteration.done) {
-        rightKey = rightIteration.value;
-      }
+    const baseKey = baseKeys[baseIndex];
+    if (baseKey !== comparatorKeys[ci]) {
+      unmatchedKeys[baseIndex] = baseKey;
     }
+    ci += 1;
+    return true;
+  });
+  return unmatchedKeys;
+};
 
-    if (!leftIteration.done && !rightIteration.done) {
-      let matching = false;
-      if (leftKey === rightKey) {
-        const leftVal = leftOp[leftKey];
-        const rightVal = rightOp[rightKey];
-
-        matching = leftVal === rightVal;
-        if (!matching) {
-          switch (actualType(leftVal)) {
-            case 'object':
-              matching = compareObjects(leftVal as StdObject, rightVal as StdObject).status;
-              break;
-            default:
-              // incomplete
-              matching = false;
-          }
-        }
-      }
-
-      if (!matching) {
-        left[leftKey] = leftOp[leftKey];
-        right[rightKey] = rightOp[rightKey];
-        status = false;
-      }
-
-      leftIteration = leftItr.next();
-      rightIteration = rightItr.next();
-    }
-  }
-
-  while (!leftIteration.done) {
-    leftKey = leftIteration.value;
-    left[leftKey] = leftOp[leftKey];
-    leftIteration = leftItr.next();
-  }
-
-  while (!rightIteration.done) {
-    rightKey = rightIteration.value;
-    right[rightKey] = rightOp[rightKey];
-    rightIteration = rightItr.next();
-  }
+export const compareKeysByNameOrder = (leftOp: StdObject, rightOp: StdObject): KeyCompareResult => {
+  const left = Object.values(findUnmatchedKeys(leftOp, rightOp));
+  const right = Object.values(findUnmatchedKeys(rightOp, leftOp));
+  const status = !left.length && !right.length;
   return { left, right, status };
 };
 
-// // option: keyValue
-// export const findUnmatchedKeyValues = (base: StdObject, comparator: StdObject): StdObject => {
-//   const unmatchedKeyBlocks = findUnmatchedKeyBlocks(base, comparator);
-//   const baseKeys = Object.keys(base);
-//   const comparatorKeys = Object.keys(comparator);
-//   return [
-//     ...baseKeys.filter((k, i) => k !== comparatorKeys[i]),
-//     ...baseKeys.slice(comparatorKeys.length),
-//   ];
+// option: keyValueOrder
+// export const compareObjects = (leftOp: StdObject, rightOp: StdObject): ObjCompareResult => {
+//   const leftUnmatched = findUnmatchedKeys(leftOp, rightOp);
+//   const rightUnmatched = findUnmatchedKeys(rightOp, leftOp);
+//   const leftIndices = sparseIndexes(leftUnmatched);
+//   const rightIndices = sparseIndexes(rightUnmatched);
+//   return { left, right, status };
 // };
+
+// // // // option: keyValue
+// // export const findUnmatchedKeyValues = (base: StdObject, comparator: StdObject): StdObject => {
+// //   const unmatchedKeyBlocks = findUnmatchedKeyBlocks(base, comparator);
+// //   const baseKeys = Object.keys(base);
+// //   const comparatorKeys = Object.keys(comparator);
+// //   return [
+// //     ...baseKeys.filter((k, i) => k !== comparatorKeys[i]),
+// //     ...baseKeys.slice(comparatorKeys.length),
+// //   ];
+// // };
