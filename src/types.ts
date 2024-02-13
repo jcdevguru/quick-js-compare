@@ -2,46 +2,42 @@
 
 // TypeScript declarations for transpilations
 export type StdObject = Record<string, unknown>;
-
+export type MapObject = Map<unknown, unknown>;
+export type SparseArray<T> = Array<T | undefined>;
+export type KeyedObject = StdObject | MapObject;
 export type Primitive = string | number | boolean | undefined | null | symbol | bigint;
-export type NonPrimitive = Exclude<unknown, Primitive>;
-export type DiffValue = NonPrimitive | Primitive;
-export type CompareElement = Primitive | NonPrimitive;
+export type NonPrimitive = StdObject | Set<unknown> | Map<unknown, unknown> | Array<unknown> | Date;
+export type CompareItem = Primitive | NonPrimitive;
+export type Collection = Array<CompareItem> | Set<CompareItem>;
+export type ResultItem = Primitive | StdObject | Array<CompareItem>;
+
+export type StdObjectEntry = [keyof StdObject, unknown];
+export type StdObjectEntries = Array<StdObjectEntry>;
+export type SparseStdObjectEntries = SparseArray<StdObjectEntry>;
+
+export type CompareFunc<T> = (baseItem: T, otherItem: T, options?: AppOptions) => boolean;
+export type PrimitiveCompareFunc = CompareFunc<Primitive>;
+export type StdObjectCompareFunc = CompareFunc<StdObjectEntry>;
+export type MapObjectCompareFunc = CompareFunc<MapObject>;
+export type CollectionCompareFunc = CompareFunc<Collection>;
 
 export interface CompareResult {
-  left: DiffValue
-  right: DiffValue
-  status: boolean
+  left: ResultItem
+  right: ResultItem
 }
 
-export interface ObjCompareResult extends CompareResult {
-  left: StdObject
+export interface StdObjectCompareResult extends CompareResult {
+  left: StdObject,
   right: StdObject
 }
 
-export interface KeyCompareResult extends CompareResult {
-  left: Array<string>
-  right: Array<string>
-}
-
-export type CollectionType = Array<CompareElement> | Set<CompareElement>;
-
-export type PrimitiveCompareFunction =
-  (subject: Primitive, toCompareWith: Primitive, options?: AppOptions) => boolean;
-
-export type ObjectCompareFunction =
-  (subject: NonPrimitive, toCompareWith: NonPrimitive, options?: AppOptions) => CompareResult;
-
-export type CollectionCompareFunction =
-  (subject: CollectionType, toCompareWith: CollectionType, options?: AppOptions) => CompareResult;
-
 export interface CompareOptions {
-  compareValue: 'strict' | 'abstract' | 'ignore' | PrimitiveCompareFunction
-  compareObject: 'reference' | 'keyValueOrder' | 'keyValue' | 'keyOrder' | 'keyOnly' | 'valueOnly' | 'ignore' | ObjectCompareFunction
-  compareCollection: 'reference' | 'valueOrder' | 'valueOnly' | 'sizeOnly' | 'ignore' | CollectionCompareFunction
+  compareValue: 'strict' | 'abstract' | 'ignore' | PrimitiveCompareFunc
+  compareObject: 'reference' | 'keyValueOrder' | 'keyValue' | 'keyOrder' | 'keyOnly' | 'valueOnly' | 'ignore' | StdObjectCompareFunc
+  compareCollection: 'reference' | 'valueOrder' | 'valueOnly' | 'sizeOnly' | 'ignore' | CollectionCompareFunc
 }
 
-export type RenderFunction = (result: CompareResult) => unknown;
+export type RenderFunc = (result: CompareResult) => unknown;
 
 export interface RenderOptions {
   jsMapAsObject: boolean
@@ -51,12 +47,12 @@ export interface RenderOptions {
   debug: boolean
 }
 
-export type CompareFunction =
-  (base: CompareElement, comparator: CompareElement) => CompareResult;
+export type SummaryCompareFunc =
+  (baseItem: ResultItem, otherItem: ResultItem) => CompareResult;
 
 export interface AppOptions {
-  compare: 'Strict' | 'Equivalent' | Partial<CompareOptions> | CompareFunction
-  render: 'StatusOnly' | 'Standard' | Partial<RenderOptions> | RenderFunction
+  compare: 'Strict' | 'Equivalent' | Partial<CompareOptions> | SummaryCompareFunc
+  render: 'StatusOnly' | 'Standard' | Partial<RenderOptions> | RenderFunc
 }
 
 // Methods for run-time handling of data types
