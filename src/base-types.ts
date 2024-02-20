@@ -15,14 +15,11 @@ export type CollectionObject = ArrayObject | SetObject;
 export type CompareItem = Primitive | StdObject | ArrayObject | MapObject | SetObject;
 
 export type StdObjectEntry = [keyof StdObject, CompareItem];
-export type StdObjectEntries = Array<StdObjectEntry>;
 
-export interface BaseCompareFunc {
-  (left: CompareItem, right: CompareItem): boolean;
-}
+export type CompareStatus = boolean | undefined;
 
-export interface CompareFunc<T extends CompareItem> extends BaseCompareFunc {
-  (left: T, right: T): boolean;
+export interface CompareFunc<T extends CompareItem> {
+  (left: T, right: T): CompareStatus;
 }
 
 export type PrimitiveCompareFunc = CompareFunc<Primitive>;
@@ -34,4 +31,5 @@ export interface CompareResult {
   left: CompareItem
   right: CompareItem
   same?: CompareItem
+  status: CompareStatus
 }

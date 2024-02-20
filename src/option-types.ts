@@ -1,4 +1,7 @@
-import { type BaseCompareFunc } from './base-types';
+import type {
+  CompareFunc,
+  CompareItem,
+} from './base-types';
 
 export interface CompareOptions {
   compareValue: 'strict' | 'abstract' | 'ignore'
@@ -15,6 +18,6 @@ export interface RenderOptions {
 }
 
 export interface AppOptions {
-  compare: 'Strict' | 'Equivalent' | Partial<CompareOptions> | BaseCompareFunc
-  render: 'StatusOnly' | 'Standard' | Partial<RenderOptions>
+  compare: 'Strict' | 'Equivalent' | CompareOptions | CompareFunc<CompareItem>
+  render: 'StatusOnly' | 'Standard' | RenderOptions
 }

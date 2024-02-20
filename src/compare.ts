@@ -1,41 +1,90 @@
 import type {
-  BaseCompareFunc,
+  CompareFunc,
   CompareItem,
   CompareResult,
+  CompareStatus,
 } from './base-types';
 
 import {
   type AppOptions,
 } from './option-types';
 
-// incomplete
-const defaultComparer = (left: CompareItem, right: CompareItem) => left === right;
+import {
+  GeneralComparer,
+  StrictComparer,
+} from './compare-methods';
+
+import {
+  genResult,
+  valIsReference,
+} from './compare-utils';
 
 export default class QuickCompare {
-  public readonly comparer: BaseCompareFunc = defaultComparer;
+  private compareMethodFromOptions: CompareFunc<CompareItem>;
 
-  protected static methodFromOptions(options: AppOptions): BaseCompareFunc {
+  private refSets = {
+    left: new WeakSet(),
+    right: new WeakSet(),
+  };
+
+  private appOptions: Partial<AppOptions>;
+
+  private static defaultMethodFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<CompareItem> => {
+    const appType = typeof appOptions;
+    if (appType === 'function') {
+      return appOptions as CompareFunc<CompareItem>;
+    }
     // incomplete
-    if (Object.keys(options).length === 0) {
-      return (left: CompareItem, right: CompareItem) => left === right;
+    if (appType === 'string') {
+      switch (appOptions as string) {
+        case 'General':
+          return GeneralComparer;
+        default:
+          return StrictComparer;
+      }
     }
-    return (left: CompareItem, right: CompareItem) => left === right;
+    // Incomplete
+    return StrictComparer;
+  };
+
+  protected comparer(leftItem: CompareItem, rightItem: CompareItem): CompareStatus {
+    return this.compareMethodFromOptions(leftItem, rightItem);
   }
 
-  constructor(appOptions?: AppOptions) {
-    if (appOptions !== undefined) {
-      this.comparer = QuickCompare.methodFromOptions(appOptions);
-    }
+  constructor(appOptions: Partial<AppOptions> = {}) {
+    this.appOptions = appOptions;
+    this.compareMethodFromOptions = QuickCompare.defaultMethodFromOptions(this.appOptions);
   }
+
+  protected addLeftReference = (ref: CompareItem) => this.refSets.left.add(ref as object);
+
+  protected referencedInLeft = (ref: CompareItem) => this.refSets.left.has(ref as object);
+
+  protected addRightReference = (ref: CompareItem) => this.refSets.right.add(ref as object);
+
+  protected referencedInRight = (ref: CompareItem) => this.refSets.right.has(ref as object);
 
   compare(leftItem: CompareItem, rightItem: CompareItem): CompareResult {
-    let left: CompareItem = null;
-    let right: CompareItem = null;
-
-    if (!this.comparer(leftItem, rightItem)) {
-      left = leftItem;
-      right = rightItem;
+    if (leftItem === rightItem) {
+      return genResult(leftItem, rightItem, true);
     }
-    return { left, right };
+    let leftOp = leftItem;
+    let rightOp = rightItem;
+
+    if (valIsReference(leftItem)) {
+      this.addLeftReference(leftItem);
+    } else if (this.referencedInLeft(leftItem)) {
+      leftOp = null;
+    }
+
+    if (valIsReference(rightItem)) {
+      this.addRightReference(rightItem);
+    } else if (this.referencedInRight(rightItem)) {
+      rightOp = null;
+    }
+
+    const result = genResult(leftItem, rightItem, this.comparer(leftOp, rightOp));
+
+    return result;
   }
 }
