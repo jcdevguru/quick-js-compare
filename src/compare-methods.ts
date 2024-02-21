@@ -3,7 +3,7 @@ import {
   actualType,
   typeIsSupported,
   typeIsPrimitive,
-} from './compare-utils';
+} from './util';
 
 export const GeneralComparer = (leftItem: CompareItem, rightItem: CompareItem) : CompareStatus => {
   // always check for strict match

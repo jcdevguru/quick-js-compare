@@ -13,7 +13,7 @@ import {
   typeIsStdObject,
   isMatching,
   genResult,
-} from './compare-utils';
+} from './util';
 
 import {
   AppOptions,

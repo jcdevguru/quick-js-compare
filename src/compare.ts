@@ -17,7 +17,7 @@ import {
 import {
   genResult,
   valIsReference,
-} from './compare-utils';
+} from './util';
 
 export default class QuickCompare {
   private compareMethodFromOptions: CompareFunc<CompareItem>;
