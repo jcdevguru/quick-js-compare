@@ -1,8 +1,9 @@
 import type {
   CompareFunc,
   CompareItem,
-  CompareResult,
-  CompareStatus,
+  Comparison,
+  ComparisonStatus,
+  ReferenceObject,
 } from './base-types';
 
 import {
@@ -15,21 +16,23 @@ import {
 } from './compare-methods';
 
 import {
-  genResult,
+  createComparison,
   valIsReference,
 } from './util';
 
+type RefSet = WeakSet<ReferenceObject>;
+
 export default class QuickCompare {
-  private compareMethodFromOptions: CompareFunc<CompareItem>;
+  private match: CompareFunc;
 
   private refSets = {
-    left: new WeakSet(),
-    right: new WeakSet(),
+    left: new WeakSet<ReferenceObject>(),
+    right: new WeakSet<ReferenceObject>(),
   };
 
   private appOptions: Partial<AppOptions>;
 
-  private static defaultMethodFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<CompareItem> => {
+  private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<CompareItem> => {
     const appType = typeof appOptions;
     if (appType === 'function') {
       return appOptions as CompareFunc<CompareItem>;
@@ -39,6 +42,7 @@ export default class QuickCompare {
       switch (appOptions as string) {
         case 'General':
           return GeneralComparer;
+        case 'Strict':
         default:
           return StrictComparer;
       }
@@ -47,44 +51,39 @@ export default class QuickCompare {
     return StrictComparer;
   };
 
-  protected comparer(leftItem: CompareItem, rightItem: CompareItem): CompareStatus {
-    return this.compareMethodFromOptions(leftItem, rightItem);
+  private static filterReference(item: CompareItem, refSet: RefSet): boolean {
+    let rc = true;
+    if (valIsReference(item)) {
+      if (refSet.has(item)) {
+        rc = false;
+      } else {
+        refSet.add(item);
+      }
+    }
+
+    return rc;
+  }
+
+  protected comparer(leftItem: CompareItem, rightItem: CompareItem): ComparisonStatus {
+    return this.match(leftItem, rightItem);
   }
 
   constructor(appOptions: Partial<AppOptions> = {}) {
     this.appOptions = appOptions;
-    this.compareMethodFromOptions = QuickCompare.defaultMethodFromOptions(this.appOptions);
+    this.match = QuickCompare.createMatchFromOptions(this.appOptions);
   }
 
-  protected addLeftReference = (ref: CompareItem) => this.refSets.left.add(ref as object);
-
-  protected referencedInLeft = (ref: CompareItem) => this.refSets.left.has(ref as object);
-
-  protected addRightReference = (ref: CompareItem) => this.refSets.right.add(ref as object);
-
-  protected referencedInRight = (ref: CompareItem) => this.refSets.right.has(ref as object);
-
-  compare(leftItem: CompareItem, rightItem: CompareItem): CompareResult {
-    if (leftItem === rightItem) {
-      return genResult(leftItem, rightItem, true);
-    }
-    let leftOp = leftItem;
-    let rightOp = rightItem;
-
-    if (valIsReference(leftItem)) {
-      this.addLeftReference(leftItem);
-    } else if (this.referencedInLeft(leftItem)) {
-      leftOp = null;
+  compare(left: CompareItem, right: CompareItem): Comparison {
+    let status: ComparisonStatus;
+    if (QuickCompare.filterReference(left, this.refSets.left)
+      && QuickCompare.filterReference(right, this.refSets.right)
+    ) {
+      status = this.match(left, right);
     }
 
-    if (valIsReference(rightItem)) {
-      this.addRightReference(rightItem);
-    } else if (this.referencedInRight(rightItem)) {
-      rightOp = null;
-    }
-
-    const result = genResult(leftItem, rightItem, this.comparer(leftOp, rightOp));
-
+    const result = createComparison(status, {
+      ...(status === false ? { diff: { left, right } } : { same: { left, right } }),
+    });
     return result;
   }
 }

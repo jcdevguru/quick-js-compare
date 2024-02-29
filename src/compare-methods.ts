@@ -1,11 +1,11 @@
-import type { CompareItem, CompareStatus } from './base-types';
+import type { CompareItem, ComparisonStatus } from './base-types';
 import {
   actualType,
   typeIsSupported,
   typeIsPrimitive,
 } from './util';
 
-export const GeneralComparer = (leftItem: CompareItem, rightItem: CompareItem) : CompareStatus => {
+export const StrictComparer = (leftItem: CompareItem, rightItem: CompareItem) : ComparisonStatus => {
   // always check for strict match
   if (leftItem === rightItem) {
     return true;
@@ -19,23 +19,24 @@ export const GeneralComparer = (leftItem: CompareItem, rightItem: CompareItem) :
     return undefined;
   }
 
-  if (typeIsPrimitive(leftType) && typeIsPrimitive(rightType)) {
-    // "General": abstract == true
-    // eslint-disable-next-line eqeqeq
-    if (leftItem == rightItem) {
-      return true;
-    }
+  if (leftType !== rightType) {
+    return false;
+  }
+
+  if (typeIsPrimitive(leftType)) {
     return false;
   }
 
   return undefined;
 };
 
-export const StrictComparer = (leftItem: CompareItem, rightItem: CompareItem) : CompareStatus => {
+export const GeneralComparer = (leftItem: CompareItem, rightItem: CompareItem) : ComparisonStatus => {
   // always check for strict match
-  if (leftItem === rightItem) {
-    return true;
+  const st = StrictComparer(leftItem, rightItem);
+  if (!st) {
+    // eslint-disable-next-line eqeqeq
+    return leftItem == rightItem;
   }
 
-  return undefined;
+  return st;
 };

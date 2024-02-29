@@ -1,7 +1,15 @@
 import {
-  CompareItem,
-  CompareResult,
-  CompareStatus,
+  type CompareItem,
+  type Comparison,
+  type ComparisonStatus,
+  type ComparisonResult,
+  type ComparisonData,
+  type KeyIndexValue,
+  type StdObjectEntry,
+  type StdObject,
+  type ReferenceObject,
+  type CompareItemPair,
+  ComparisonDataIndex,
 } from './base-types';
 
 // Utility methods for handling comparisons at runtime
@@ -33,9 +41,13 @@ const keyedTypes = new Set([
   'Map',
 ]);
 
+const referenceTypes = new Set([
+  ...collectionTypes,
+  ...keyedTypes,
+]);
+
 const objectTypes = new Set([
-  ...[...collectionTypes],
-  ...[...keyedTypes],
+  ...referenceTypes,
   'String',
   'Number',
   'Boolean',
@@ -61,24 +73,49 @@ export const typeIsPrimitive = (t: string) : boolean => primitiveTypes.has(t);
 export const typeIsStdObject = (t: string) : boolean => t === 'Object';
 export const typeIsKeyedObject = (t: string) : boolean => keyedTypes.has(t);
 export const typeIsFunction = (t: string) : boolean => functionTypes.has(t);
-export const typeIsReference = (t: string) : boolean => supportedTypes.has(t) && !primitiveTypes.has(t);
+export const typeIsReference = (t: string) : boolean => referenceTypes.has(t);
 
 export const actualType = (v: unknown): string => {
   const t = typeof v;
   return primitiveTypes.has(t) ? t : (v?.constructor.name || t);
 };
 
-export const valIsReference = (v: unknown) => typeIsReference(actualType(v));
+export const valIsReference = (v: unknown): v is ReferenceObject => typeIsReference(actualType(v));
 
-export const genResult = (left: CompareItem, right: CompareItem, status: CompareStatus): CompareResult => {
-  if (status) {
-    return {
-      left: null, right: null, same: [left, right], status,
-    };
+export const asArray = (v: unknown) => [v].flat();
+
+export const toComparisonData = (v: CompareItem): ComparisonData => asArray(v !== undefined ? v : []) as ComparisonData;
+
+export const createComparison = (
+  status: ComparisonStatus,
+  {
+    diff, same,
+  } : Partial<{ diff: CompareItemPair, same: CompareItemPair }> = {},
+): Comparison => {
+  const {
+    Left, LeftSame, RightSame, Right,
+  } = ComparisonDataIndex;
+  const result = new Array<ComparisonData>(4) as ComparisonResult;
+  if (diff) {
+    result[Left] = toComparisonData(diff.left);
+    result[Right] = toComparisonData(diff.right);
   }
-  return {
-    left, right, same: null, status,
-  };
+  if (same) {
+    result[LeftSame] = toComparisonData(same.left);
+    result[RightSame] = toComparisonData(same.right);
+  }
+  return { result, status };
 };
 
-export const isMatching = ({ status }: CompareResult) => !!status;
+export const spliceKeyIndexValues = (kivs: KeyIndexValue[], stopIndex: number) : Array<KeyIndexValue> => {
+  const limit = kivs.findIndex(({ indexValue: { index } }) => index >= stopIndex);
+  const spliceLen = limit === -1 ? kivs.length + 1 : limit;
+  return kivs.splice(0, spliceLen);
+};
+
+export const sparseEntriesToStdObject = (entries: Array<StdObjectEntry | undefined>): StdObject => {
+  const condensedArray = Object.values(entries) as Array<StdObjectEntry>;
+  return Object.fromEntries(condensedArray.map(
+    ([s, v]: StdObjectEntry) => [s, (Array.isArray(v) ? sparseEntriesToStdObject(v as Array<StdObjectEntry>) : v)],
+  ));
+};

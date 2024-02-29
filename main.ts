@@ -1,4 +1,7 @@
 import { StdObjectCompare } from './src/std-object-compare';
+import type { CompareItem, StdObjectEntry } from './src/base-types';
+import { sparseEntriesToStdObject } from './src/util';
+
 const cmp = new StdObjectCompare();
 
 const asString = (o: any) => {
@@ -26,19 +29,20 @@ const showIt = (left: unknown, right: unknown, result: unknown) => {
 // circular nonsense
 const left = { a: { c: 1, e: {}, d: { a: 1 }}};
 // should be ok - reference at same level
-left.a.e = left.a.d; 
+// left.a.e = left.a.d; 
 const right = { a: { c: 2, d: { a: 3 }, e: { a: 4  }}};
 
 const r2 = cmp.compare(left, right);
-showIt(left, right, r2);
+const result = r2.result.map((a) => sparseEntriesToStdObject(a as Array<StdObjectEntry|undefined>));
+showIt(left, right, result);
 
 
-// now mess with them.
-// no results should exist from left.a.e
-left.a.e = left.a;
+// // now mess with them.
+// // no results should exist from left.a.e
+// left.a.e = left.a;
 
-const r3 = cmp.compare(left, right);
-showIt('left', right, r3);
+// const r3 = cmp.compare(left, right);
+// showIt('left', right, r3);
 
 // // ok to reference between objects
 // left.a.e = right.a;

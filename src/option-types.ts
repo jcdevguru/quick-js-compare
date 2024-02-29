@@ -18,6 +18,6 @@ export interface RenderOptions {
 }
 
 export interface AppOptions {
-  compare: 'Strict' | 'Equivalent' | CompareOptions | CompareFunc<CompareItem>
+  compare: 'Strict' | 'General' | CompareOptions | CompareFunc<CompareItem>
   render: 'StatusOnly' | 'Standard' | RenderOptions
 }
