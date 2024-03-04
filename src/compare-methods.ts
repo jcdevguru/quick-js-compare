@@ -1,18 +1,18 @@
-import type { CompareItem, ComparisonStatus } from './base-types';
+import type { Value, Status } from './base-types';
 import {
   actualType,
   typeIsSupported,
   typeIsPrimitive,
 } from './util';
 
-export const StrictComparer = (leftItem: CompareItem, rightItem: CompareItem) : ComparisonStatus => {
+export const StrictComparer = (leftValue: Value, rightValue: Value) : Status => {
   // always check for strict match
-  if (leftItem === rightItem) {
+  if (leftValue === rightValue) {
     return true;
   }
 
-  const leftType = actualType(leftItem);
-  const rightType = actualType(rightItem);
+  const leftType = actualType(leftValue);
+  const rightType = actualType(rightValue);
 
   // if we can't support the comparison, don't try
   if (!typeIsSupported(leftType) || !typeIsSupported(rightType)) {
@@ -30,12 +30,12 @@ export const StrictComparer = (leftItem: CompareItem, rightItem: CompareItem) : 
   return undefined;
 };
 
-export const GeneralComparer = (leftItem: CompareItem, rightItem: CompareItem) : ComparisonStatus => {
+export const GeneralComparer = (leftValue: Value, rightValue: Value) : Status => {
   // always check for strict match
-  const st = StrictComparer(leftItem, rightItem);
+  const st = StrictComparer(leftValue, rightValue);
   if (!st) {
     // eslint-disable-next-line eqeqeq
-    return leftItem == rightItem;
+    return leftValue == rightValue;
   }
 
   return st;

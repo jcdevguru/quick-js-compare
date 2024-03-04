@@ -1,5 +1,5 @@
 import { StdObjectCompare } from './src/std-object-compare';
-import type { CompareItem, StdObjectEntry } from './src/base-types';
+import type { Value, StdObjectEntry } from './src/base-types';
 import { sparseEntriesToStdObject } from './src/util';
 
 const cmp = new StdObjectCompare();
@@ -27,10 +27,10 @@ const showIt = (left: unknown, right: unknown, result: unknown) => {
 // showIt(ops[0], ops[1], r1);
 
 // circular nonsense
-const left = { a: { c: 1, e: {}, d: { a: 1 }}};
+const left = { q: 'uniq', a: { c: 1, e: {}, d: { a: 1 }}, f: 'matcher'};
 // should be ok - reference at same level
 // left.a.e = left.a.d; 
-const right = { a: { c: 2, d: { a: 3 }, e: { a: 4  }}};
+const right = { a: { c: 2, d: { a: 3 }, e: { a: 4  }}, f: 'matcher', x: 'sole'};
 
 const r2 = cmp.compare(left, right);
 const result = r2.result.map((a) => sparseEntriesToStdObject(a as Array<StdObjectEntry|undefined>));

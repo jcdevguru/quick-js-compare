@@ -1,14 +1,13 @@
 import {
-  type CompareItem,
   type Comparison,
-  type ComparisonStatus,
-  type ComparisonResult,
+  type Status,
+  type Result,
   type ComparisonData,
   type KeyIndexValue,
   type StdObjectEntry,
   type StdObject,
   type ReferenceObject,
-  type CompareItemPair,
+  type ValuePair,
   ComparisonDataIndex,
 } from './base-types';
 
@@ -82,27 +81,23 @@ export const actualType = (v: unknown): string => {
 
 export const valIsReference = (v: unknown): v is ReferenceObject => typeIsReference(actualType(v));
 
-export const asArray = (v: unknown) => [v].flat();
-
-export const toComparisonData = (v: CompareItem): ComparisonData => asArray(v !== undefined ? v : []) as ComparisonData;
-
 export const createComparison = (
-  status: ComparisonStatus,
+  status: Status,
   {
     diff, same,
-  } : Partial<{ diff: CompareItemPair, same: CompareItemPair }> = {},
+  } : Partial<{ diff: ValuePair, same: ValuePair }> = {},
 ): Comparison => {
   const {
     Left, LeftSame, RightSame, Right,
   } = ComparisonDataIndex;
-  const result = new Array<ComparisonData>(4) as ComparisonResult;
+  const result = new Array<ComparisonData>(4) as Result;
   if (diff) {
-    result[Left] = toComparisonData(diff.left);
-    result[Right] = toComparisonData(diff.right);
+    result[Left] = diff.left;
+    result[Right] = diff.right;
   }
   if (same) {
-    result[LeftSame] = toComparisonData(same.left);
-    result[RightSame] = toComparisonData(same.right);
+    result[LeftSame] = same.left;
+    result[RightSame] = same.right;
   }
   return { result, status };
 };

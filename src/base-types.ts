@@ -1,14 +1,14 @@
 // TypeScript declarations for transpilations
 
-// private type to work around self-reference restrictions to CompareItem
-type CompareItemBase = NonNullable<unknown>;
+// private type to work around self-reference restrictions
+type ValueBase = NonNullable<unknown>;
 
-export type Primitive = CompareItemBase & (string | number | boolean | undefined | symbol | bigint);
+export type Primitive = ValueBase & (string | number | boolean | undefined | symbol | bigint);
 
-export type StdObject = Record<string, CompareItemBase>;
-export type MapObject = Map<unknown, CompareItemBase>;
-export type ArrayObject = Array<CompareItemBase>;
-export type SetObject = Set<CompareItemBase>;
+export type StdObject = Record<string, ValueBase>;
+export type MapObject = Map<unknown, ValueBase>;
+export type ArrayObject = Array<ValueBase>;
+export type SetObject = Set<ValueBase>;
 
 // Contains multiple values, accessed via keys
 export type KeyedObject = StdObject | MapObject | ArrayObject;
@@ -18,14 +18,14 @@ export type CollectionObject = ArrayObject | SetObject;
 
 export type ReferenceObject = KeyedObject | CollectionObject;
 
-export type CompareItem = CompareItemBase & (Primitive | ReferenceObject);
+export type Value = ValueBase & (Primitive | ReferenceObject);
 
-export type StdObjectEntry = [keyof StdObject, CompareItem];
+export type StdObjectEntry = [keyof StdObject, Value];
 
-export type ComparisonStatus = boolean | undefined;
+export type Status = boolean | undefined;
 
-export interface CompareFunc<T extends CompareItem = CompareItem> {
-  (left: T, right: T): ComparisonStatus;
+export interface CompareFunc<T extends Value = Value> {
+  (left: T, right: T): Status;
 }
 
 export type PrimitiveCompareFunc = CompareFunc<Primitive>;
@@ -42,23 +42,23 @@ export enum ComparisonDataIndex {
   Right = 3,
 }
 
-export interface CompareItemPair {
-  left: CompareItem,
-  right: CompareItem
+export interface ValuePair<T extends Value = Value> {
+  left: T,
+  right: T
 }
 
-export type ComparisonData = Array<CompareItem>;
-export type ComparisonResult = TupleOf<ComparisonData, 4>;
+export type ComparisonData = Value;
+export type Result = TupleOf<ComparisonData, 4>;
 
 export interface Comparison {
-  result: ComparisonResult,
-  status: ComparisonStatus,
+  result: Result,
+  status: Status,
 }
 
 // for objects with enumerable values
 export interface IndexValue {
   index: number
-  value: CompareItem
+  value: Value
 }
 
 export interface KeyIndexValue {

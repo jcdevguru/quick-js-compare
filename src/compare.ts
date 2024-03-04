@@ -1,8 +1,8 @@
 import type {
   CompareFunc,
-  CompareItem,
+  Value,
   Comparison,
-  ComparisonStatus,
+  Status,
   ReferenceObject,
 } from './base-types';
 
@@ -32,10 +32,10 @@ export default class QuickCompare {
 
   private appOptions: Partial<AppOptions>;
 
-  private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<CompareItem> => {
+  private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<Value> => {
     const appType = typeof appOptions;
     if (appType === 'function') {
-      return appOptions as CompareFunc<CompareItem>;
+      return appOptions as CompareFunc<Value>;
     }
     // incomplete
     if (appType === 'string') {
@@ -51,21 +51,21 @@ export default class QuickCompare {
     return StrictComparer;
   };
 
-  private static filterReference(item: CompareItem, refSet: RefSet): boolean {
+  private static filterReference(value: Value, refSet: RefSet): boolean {
     let rc = true;
-    if (valIsReference(item)) {
-      if (refSet.has(item)) {
+    if (valIsReference(value)) {
+      if (refSet.has(value)) {
         rc = false;
       } else {
-        refSet.add(item);
+        refSet.add(value);
       }
     }
 
     return rc;
   }
 
-  protected comparer(leftItem: CompareItem, rightItem: CompareItem): ComparisonStatus {
-    return this.match(leftItem, rightItem);
+  protected comparer(left: Value, right: Value): Status {
+    return this.match(left, right);
   }
 
   constructor(appOptions: Partial<AppOptions> = {}) {
@@ -73,8 +73,8 @@ export default class QuickCompare {
     this.match = QuickCompare.createMatchFromOptions(this.appOptions);
   }
 
-  compare(left: CompareItem, right: CompareItem): Comparison {
-    let status: ComparisonStatus;
+  compare(left: Value, right: Value): Comparison {
+    let status: Status;
     if (QuickCompare.filterReference(left, this.refSets.left)
       && QuickCompare.filterReference(right, this.refSets.right)
     ) {
