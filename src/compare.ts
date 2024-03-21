@@ -4,11 +4,11 @@ import type {
   Comparison,
   Status,
   ReferenceObject,
-} from './base-types';
+} from './compare-types';
 
 import {
   type AppOptions,
-} from './option-types';
+} from './option';
 
 import {
   GeneralComparer,
@@ -18,7 +18,7 @@ import {
 import {
   createComparisonResult,
   valIsReference,
-} from './util';
+} from './compare-util';
 
 type RefSet = WeakSet<ReferenceObject>;
 

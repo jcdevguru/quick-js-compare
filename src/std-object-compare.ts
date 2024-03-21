@@ -10,14 +10,14 @@ import {
   type IndexValueCompareOp,
   type Status,
   ComparisonDataIndex,
-} from './base-types';
+} from './compare-types';
 
 import {
   actualType,
   typeIsStdObject,
   createComparisonResult,
   spliceKeyIndexValues,
-} from './util';
+} from './compare-util';
 
 const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
   if (!keySet.has(key)) {

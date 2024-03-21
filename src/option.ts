@@ -1,7 +1,7 @@
 import type {
   CompareFunc,
   Value,
-} from './base-types';
+} from './compare-types';
 
 export interface CompareOptions {
   compareValue: 'strict' | 'abstract' | 'ignore'
