@@ -42,6 +42,11 @@ export enum ComparisonDataIndex {
   Right = 3,
 }
 
+export interface ValuePairN<T extends Value = Value> {
+  left: T,
+  right: T
+}
+
 export interface ValuePair<T extends Value = Value> {
   left: T,
   right: T

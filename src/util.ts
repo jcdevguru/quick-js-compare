@@ -81,7 +81,7 @@ export const actualType = (v: unknown): string => {
 
 export const valIsReference = (v: unknown): v is ReferenceObject => typeIsReference(actualType(v));
 
-export const createComparison = (
+export const createComparisonResult = (
   status: Status,
   {
     diff, same,

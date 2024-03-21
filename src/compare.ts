@@ -16,7 +16,7 @@ import {
 } from './compare-methods';
 
 import {
-  createComparison,
+  createComparisonResult,
   valIsReference,
 } from './util';
 
@@ -33,25 +33,35 @@ export default class QuickCompare {
   private appOptions: Partial<AppOptions>;
 
   private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<Value> => {
-    const appType = typeof appOptions;
-    if (appType === 'function') {
+    const optionsType = typeof appOptions;
+    if (optionsType === 'function') {
       return appOptions as CompareFunc<Value>;
     }
     // incomplete
-    if (appType === 'string') {
-      switch (appOptions as string) {
-        case 'General':
-          return GeneralComparer;
-        case 'Strict':
-        default:
-          return StrictComparer;
+    switch (optionsType) {
+      case 'string': {
+        const optString = appOptions as string;
+        switch (optString) {
+          case 'General':
+            return GeneralComparer;
+          case 'Strict':
+            return StrictComparer;
+          default:
+            throw new Error(`Unsupported options string '${optString}`);
+        }
       }
+
+      case 'object':
+        break;
+
+      default:
+        throw new Error(`Unsupported options type ${optionsType}`);
     }
     // Incomplete
     return StrictComparer;
   };
 
-  private static filterReference(value: Value, refSet: RefSet): boolean {
+  private static alreadyTraversed(value: Value, refSet: RefSet): boolean {
     let rc = true;
     if (valIsReference(value)) {
       if (refSet.has(value)) {
@@ -64,10 +74,6 @@ export default class QuickCompare {
     return rc;
   }
 
-  protected comparer(left: Value, right: Value): Status {
-    return this.match(left, right);
-  }
-
   constructor(appOptions: Partial<AppOptions> = {}) {
     this.appOptions = appOptions;
     this.match = QuickCompare.createMatchFromOptions(this.appOptions);
@@ -75,13 +81,13 @@ export default class QuickCompare {
 
   compare(left: Value, right: Value): Comparison {
     let status: Status;
-    if (QuickCompare.filterReference(left, this.refSets.left)
-      && QuickCompare.filterReference(right, this.refSets.right)
+    if (QuickCompare.alreadyTraversed(left, this.refSets.left)
+      && QuickCompare.alreadyTraversed(right, this.refSets.right)
     ) {
       status = this.match(left, right);
     }
 
-    const result = createComparison(status, {
+    const result = createComparisonResult(status, {
       ...(status === false ? { diff: { left, right } } : { same: { left, right } }),
     });
     return result;

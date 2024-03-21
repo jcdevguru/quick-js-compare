@@ -1,6 +1,7 @@
 import QuickCompare from './compare';
 
 import {
+  type Comparison,
   type Value,
   type ValuePair,
   type StdObject,
@@ -14,7 +15,7 @@ import {
 import {
   actualType,
   typeIsStdObject,
-  createComparison,
+  createComparisonResult,
   spliceKeyIndexValues,
 } from './util';
 
@@ -57,7 +58,7 @@ export class StdObjectCompare extends QuickCompare {
     // incomplete
   }
 
-  compare(left: Value, right: Value) {
+  compare(left: Value, right: Value) : Comparison {
     const baseResult = super.compare(left, right);
     if (baseResult.status !== undefined) {
       return baseResult;
@@ -133,6 +134,6 @@ export class StdObjectCompare extends QuickCompare {
       diff.right[index] = [rightKey, value];
     });
 
-    return createComparison(status, { diff, same });
+    return createComparisonResult(status, { diff, same });
   }
 }
