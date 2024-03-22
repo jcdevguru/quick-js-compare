@@ -65,6 +65,7 @@ const supportedTypes = new Set([
   ...objectTypes,
 ]);
 
+// Note 't' in argument should be return from 'actualType()', not value of 'typeof'
 export const typeIsSupported = (t: string): boolean => supportedTypes.has(t);
 export const typeIsObject = (t: string): boolean => objectTypes.has(t);
 export const typeIsGenericObject = (t: string): boolean => t === 'object';

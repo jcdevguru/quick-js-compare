@@ -34,3 +34,26 @@ export const toArray = (...v: Array<unknown>) => [...v].flat();
 export const isEnumMember = <E>(
   value: unknown, enumArg: EnumLike<E>,
 ): value is E => (Object.values(enumArg) as unknown[]).includes(value);
+
+// True when argument represents non-null 'Record' object.
+// Will be false with an array, set, map, etc.
+export const isStandardObject = (v: unknown): v is object => v?.constructor.name === 'Object';
+
+// Type and exception-safe conversions of any JS value to a string, if conversion
+// is natural.  Will not show data contained in objects. Allows fallback for
+// more sophisticated mappings.  When all else fails, return empty string.
+export const anyToString = (v: unknown, fallback?: (v: unknown) => string): string => {
+  let s;
+  try {
+    s = v?.constructor.name || `${v}`;
+  } catch (err) {
+    if (fallback) {
+      s = fallback(v);
+    }
+  } finally {
+    if (typeof s !== 'string') {
+      s = '';
+    }
+  }
+  return s;
+};

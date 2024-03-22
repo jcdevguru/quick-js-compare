@@ -19,6 +19,10 @@ import {
   spliceKeyIndexValues,
 } from './compare-util';
 
+import {
+  type CompareAppOption,
+} from './option';
+
 const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
   if (!keySet.has(key)) {
     acc.push({ key, indexValue: { index, value: obj[key] as Value } });
@@ -54,7 +58,7 @@ export class StdObjectCompare extends QuickCompare {
   // Incomplete - should not be specific to StdObjects
 
   public constructor() {
-    super({ compare: 'General' });
+    super({ compare: 'General' as CompareAppOption });
     // incomplete
   }
 
