@@ -21,7 +21,7 @@ import {
 
 import {
   type CompareAppOption,
-} from './option';
+} from './compare-option';
 
 const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
   if (!keySet.has(key)) {
