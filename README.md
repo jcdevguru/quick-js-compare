@@ -122,29 +122,43 @@ will result in:
 
 ## Options
 
-Quick JS Compare accepts an options structure to customize the comparison behavior and to provide formatting and output choices:
+Quick JS Compare accepts an `options` arguyment to customize the comparison and data rendering behavior:
 
-Compare options:
+```js
+{
+  compare: /*... see "Compare options section" ...*/,
+  render: /*... see "Render options section *//
+}
+```
+When there is no options argument, the default values for `compare` and `render` are `Standard` (see below).
 
-  * `compare`: "`Strict`" | "`General`"* | options | function
-  * `compareValue`: "`strict`"* | "`abstract`" | "`ignore`" | function
-  * `compareObject`: "`reference`" | "`keyValueOrder`" | "`keyValue`"* | "`keyOrder`" | "`keyOnly`" | "`valueOnly`" | "`ignore`" | function
-  * `compareCollection`: "`reference`" | "`valueOrder`" | "`valueOnly`"* | "`sizeOnly`" | "`ignore`" | function
+### Compare options
+
+Here are properties you can use for the `compare` options object.
+
+  * `compare`: "`Strict`" | "`General`" | "`StructureOnly`" | *options-as-object* | *function*
+
+If specifying an object, the following properties are supported.
+
+  * `compareValue`: "`strict`" | "`abstract`" | "`ignore`" | *function*
+  * `compareObject`: "`reference`" | "`keyValueOrder`" | "`keyValue`" | "`keyOrder`" | "`keyOnly`" | "`valueOnly`" | "`ignore`" | *function*
+  * `compareCollection`: "`reference`" | "`valueOrder`" | "`valueOnly`" | "`sizeOnly`" | "`ignore`" | *function*
+
+(TODO: explain compare options.)
 
 
-### Explanations
+The following defines the behaviors of each possible option specification within the the *compare-object*:
 
-* Strict
-  * - compare using `===` for primitives (i.e., type and value)
-  * - compare by type, order, values for object
-  * - compare by index, value for collection
+*TODO- explain compare object:
+  * all primitive values (e.g., `string`, `number`) must match exactly (i.e., as with `===`), both when compared specifically or when inside objects.
+  * standard objects with named keys, e.g., `{ a: 1, b: 2}`, must match exactly by key, value, and order of keys.
+  * objects of type `Map`, such as from `new Map([['a', 1],['b', 2]])`, must match exactly by key, value, and order of keys.
+  * array objects, e.g., `[ 'a', 7, 'bbbb' ]`, must match exactly by value and order of values. Any array sparseness is ignored.
+  * objects of type `Set`, such as from `new Set(['a', 'b', 2])`, must match exactly by value and type.
 
-  * compare
-  * `compareValue`: "`strict`"
-  * `compareObject`: "`keyValueOrder`"
-  * `compareCollection`: "`indexValue`"
+* `Strict`: values will be compared for an exact match. Contents of objects will be compared when their references do not match. This has the equivalent function as when *compare-object* has the following settings:
 
-* General (default)
+* `General` (default)
   * - compare using `==` for primitives (can compare only in value)
   * - compare by key/value for object (order insignificant)
   * - compare by order, value for collection
@@ -153,14 +167,24 @@ Compare options:
   * `compareObject`: "`keyValue`"
   * `compareCollection`: "`valueOnly`"
 
-* `Structure`:
+* `StructureOnly`:
   * `compareValue`: "`ignore`"
   * `compareObject`: "`keyOnly`"
   * `compareCollection`: "`sizeOnly`"
 
+### Render options
 
-* `render`: "`Standard`" | "`Verbose`" | options | function
+* `render`: "`Standard`" | "`Verbose`" | *options-as-object* | *function*
 
+The following properties are supported in *render-object*.
+
+* `mapAsObject`: boolean
+* `setAsArray`: boolean
+* `maxDepth`: number
+* `same`: boolean
+* `report`: boolean
+
+(TODO: explain render options.)
 * `Standard`:
   * `mapAsObject`: true
   * `setAsArray`: true
