@@ -1,5 +1,6 @@
 // Types for comparison operations
 import { type TupleOf } from './util';
+import { type AppOptions } from './option';
 
 // private type to work around self-reference restrictions
 type ValueBase = NonNullable<unknown>;
@@ -26,7 +27,7 @@ export type StdObjectEntry = [keyof StdObject, Value];
 export type Status = boolean | undefined;
 
 export interface CompareFunc<T extends Value = Value> {
-  (left: T, right: T): Status;
+  (left: T, right: T, options: AppOptions): Status;
 }
 
 export type PrimitiveCompareFunc = CompareFunc<Primitive>;

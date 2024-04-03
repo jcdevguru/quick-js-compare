@@ -7,6 +7,7 @@ import {
   isEnumMember,
   isStandardObject,
   anyToString,
+  verifyObject,
   type AtLeastOne,
 } from './util';
 
@@ -17,6 +18,7 @@ import OptionError from './error-classes/option-error';
 enum CompareOperation {
   Strict = 'Strict',
   General = 'General',
+  StructureOnly = 'StructureOnly',
 }
 
 enum CmpPrimitiveValue {
@@ -54,19 +56,12 @@ export interface CompareOptionObject {
   compareCollection: CompareCollectionToken
 }
 
-type CompareOptionObjectKey = keyof CompareOptionObject;
-
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
 
 export type CompareToken = CompareOperation;
 export type CompareAppOption = CompareToken | MinimalCompareOptionObject | CompareFunc<Value>;
 
 // Methods
-
-const compareOptionKeySet = new Set<string>(
-  ['compareValue', 'compareObject', 'compareCollection'],
-);
-
 export const isCompareToken = (v: unknown): v is CompareToken => isEnumMember(v, CompareOperation);
 
 export const isCompareValueToken = (v: unknown): v is CompareValueToken => isEnumMember(v, CmpPrimitiveValue);
@@ -81,40 +76,11 @@ export const isCompareCollectionToken = (v: unknown): v is CompareCollectionToke
 
 export const isCompareFunction = (v: unknown): v is CompareFunc<Value> => typeof v === 'function';
 
-export const isCompareOptionObjectKey = (v: unknown): v is CompareOptionObjectKey => compareOptionKeySet.has(v as string);
-
-export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOptionObject => {
-  if (!isStandardObject(v)) {
-    return false;
-  }
-  const objKeys = Object.keys(v);
-  const unknownKeys = objKeys.filter((k) => !isCompareOptionObjectKey(k));
-
-  if (unknownKeys.length) {
-    errs?.push(...unknownKeys.map((k) => `property ${k} unknown`));
-    return false;
-  }
-
-  if (!objKeys.length) {
-    errs?.push('need at least one of compareValue, compareObject, or compareCollection');
-    return false;
-  }
-
-  const invalidSettings = ([
-    ['compareValue', isCompareValueToken],
-    ['compareObject', isCompareObjectToken],
-    ['compareCollection', isCompareCollectionToken],
-  ] as Array<[string, (a: unknown) => boolean]>).filter(
-    ([setting, check]) => (setting && !check((v as Record<string, unknown>)[setting])),
-  ).map(([s]) => s);
-
-  if (invalidSettings.length) {
-    errs?.push(...invalidSettings.map((s) => `field ${s} has invalid value`));
-    return false;
-  }
-
-  return true;
-};
+export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOptionObject => verifyObject(v, {
+  compareValue: isCompareValueToken,
+  compareObject: isCompareObjectToken,
+  compareCollection: isCompareCollectionToken,
+}, errs);
 
 export const isCompareAppOption = (v: unknown): v is CompareAppOption => (
   isCompareToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v)
