@@ -1,6 +1,5 @@
 import type {
   CompareFunc,
-  Value,
 } from './compare-types';
 
 import {
@@ -15,71 +14,76 @@ import OptionError from './error-classes/option-error';
 
 // Types
 
-enum CompareOperation {
-  Strict = 'Strict',
+enum CompareToken {
+  Exact = 'Exact',
   General = 'General',
-  StructureOnly = 'StructureOnly',
+  ExactStructure = 'ExactStructure',
+  GeneralStructure = 'GeneralStructure',
 }
 
-enum CmpPrimitiveValue {
+enum CmpPrimitiveToken {
   strict = 'strict',
   abstract = 'abstract',
+  typeOnly = 'typeOnly',
   ignore = 'ignore',
 }
 
-enum CmpReferenceValue {
+enum CmpObjectToken {
   reference = 'reference',
   valueOnly = 'valueOnly',
   ignore = 'ignore',
 }
 
-enum CmpKeyedObject {
+enum CmpKeyedObjectToken {
   keyValueOrder = 'keyValueOrder',
   keyValue = 'keyValue',
   keyOrder = 'keyOrder',
   keyOnly = 'keyOnly',
 }
 
-enum CmpCollectionObject {
+enum CmpCollectionToken {
   valueOrder = 'valueOrder',
   valueOnly = 'valueOnly',
   sizeOnly = 'sizeOnly',
 }
 
-export type CompareValueToken = CmpPrimitiveValue;
-export type CompareObjectToken = CmpReferenceValue | CmpKeyedObject;
-export type CompareCollectionToken = CmpReferenceValue | CmpCollectionObject;
+export type CompareValueSpec = CmpPrimitiveToken;
+export type CompareObjectSpec = CmpObjectToken | CmpKeyedObjectToken;
+export type CompareCollectionSpec = CmpObjectToken | CmpCollectionToken;
 
 export interface CompareOptionObject {
-  compareValue: CompareValueToken
-  compareObject: CompareObjectToken
-  compareCollection: CompareCollectionToken
+  compareValue: CompareValueSpec
+  compareObject: CompareObjectSpec
+  compareMap: CompareObjectSpec
+  compareArray: CompareCollectionSpec
+  compareSet: CompareCollectionSpec
 }
 
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
 
-export type CompareToken = CompareOperation;
-export type CompareAppOption = CompareToken | MinimalCompareOptionObject | CompareFunc<Value>;
+export type CompareAppOption = CompareToken | MinimalCompareOptionObject | CompareFunc;
 
 // Methods
-export const isCompareToken = (v: unknown): v is CompareToken => isEnumMember(v, CompareOperation);
+export const isCompareToken = (v: unknown): v is CompareToken => isEnumMember(v, CompareToken);
 
-export const isCompareValueToken = (v: unknown): v is CompareValueToken => isEnumMember(v, CmpPrimitiveValue);
+export const isComparePrimitiveSpec = (v: unknown): v is CompareValueSpec => isEnumMember(v, CmpPrimitiveToken);
 
-export const isCompareObjectToken = (v: unknown): v is CompareObjectToken => (
-  isEnumMember(v, CmpReferenceValue) || isEnumMember(v, CmpKeyedObject)
+export const isCompareObjectSpec = (v: unknown): v is CompareObjectSpec => (
+  isEnumMember(v, CmpObjectToken) || isEnumMember(v, CmpKeyedObjectToken)
 );
 
-export const isCompareCollectionToken = (v: unknown): v is CompareCollectionToken => (
-  isEnumMember(v, CmpReferenceValue) || isEnumMember(v, CmpCollectionObject)
+export const isCompareCollectionSpec = (v: unknown): v is CompareCollectionSpec => (
+  isEnumMember(v, CmpObjectToken) || isEnumMember(v, CmpCollectionToken)
 );
 
-export const isCompareFunction = (v: unknown): v is CompareFunc<Value> => typeof v === 'function';
+export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function';
 
 export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOptionObject => verifyObject(v, {
-  compareValue: isCompareValueToken,
-  compareObject: isCompareObjectToken,
-  compareCollection: isCompareCollectionToken,
+  compareValue: isComparePrimitiveSpec,
+  compareObject: isCompareObjectSpec,
+  compareMap: isCompareObjectSpec,
+  compareArray: isCompareCollectionSpec,
+  compareSet: isCompareCollectionSpec,
 }, errs);
 
 export const isCompareAppOption = (v: unknown): v is CompareAppOption => (

@@ -30,9 +30,9 @@ export default class QuickCompare {
     right: new WeakSet<ReferenceObject>(),
   };
 
-  private appOptions: Partial<AppOptions>;
+  private appOptions: AppOptions;
 
-  private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc<Value> => {
+  private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc => {
     const optionsType = typeof appOptions;
     if (optionsType === 'function') {
       return appOptions as CompareFunc<Value>;
@@ -44,7 +44,7 @@ export default class QuickCompare {
         switch (optString) {
           case 'General':
             return GeneralComparer;
-          case 'Strict':
+          case 'Exact':
             return StrictComparer;
           default:
             throw new Error(`Unsupported options string '${optString}`);
@@ -75,7 +75,8 @@ export default class QuickCompare {
   }
 
   constructor(appOptions: Partial<AppOptions> = {}) {
-    this.appOptions = appOptions;
+    // TODO: apply defaults
+    this.appOptions = appOptions as AppOptions;
     this.match = QuickCompare.createMatchFromOptions(this.appOptions);
   }
 
@@ -84,7 +85,7 @@ export default class QuickCompare {
     if (QuickCompare.alreadyTraversed(left, this.refSets.left)
       && QuickCompare.alreadyTraversed(right, this.refSets.right)
     ) {
-      status = this.match(left, right);
+      status = this.match(left, right, this.appOptions);
     }
 
     const result = createComparisonResult(status, {
