@@ -1,6 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "ignorePatterns": ["dist/**","main.ts"],
+  "ignorePatterns": ["dist/**","main.ts","jest.config.js"],
   "env": {
     "node": true,
     "jest": true

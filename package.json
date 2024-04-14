@@ -17,7 +17,8 @@
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "main": "ts-node main.ts"
+    "main": "ts-node main.ts",
+    "test": "jest --coverage"
   },
   "keywords": [
     "javascript",
@@ -27,6 +28,7 @@
   "author": "Jim Campbell",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@typescript-eslint/parser": "^6.20.0",
     "eslint": "^8.56.0",
@@ -37,6 +39,7 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
