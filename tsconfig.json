@@ -111,8 +111,8 @@
     "node_modules",
     "dist",
     "main.ts",
-    "**/*.test.{js,ts}",
-    "**/*.spec.ts",
+    "**/*.test.[jt]s",
+    "**/*.spec.[jt]s",
     "__tests__"
   ]
 }
