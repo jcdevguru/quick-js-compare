@@ -8,11 +8,12 @@ import type {
 
 import {
   type AppOptions,
-} from './option';
+  validateAppOption,
+} from './app-option';
 
 import {
   GeneralComparer,
-  StrictComparer,
+  ExactComparer,
 } from './compare-methods';
 
 import {
@@ -32,11 +33,8 @@ export default class QuickCompare {
 
   private appOptions: AppOptions;
 
-  private static createMatchFromOptions = (appOptions: Partial<AppOptions>): CompareFunc => {
+  private static createMatchFromOptions = (appOptions: AppOptions): CompareFunc => {
     const optionsType = typeof appOptions;
-    if (optionsType === 'function') {
-      return appOptions as CompareFunc<Value>;
-    }
     // incomplete
     switch (optionsType) {
       case 'string': {
@@ -45,7 +43,7 @@ export default class QuickCompare {
           case 'General':
             return GeneralComparer;
           case 'Exact':
-            return StrictComparer;
+            return ExactComparer;
           default:
             throw new Error(`Unsupported options string '${optString}`);
         }
@@ -58,7 +56,7 @@ export default class QuickCompare {
         throw new Error(`Unsupported options type ${optionsType}`);
     }
     // Incomplete
-    return StrictComparer;
+    return ExactComparer;
   };
 
   private static alreadyTraversed(value: Value, refSet: RefSet): boolean {
@@ -74,10 +72,14 @@ export default class QuickCompare {
     return rc;
   }
 
-  constructor(appOptions: Partial<AppOptions> = {}) {
+  constructor(appOptions?: AppOptions) {
+    if (appOptions && !validateAppOption(appOptions)) {
+      // Probably not needed since validateAppOption throws
+      throw new Error('Invalid app options');
+    }
     // TODO: apply defaults
+    this.match = QuickCompare.createMatchFromOptions(appOptions || 'Exact');
     this.appOptions = appOptions as AppOptions;
-    this.match = QuickCompare.createMatchFromOptions(this.appOptions);
   }
 
   compare(left: Value, right: Value): Comparison {
