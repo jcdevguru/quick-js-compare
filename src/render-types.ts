@@ -1,6 +1,6 @@
 import { Result } from './compare-types';
-import { type AppOptions } from './option';
+import { type AppOptionObject } from './app-option';
 
 export interface RenderFunc<T extends Result = Result> {
-  (result: T, options: AppOptions): unknown;
+  (result: T, options: AppOptionObject): unknown;
 }
