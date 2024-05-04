@@ -5,7 +5,7 @@ import {
   typeIsPrimitive,
 } from './compare-util';
 
-export const StrictComparer = (leftValue: Value, rightValue: Value) : Status => {
+export const ExactComparer = (leftValue: Value, rightValue: Value) : Status => {
   // always check for strict match
   if (leftValue === rightValue) {
     return true;
@@ -32,7 +32,7 @@ export const StrictComparer = (leftValue: Value, rightValue: Value) : Status => 
 
 export const GeneralComparer = (leftValue: Value, rightValue: Value) : Status => {
   // always check for strict match
-  const st = StrictComparer(leftValue, rightValue);
+  const st = ExactComparer(leftValue, rightValue);
   if (!st) {
     // eslint-disable-next-line eqeqeq
     return leftValue == rightValue;

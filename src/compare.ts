@@ -12,7 +12,7 @@ import {
 
 import {
   GeneralComparer,
-  StrictComparer,
+  ExactComparer,
 } from './compare-methods';
 
 import {
@@ -45,7 +45,7 @@ export default class QuickCompare {
           case 'General':
             return GeneralComparer;
           case 'Exact':
-            return StrictComparer;
+            return ExactComparer;
           default:
             throw new Error(`Unsupported options string '${optString}`);
         }
@@ -58,7 +58,7 @@ export default class QuickCompare {
         throw new Error(`Unsupported options type ${optionsType}`);
     }
     // Incomplete
-    return StrictComparer;
+    return ExactComparer;
   };
 
   private static alreadyTraversed(value: Value, refSet: RefSet): boolean {
