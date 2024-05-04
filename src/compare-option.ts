@@ -14,7 +14,7 @@ import OptionError from './error-classes/option-error';
 
 // Types
 
-enum CompareToken {
+enum CompareOptionToken {
   Exact = 'Exact',
   General = 'General',
   ExactStructure = 'ExactStructure',
@@ -61,10 +61,10 @@ export interface CompareOptionObject {
 
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
 
-export type CompareAppOption = CompareToken | MinimalCompareOptionObject | CompareFunc;
+export type CompareAppOption = CompareOptionToken | keyof typeof CompareOptionToken | MinimalCompareOptionObject | CompareFunc;
 
 // Methods
-export const isCompareToken = (v: unknown): v is CompareToken => isEnumMember(v, CompareToken);
+export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => isEnumMember(v, CompareOptionToken);
 
 export const isComparePrimitiveSpec = (v: unknown): v is CompareValueSpec => isEnumMember(v, CmpPrimitiveToken);
 
@@ -84,10 +84,10 @@ export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): 
   compareMap: isCompareObjectSpec,
   compareArray: isCompareCollectionSpec,
   compareSet: isCompareCollectionSpec,
-}, errs);
+}, true, errs);
 
 export const isCompareAppOption = (v: unknown): v is CompareAppOption => (
-  isCompareToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v)
+  isCompareOptionToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v)
 );
 
 export const validateCompareAppOption = (v: unknown): v is CompareAppOption => {
@@ -96,7 +96,7 @@ export const validateCompareAppOption = (v: unknown): v is CompareAppOption => {
 
   switch (aType) {
     case 'string':
-      if (!isCompareToken(v)) {
+      if (!isCompareOptionToken(v)) {
         throw new OptionError('invalid token for compare option', v as string);
       }
       break;
@@ -106,9 +106,9 @@ export const validateCompareAppOption = (v: unknown): v is CompareAppOption => {
         throw new OptionError('invalid object type for compare option', anyToString(v));
       }
       if (!isMinimalCompareOptionObject(v, errors)) {
-        let s = 'option object is not valid';
+        let s = 'compare option object is not valid';
         if (errors.length) {
-          s = `: errors: ${errors.join(', ')}`;
+          s = `${s}: errors: ${errors.join(', ')}`;
         }
         throw new OptionError(s);
       }
@@ -118,9 +118,9 @@ export const validateCompareAppOption = (v: unknown): v is CompareAppOption => {
       if (aType !== 'function') {
         throw new OptionError('invalid type for compare option', anyToString(v));
       } else if (!isCompareFunction(v)) {
-        throw new OptionError('option function is not valid', anyToString(v));
+        throw new OptionError('compare option function is not valid', anyToString(v));
       }
-      throw new OptionError(`unhandled option type ${aType}`);
+      throw new OptionError(`invalid compare option type ${aType}`);
   }
   return true;
 };

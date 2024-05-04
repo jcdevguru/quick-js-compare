@@ -43,4 +43,8 @@ export const isMinimalRenderOptionObject = (v: unknown, errs?: Array<string>): v
   maxDepth: isNumber,
   includeSame: isBoolean,
   debug: isBoolean,
-}, errs);
+}, true, errs);
+
+export const isRenderAppOption = (v: unknown): v is RenderAppOption => isRenderToken(v) || isMinimalRenderOptionObject(v);
+
+// TODO: validateRenderOption
