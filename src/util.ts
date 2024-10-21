@@ -46,7 +46,7 @@ export const anyToString = (v: unknown, fallback?: (v: unknown) => string): stri
   let s;
   try {
     s = v?.constructor.name || `${v}`;
-  } catch (err) {
+  } catch {
     if (fallback) {
       s = fallback(v);
     }
