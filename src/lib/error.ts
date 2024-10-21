@@ -1,4 +1,4 @@
-export default class OptionError extends Error {
+export class OptionError extends Error {
   public optionValue?: string;
 
   constructor(message: string, optionValue?: string) {

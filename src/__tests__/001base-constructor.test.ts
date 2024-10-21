@@ -1,32 +1,32 @@
 // These tests tha are for validations and functinos of
 // compare options provided through the top-level function
 
-import QuickCompare from '../compare';
-import type { AppOptions } from '../app-option';
-import OptionError from '../error-classes/option-error';
+import CoreCompare from '../compare';
+import type { Option } from '../lib/option';
+import { OptionError } from '../lib/error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      const qc = new QuickCompare(options as AppOptions);
-      expect(qc).toBeInstanceOf(QuickCompare);
+      const c = new CoreCompare(options as Option);
+      expect(c).toBeInstanceOf(CoreCompare);
     });
   };
 
-  testConstructor('constructor, no options');
-  testConstructor('constructor, General', 'General');
-  testConstructor('constructor, Exact', 'Exact');
+  testConstructor('no options');
 });
 
 describe('invalid constructor calls', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      expect(() => new QuickCompare(options as AppOptions)).toThrow(OptionError);
+      expect(() => new CoreCompare(options as Option)).toThrow(OptionError);
     });
   };
 
-  testConstructor('constructor, empty options', {});
-  testConstructor('constructor, unknown string', 'not an option');
-  testConstructor('constructor, not object, string, or function', 123);
-  testConstructor('constructor, function', () => true);
+  testConstructor('empty options', {});
+  testConstructor('string', 'not an option');
+  testConstructor('number', 123);
+  testConstructor('function', () => true);
+  testConstructor('invalid compare option', { compare: 'not an option' });
+  testConstructor('invalid render option', { render: 'not an option' });
 });

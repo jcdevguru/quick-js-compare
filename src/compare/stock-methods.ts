@@ -1,9 +1,9 @@
-import type { Value, Status } from './compare-types';
+import type { Value, Status } from './types';
 import {
   actualType,
   typeIsSupported,
   typeIsPrimitive,
-} from './compare-util';
+} from './util';
 
 export const ExactComparer = (leftValue: Value, rightValue: Value) : Status => {
   // always check for strict match
@@ -34,7 +34,6 @@ export const GeneralComparer = (leftValue: Value, rightValue: Value) : Status =>
   // always check for strict match
   const st = ExactComparer(leftValue, rightValue);
   if (!st) {
-    // eslint-disable-next-line eqeqeq
     return leftValue == rightValue;
   }
 

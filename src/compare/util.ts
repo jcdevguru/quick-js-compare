@@ -1,15 +1,15 @@
 import {
-  type Comparison,
+  type ComparisonResult,
   type Status,
-  type Result,
-  type ComparisonData,
+  type ComparisonResultArray,
+  type Value,
   type KeyIndexValue,
   type StdObjectEntry,
   type StdObject,
   type ReferenceObject,
-  type ValuePair,
-  ComparisonDataIndex,
-} from './compare-types';
+  type ComparisonResultObject,
+  ComparisonResultArrayIndex,
+} from './types';
 
 // Utility methods for handling comparisons at runtime
 
@@ -86,12 +86,12 @@ export const createComparisonResult = (
   status: Status,
   {
     diff, same,
-  } : Partial<{ diff: ValuePair, same: ValuePair }> = {},
-): Comparison => {
+  } : Partial<{ diff: ComparisonResultObject, same: ComparisonResultObject }> = {},
+): ComparisonResult => {
   const {
     Left, LeftSame, RightSame, Right,
-  } = ComparisonDataIndex;
-  const result = new Array<ComparisonData>(4) as Result;
+  } = ComparisonResultArrayIndex;
+  const result = new Array<Value>(4) as ComparisonResultArray;
   if (diff) {
     result[Left] = diff.left;
     result[Right] = diff.right;
