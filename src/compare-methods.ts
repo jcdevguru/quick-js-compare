@@ -34,7 +34,6 @@ export const GeneralComparer = (leftValue: Value, rightValue: Value) : Status =>
   // always check for strict match
   const st = ExactComparer(leftValue, rightValue);
   if (!st) {
-     
     return leftValue == rightValue;
   }
 

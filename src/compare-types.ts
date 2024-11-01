@@ -76,3 +76,4 @@ export interface IndexValueCompareOp {
   leftIndexValue: IndexValue
   rightIndexValue: IndexValue
 }
+
