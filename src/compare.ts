@@ -8,7 +8,7 @@ import type {
 
 import {
   type AppOptions,
-  validateAppOption,
+  validateAppOptions,
 } from './app-option';
 
 import {
@@ -73,8 +73,8 @@ export default class QuickCompare {
   }
 
   constructor(appOptions?: AppOptions) {
-    if (appOptions && !validateAppOption(appOptions)) {
-      // Probably not needed since validateAppOption throws
+    if (appOptions && !validateAppOptions(appOptions)) {
+      // Probably not needed since validateAppOptions throws
       throw new Error('Invalid app options');
     }
     // TODO: apply defaults

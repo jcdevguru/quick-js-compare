@@ -34,7 +34,7 @@ export const isMinimalAppOptionObject = (v: unknown, errs?: Array<string>): v is
 
 export const isAppOptions = (v: unknown): v is AppOptions => isAppOptionToken(v) || isMinimalAppOptionObject(v);
 
-export const validateAppOption = (v: unknown): v is CompareAppOption => {
+export const validateAppOptions = (v: unknown): v is CompareAppOption => {
   const aType = typeof v;
   const errors: Array<string> = [];
 
