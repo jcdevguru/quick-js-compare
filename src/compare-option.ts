@@ -76,7 +76,7 @@ export const isCompareCollectionSpec = (v: unknown): v is CompareCollectionSpec 
   isEnumMember(v, CmpObjectToken) || isEnumMember(v, CmpCollectionToken)
 );
 
-export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function';
+export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
 
 export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOptionObject => verifyObject(v, {
   compareValue: isComparePrimitiveSpec,
