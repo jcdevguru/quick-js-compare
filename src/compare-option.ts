@@ -3,9 +3,6 @@ import type {
 } from './compare-types';
 
 import {
-  isEnumMember,
-  isStandardObject,
-  anyToString,
   verifyObject,
   type AtLeastOne,
 } from './util';
@@ -14,38 +11,20 @@ import OptionError from './error-classes/option-error';
 
 // Types
 
-enum CompareOptionToken {
-  Exact = 'Exact',
-  General = 'General',
-  ExactStructure = 'ExactStructure',
-  GeneralStructure = 'GeneralStructure',
-}
+const COMPARE_OPTION_TOKENS = ['Exact', 'General', 'ExactStructure', 'GeneralStructure'] as const;
+export type CompareOptionToken = typeof COMPARE_OPTION_TOKENS[number];
 
-enum CmpPrimitiveToken {
-  strict = 'strict',
-  abstract = 'abstract',
-  typeOnly = 'typeOnly',
-  ignore = 'ignore',
-}
+const CMP_PRIMITIVE_TOKENS = ['strict', 'abstract', 'typeOnly', 'ignore'] as const;
+export type CmpPrimitiveToken = typeof CMP_PRIMITIVE_TOKENS[number];
 
-enum CmpObjectToken {
-  reference = 'reference',
-  valueOnly = 'valueOnly',
-  ignore = 'ignore',
-}
+const CMP_OBJECT_TOKENS = ['reference', 'valueOnly', 'ignore'] as const;
+export type CmpObjectToken = typeof CMP_OBJECT_TOKENS[number];
 
-enum CmpKeyedObjectToken {
-  keyValueOrder = 'keyValueOrder',
-  keyValue = 'keyValue',
-  keyOrder = 'keyOrder',
-  keyOnly = 'keyOnly',
-}
+const CMP_KEYED_OBJECT_TOKENS = ['keyValueOrder', 'keyValue', 'keyOrder', 'keyOnly'] as const;
+export type CmpKeyedObjectToken = typeof CMP_KEYED_OBJECT_TOKENS[number];
 
-enum CmpCollectionToken {
-  valueOrder = 'valueOrder',
-  valueOnly = 'valueOnly',
-  sizeOnly = 'sizeOnly',
-}
+const CMP_COLLECTION_TOKENS = ['valueOrder', 'valueOnly', 'sizeOnly'] as const;
+export type CmpCollectionToken = typeof CMP_COLLECTION_TOKENS[number];
 
 export type CompareValueSpec = CmpPrimitiveToken;
 export type CompareObjectSpec = CmpObjectToken | CmpKeyedObjectToken;
@@ -61,19 +40,19 @@ export interface CompareOptionObject {
 
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
 
-export type CompareAppOption = CompareOptionToken | keyof typeof CompareOptionToken | MinimalCompareOptionObject | CompareFunc;
+export type CompareAppOption = CompareOptionToken | MinimalCompareOptionObject | CompareFunc;
 
 // Methods
-export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => isEnumMember(v, CompareOptionToken);
+export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => COMPARE_OPTION_TOKENS.includes(v as CompareOptionToken);
 
-export const isComparePrimitiveSpec = (v: unknown): v is CompareValueSpec => isEnumMember(v, CmpPrimitiveToken);
+export const isComparePrimitiveSpec = (v: unknown): v is CompareValueSpec => CMP_PRIMITIVE_TOKENS.includes(v as CmpPrimitiveToken);
 
 export const isCompareObjectSpec = (v: unknown): v is CompareObjectSpec => (
-  isEnumMember(v, CmpObjectToken) || isEnumMember(v, CmpKeyedObjectToken)
+  CMP_OBJECT_TOKENS.includes(v as CmpObjectToken) || CMP_KEYED_OBJECT_TOKENS.includes(v as CmpKeyedObjectToken)
 );
 
 export const isCompareCollectionSpec = (v: unknown): v is CompareCollectionSpec => (
-  isEnumMember(v, CmpObjectToken) || isEnumMember(v, CmpCollectionToken)
+  CMP_OBJECT_TOKENS.includes(v as CmpObjectToken) || CMP_COLLECTION_TOKENS.includes(v as CmpCollectionToken)
 );
 
 export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
@@ -91,36 +70,23 @@ export const isCompareAppOption = (v: unknown): v is CompareAppOption => (
 );
 
 export const validateCompareAppOption = (v: unknown): v is CompareAppOption => {
-  const aType = typeof v;
   const errors: Array<string> = [];
 
-  switch (aType) {
-    case 'string':
-      if (!isCompareOptionToken(v)) {
-        throw new OptionError('invalid token for compare option', v as string);
-      }
-      break;
-
-    case 'object':
-      if (!isStandardObject(v)) {
-        throw new OptionError('invalid object type for compare option', anyToString(v));
-      }
-      if (!isMinimalCompareOptionObject(v, errors)) {
-        let s = 'compare option object is not valid';
-        if (errors.length) {
-          s = `${s}: errors: ${errors.join(', ')}`;
-        }
-        throw new OptionError(s);
-      }
-      break;
-
-    default:
-      if (aType !== 'function') {
-        throw new OptionError('invalid type for compare option', anyToString(v));
-      } else if (!isCompareFunction(v)) {
-        throw new OptionError('compare option function is not valid', anyToString(v));
-      }
-      throw new OptionError(`invalid compare option type ${aType}`);
+  if (isCompareOptionToken(v)) {
+    return true;
   }
+
+  if (isCompareFunction(v)) {
+    return true;
+  }
+
+  if (!isMinimalCompareOptionObject(v, errors)) {
+    let s = 'compare option object is not valid';
+    if (errors.length) {
+      s = `${s}: errors: ${errors.join(', ')}`;
+    }
+    throw new OptionError(s);
+  }
+
   return true;
 };
