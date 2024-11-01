@@ -22,41 +22,10 @@ export type NonEmptyArray<T> = [T, ...T[]];
 // toArray() -> []
 export const toArray = (...v: Array<unknown>) => [...v].flat();
 
-// Tests if item is an enum element - e.g.,
-//   enum foo { a, b };
-//   isEnumMember('a', foo) -> true
-//   isEnumMember('c', foo) -> false
-// Caution: this implementation will match on number as index
-// unless explicit mappings assigned, e.g.,
-//   enum bar { a = 'a', b = 'b' };
-//   isEnumMember(1, foo) -> true   // corresponds with 'b'
-//   isEnumMember(1, bar) -> false  // no integer mapping
-export const isEnumMember = <E>(
-  value: unknown, enumArg: EnumLike<E>,
-): value is E => (Object.values(enumArg) as unknown[]).includes(value);
-
 // True when argument represents non-null 'Record' object.
 // Will be false with an array, set, map, etc.
 export const isStandardObject = (v: unknown): v is Record<string, unknown> => v?.constructor.name === 'Object';
 
-// Type and exception-safe conversions of any JS value to a string, if conversion
-// is natural.  Will not show data contained in objects. Allows fallback for
-// more sophisticated mappings.  When all else fails, return empty string.
-export const anyToString = (v: unknown, fallback?: (v: unknown) => string): string => {
-  let s;
-  try {
-    s = v?.constructor.name || `${v}`;
-  } catch {
-    if (fallback) {
-      s = fallback(v);
-    }
-  } finally {
-    if (typeof s !== 'string') {
-      s = '';
-    }
-  }
-  return s;
-};
 
 export const verifyObject = (
   obj: unknown,
