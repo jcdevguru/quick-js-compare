@@ -9,7 +9,7 @@ import {
   type ReferenceObject,
   type ValuePair,
   ComparisonDataIndex,
-} from './compare-types';
+} from './types';
 
 // Utility methods for handling comparisons at runtime
 

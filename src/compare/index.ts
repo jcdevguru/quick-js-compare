@@ -4,22 +4,22 @@ import type {
   Comparison,
   Status,
   ReferenceObject,
-} from './compare-types';
+} from './types';
 
 import {
   type AppOptions,
   validateAppOptions,
-} from './app-option';
+} from '../app/option';
 
 import {
   GeneralComparer,
   ExactComparer,
-} from './compare-methods';
+} from './methods';
 
 import {
   createComparisonResult,
   valIsReference,
-} from './compare-util';
+} from './util';
 
 type RefSet = WeakSet<ReferenceObject>;
 

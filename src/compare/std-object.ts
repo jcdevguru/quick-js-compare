@@ -1,4 +1,4 @@
-import QuickCompare from './compare';
+import QuickCompare from '.';
 
 import {
   type Comparison,
@@ -10,18 +10,18 @@ import {
   type IndexValueCompareOp,
   type Status,
   ComparisonDataIndex,
-} from './compare-types';
+} from './types';
 
 import {
   actualType,
   typeIsStdObject,
   createComparisonResult,
   spliceKeyIndexValues,
-} from './compare-util';
+} from './util';
 
 import {
   type CompareAppOption,
-} from './compare-option';
+} from './option';
 
 const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
   if (!keySet.has(key)) {

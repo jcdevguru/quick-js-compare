@@ -1,6 +1,6 @@
 // Types for comparison operations
-import { type TupleOf } from './util';
-import { type AppOptions } from './app-option';
+import { type TupleOf } from '../util';
+import { type AppOptions } from '../app/option';
 
 // private type to work around self-reference restrictions
 type ValueBase = NonNullable<unknown>;

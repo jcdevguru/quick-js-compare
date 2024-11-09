@@ -1,6 +1,6 @@
 import { StdObjectCompare } from './src/std-object-compare';
-import type { Value, StdObjectEntry } from './src/compare-types';
-import { sparseEntriesToStdObject } from './src/compare-util';
+import type { Value, StdObjectEntry } from './src/types';
+import { sparseEntriesToStdObject } from './src/util';
 
 const cmp = new StdObjectCompare();
 

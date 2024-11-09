@@ -1,12 +1,12 @@
-import { CompareAppOption, isCompareAppOption } from './compare-option';
-import { RenderAppOption, isRenderAppOption } from './render-option';
+import { CompareAppOption, isCompareAppOption } from '../compare/option';
+import { RenderAppOption, isRenderAppOption } from '../render/option';
 
 import {
   verifyObject,
   type AtLeastOne,
-} from './util';
+} from '../util';
 
-import OptionError from './error-classes/option-error';
+import OptionError from '../error-classes/option-error';
 
 export interface AppOptionObject {
   compare: CompareAppOption

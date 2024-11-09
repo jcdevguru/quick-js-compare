@@ -2,7 +2,7 @@
 // compare options provided through the top-level function
 
 import QuickCompare from '../compare';
-import type { AppOptions } from '../app-option';
+import type { AppOptions } from '../app/option';
 import OptionError from '../error-classes/option-error';
 
 describe('successful construction', () => {

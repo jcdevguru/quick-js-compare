@@ -1,13 +1,13 @@
 import type {
   CompareFunc,
-} from './compare-types';
+} from './types';
 
 import {
   verifyObject,
   type AtLeastOne,
-} from './util';
+} from '../util';
 
-import OptionError from './error-classes/option-error';
+import OptionError from '../error-classes/option-error';
 
 // Types
 
