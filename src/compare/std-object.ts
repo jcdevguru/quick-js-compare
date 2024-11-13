@@ -1,4 +1,4 @@
-import QuickCompare from '.';
+import CoreCompare from '.';
 
 import {
   type Comparison,
@@ -54,7 +54,7 @@ export const alignStdObjects = (left: StdObject, right: StdObject) => {
   return { leftOnly, rightOnly, corresponding };
 };
 
-export class StdObjectCompare extends QuickCompare {
+export class StdObjectCompare extends CoreCompare {
   // Incomplete - should not be specific to StdObjects
 
   public constructor() {

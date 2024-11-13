@@ -23,7 +23,7 @@ import {
 
 type RefSet = WeakSet<ReferenceObject>;
 
-export default class QuickCompare {
+export default class CoreCompare {
   private match: CompareFunc;
 
   private refSets = {
@@ -78,14 +78,14 @@ export default class QuickCompare {
       throw new Error('Invalid app options');
     }
     // TODO: apply defaults
-    this.match = QuickCompare.createMatchFromOptions(appOptions || 'Exact');
+    this.match = CoreCompare.createMatchFromOptions(appOptions || 'Exact');
     this.appOptions = appOptions as AppOptions;
   }
 
   compare(left: Value, right: Value): Comparison {
     let status: Status;
-    if (QuickCompare.alreadyTraversed(left, this.refSets.left)
-      && QuickCompare.alreadyTraversed(right, this.refSets.right)
+    if (CoreCompare.alreadyTraversed(left, this.refSets.left)
+      && CoreCompare.alreadyTraversed(right, this.refSets.right)
     ) {
       status = this.match(left, right, this.appOptions);
     }

@@ -1,15 +1,15 @@
 // These tests tha are for validations and functinos of
 // compare options provided through the top-level function
 
-import QuickCompare from '../compare';
+import CoreCompare from '../compare';
 import type { AppOptions } from '../app/option';
 import OptionError from '../error-classes/option-error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      const qc = new QuickCompare(options as AppOptions);
-      expect(qc).toBeInstanceOf(QuickCompare);
+      const c = new CoreCompare(options as AppOptions);
+      expect(c).toBeInstanceOf(CoreCompare);
     });
   };
 
@@ -21,7 +21,7 @@ describe('successful construction', () => {
 describe('invalid constructor calls', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      expect(() => new QuickCompare(options as AppOptions)).toThrow(OptionError);
+      expect(() => new CoreCompare(options as AppOptions)).toThrow(OptionError);
     });
   };
 
