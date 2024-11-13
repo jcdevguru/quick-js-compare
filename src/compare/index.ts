@@ -14,7 +14,7 @@ import {
 import {
   GeneralComparer,
   ExactComparer,
-} from './methods';
+} from './stock-methods';
 
 import {
   createComparisonResult,
