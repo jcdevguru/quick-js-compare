@@ -4,13 +4,13 @@
   "env": {
     "node": true,
     "jest": true
-  },
+  }, 
   "parserOptions": {
     "project": "./tsconfig.json"
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
-    "max-len": ["error", 127, 2, {
+    "max-len": ["error", 140, 2, {
       "ignoreUrls": true,
       "ignoreComments": false,
       "ignoreRegExpLiterals": true,
