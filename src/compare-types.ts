@@ -1,4 +1,6 @@
-// TypeScript declarations for transpilations
+// Types for comparison operations
+import { type TupleOf } from './util';
+import { type AppOptions } from './app-option';
 
 // private type to work around self-reference restrictions
 type ValueBase = NonNullable<unknown>;
@@ -25,7 +27,7 @@ export type StdObjectEntry = [keyof StdObject, Value];
 export type Status = boolean | undefined;
 
 export interface CompareFunc<T extends Value = Value> {
-  (left: T, right: T): Status;
+  (left: T, right: T, options: AppOptions): Status;
 }
 
 export type PrimitiveCompareFunc = CompareFunc<Primitive>;
@@ -33,13 +35,16 @@ export type StdObjectCompareFunc = CompareFunc<StdObjectEntry>;
 export type MapObjectCompareFunc = CompareFunc<MapObject>;
 export type SetObjectCompareFunc = CompareFunc<SetObject>;
 
-type TupleOf<T, N extends number, A extends unknown[] = []> = A extends { length: N } ? A : TupleOf<T, N, [...A, T]>;
-
 export enum ComparisonDataIndex {
   Left = 0,
   LeftSame = 1,
   RightSame = 2,
   Right = 3,
+}
+
+export interface ValuePairN<T extends Value = Value> {
+  left: T,
+  right: T
 }
 
 export interface ValuePair<T extends Value = Value> {

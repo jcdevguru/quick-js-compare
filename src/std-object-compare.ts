@@ -1,6 +1,7 @@
 import QuickCompare from './compare';
 
 import {
+  type Comparison,
   type Value,
   type ValuePair,
   type StdObject,
@@ -9,14 +10,18 @@ import {
   type IndexValueCompareOp,
   type Status,
   ComparisonDataIndex,
-} from './base-types';
+} from './compare-types';
 
 import {
   actualType,
   typeIsStdObject,
-  createComparison,
+  createComparisonResult,
   spliceKeyIndexValues,
-} from './util';
+} from './compare-util';
+
+import {
+  type CompareAppOption,
+} from './compare-option';
 
 const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
   if (!keySet.has(key)) {
@@ -53,11 +58,11 @@ export class StdObjectCompare extends QuickCompare {
   // Incomplete - should not be specific to StdObjects
 
   public constructor() {
-    super({ compare: 'General' });
+    super({ compare: 'General' as CompareAppOption });
     // incomplete
   }
 
-  compare(left: Value, right: Value) {
+  compare(left: Value, right: Value) : Comparison {
     const baseResult = super.compare(left, right);
     if (baseResult.status !== undefined) {
       return baseResult;
@@ -133,6 +138,6 @@ export class StdObjectCompare extends QuickCompare {
       diff.right[index] = [rightKey, value];
     });
 
-    return createComparison(status, { diff, same });
+    return createComparisonResult(status, { diff, same });
   }
 }

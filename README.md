@@ -122,45 +122,119 @@ will result in:
 
 ## Options
 
-Quick JS Compare accepts an options structure to customize the comparison behavior and to provide formatting and output choices:
+Quick JS Compare accepts an `options` arguyment to customize the comparison and data rendering behavior:
 
-Compare options:
+```js
+{
+  compare: <object> | "Exact" | "General" | "ExactStructure" | "GeneralStructure" | <function>,
+  render: <object> | "Standard" | "Verbose" | <function>
+}
+```
+When there is no options argument, the default values for `compare` and `render` are `Standard` (see below).
 
-  * `compare`: "`Strict`" | "`General`"* | options | function
-  * `compareValue`: "`strict`"* | "`abstract`" | "`ignore`" | function
-  * `compareObject`: "`reference`" | "`keyValueOrder`" | "`keyValue`"* | "`keyOrder`" | "`keyOnly`" | "`valueOnly`" | "`ignore`" | function
-  * `compareCollection`: "`reference`" | "`valueOrder`" | "`valueOnly`"* | "`sizeOnly`" | "`ignore`" | function
+### `compare` option property
 
+The following settings are supported as values for the `compare` property.  When omitted, the default setting will be `General` (see below).
 
-### Explanations
+#### Options as object
 
-* Strict
-  * - compare using `===` for primitives (i.e., type and value)
-  * - compare by type, order, values for object
-  * - compare by index, value for collection
+The following combinations of properties and values are supported when options for comparison are specified in an object.
 
-  * compare
-  * `compareValue`: "`strict`"
-  * `compareObject`: "`keyValueOrder`"
-  * `compareCollection`: "`indexValue`"
+  * `compareValue`: for comparison of primitive values (e.g., `string`, `number`, `boolean`)
+    * `strict`: match only when identical in both value and type, i.e., as with `===`
+    * `abstract`: match when identical or when functionally equivalent, i.e., as with `==`
+    * `typeOnly`: match when identical in type only, without comparing values
+    * `ignore`: do not compare primitive values
+    * *function*: use function to compare (see below)
 
-* General (default)
-  * - compare using `==` for primitives (can compare only in value)
-  * - compare by key/value for object (order insignificant)
-  * - compare by order, value for collection
+    Default: `abstract`
 
-  * `compareValue`: "`abstract`"
-  * `compareObject`: "`keyValue`"
-  * `compareCollection`: "`valueOnly`"
+  * `compareObject`: for comparison of standard objects with named keys, e.g., `{ a: 1, b: 2 }`
+    * `reference`: match only when identical as references, i.e., when compared objects are references to the same object in memory
+    * `keyValueOrder`: match when compared objects have matching key/value pairs in identical order 
+    * `keyValue`: match when compared objects have matching key/value pairs, regardless of order
+    * `keyOrder`: match when compared objects have matching keys in the same order, regardless of their values
+    * `valueOrder`: match when compared objects have matching values in the same order, regardless of their keys 
+    * `keyOnly`: match when compared objects have matching keys, regardless of their order or their values 
+    * `valueOnly`: match when compared objects have matching values, regardless of their order or their keys 
+    * `ignore`: do not compare objects
+    * *function*: use function to compare (see below)
 
-* `Structure`:
-  * `compareValue`: "`ignore`"
-  * `compareObject`: "`keyOnly`"
-  * `compareCollection`: "`sizeOnly`"
+    Default: `keyValue`
 
+  * `compareMap`: for comparison of objects of type `Map`, e.g., created from `new Map([['a', 1],['b', 2]])`
+    Uses same settings as in `compareObject`. 
 
-* `render`: "`Standard`" | "`Verbose`" | options | function
+  * `compareArray`: for comparison of array objects, e.g., `[1, 7, 'a', true]`
+    * `reference`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
+    * `valueOrder`: match when compared arrays have matching values in the same order 
+    * `valueOnly`: match when compared arrays have matching values, regardless of their order
+    * `sizeOnly`: match when compared arrays have matching number of elements, regardless of their contents
+    * `ignore`: do not compare objects
+    * *function*: use function to compare (see below)
 
+    Default: `valueObly`
+  
+  * `compareSet`: for comparison of objects of type `Set`, e.g., created from `new Set([1, 7, 'a', true])`
+    Uses same settings as in `compareArray`. 
+
+  * If `compareMap` is omitted, objects of type `Map` will be compared according to settings in `compareObject`
+  * If `compareSet` is omitted, objects of type `Set` will be compared according to settings in `compareArray`
+
+  TODO: explain functions
+
+#### Options as strings
+
+String values for the `compare` option behave as shorthand for a style of comparison.  Their function is described by their equivalent representations in the previously described option object.
+
+* `General`: compare for functional equivalence (default)
+  * `compareValue`: `abstract`
+  * `compareObject`: `keyValue`
+  * `compareArray`: `valueOnly`
+  * `compareMap`: `keyValue`
+  * `compareSet`: `valueOnly`
+
+* `Exact`: compare for identical match in type, value, and structure
+  * `compareValue`: `strict`
+  * `compareObject`: `keyValueOrder`
+  * `compareArray`: `valueOrder`
+  * `compareMap`: `keyValueOrder`
+  * `compareSet`: `valueOrder`
+
+* `ExactStructure`: compare for identical structure in type and order
+  * `compareValue`: `typeOnly`
+  * `compareObject`: `keyValueOrder`
+  * `compareArray`: `valueOrder`
+  * `compareMap`: `keyValueOrder`
+  * `compareSet`: `valueOrder`
+
+* `AlignedStructure`: compare for matching structure in key ordering and collection sizes only
+  * `compareValue`: `ignore`
+  * `compareObject`: `keyOrder`
+  * `compareArray`: `sizeOnly`
+  * `compareMap`: `keyOrder`
+  * `compareSet`: `sizeOnly`
+
+* `GeneralStructure`: compare for matching structure only, regardless of order
+  * `compareValue`: `ignore`
+  * `compareObject`: `keyOnly`
+  * `compareArray`: `sizeOnly`
+  * `compareMap`: `keyOnly`
+  * `compareSet`: `sizeOnly`
+
+### Render options
+
+* `render`: 
+
+The following properties are supported in *render-object*.
+
+* `mapAsObject`: boolean
+* `setAsArray`: boolean
+* `maxDepth`: number
+* `same`: boolean
+* `report`: boolean
+
+(TODO: explain render options.)
 * `Standard`:
   * `mapAsObject`: true
   * `setAsArray`: true

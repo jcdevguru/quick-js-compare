@@ -1,116 +1,100 @@
-import {
-  type Comparison,
-  type Status,
-  type Result,
-  type ComparisonData,
-  type KeyIndexValue,
-  type StdObjectEntry,
-  type StdObject,
-  type ReferenceObject,
-  type ValuePair,
-  ComparisonDataIndex,
-} from './base-types';
+// Utility types
+// An array-like type (tuple) that must contain exactly N elements
+// e.g.,
+// type TupleOf<int, 4> -> [int, int, int, int]
+export type TupleOf<T, N extends number, A extends unknown[] = []> = A extends { length: N } ? A : TupleOf<T, N, [...A, T]>;
 
-// Utility methods for handling comparisons at runtime
+// Generic type for any object that matches an enum
+export type EnumLike<T> = Record<string | number | symbol, T>;
 
-// Primitive types in ES2020+ as string.
-// 'null' is excluded because 'typeof'
-// returns 'object' on null value.
-// supported types only here
-const primitiveTypes = new Set([
-  'string',
-  'number',
-  'boolean',
-  'undefined',
-  'symbol',
-  'bigint',
-]);
+// Generic type for any object that requires one of an element
+export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>> }> = Partial<T> & U[keyof U];
 
-// Works with [...]
-const collectionTypes = new Set([
-  'Array',
-  'Set',
-  'Map',
-]);
+// Generic type for non-empty array
+export type NonEmptyArray<T> = [T, ...T[]];
 
-// Has multiple retrievable through key
-const keyedTypes = new Set([
-  'Object',
-  'Array',
-  'Map',
-]);
+// Utility methods
 
-const referenceTypes = new Set([
-  ...collectionTypes,
-  ...keyedTypes,
-]);
+// Returns args together in an array, if not already so
+// toArray(1, 2, 3) -> [1, 2, 3]
+// toArray(['a', 'b', 'c']) -> ['a', 'b', 'c']
+// toArray(['a'], 1, 'one') -> [['a'], 1, 'one']
+// toArray() -> []
+export const toArray = (...v: Array<unknown>) => [...v].flat();
 
-const objectTypes = new Set([
-  ...referenceTypes,
-  'String',
-  'Number',
-  'Boolean',
-  'Symbol',
-  'Map',
-  'Set',
-]);
+// Tests if item is an enum element - e.g.,
+//   enum foo { a, b };
+//   isEnumMember('a', foo) -> true
+//   isEnumMember('c', foo) -> false
+// Caution: this implementation will match on number as index
+// unless explicit mappings assigned, e.g.,
+//   enum bar { a = 'a', b = 'b' };
+//   isEnumMember(1, foo) -> true   // corresponds with 'b'
+//   isEnumMember(1, bar) -> false  // no integer mapping
+export const isEnumMember = <E>(
+  value: unknown, enumArg: EnumLike<E>,
+): value is E => (Object.values(enumArg) as unknown[]).includes(value);
 
-const functionTypes = new Set([
-  'Function',
-  'function',
-]);
+// True when argument represents non-null 'Record' object.
+// Will be false with an array, set, map, etc.
+export const isStandardObject = (v: unknown): v is Record<string, unknown> => v?.constructor.name === 'Object';
 
-const supportedTypes = new Set([
-  ...primitiveTypes,
-  ...objectTypes,
-]);
-
-export const typeIsSupported = (t: string): boolean => supportedTypes.has(t);
-export const typeIsObject = (t: string): boolean => objectTypes.has(t);
-export const typeIsGenericObject = (t: string): boolean => t === 'object';
-export const typeIsPrimitive = (t: string) : boolean => primitiveTypes.has(t);
-export const typeIsStdObject = (t: string) : boolean => t === 'Object';
-export const typeIsKeyedObject = (t: string) : boolean => keyedTypes.has(t);
-export const typeIsFunction = (t: string) : boolean => functionTypes.has(t);
-export const typeIsReference = (t: string) : boolean => referenceTypes.has(t);
-
-export const actualType = (v: unknown): string => {
-  const t = typeof v;
-  return primitiveTypes.has(t) ? t : (v?.constructor.name || t);
-};
-
-export const valIsReference = (v: unknown): v is ReferenceObject => typeIsReference(actualType(v));
-
-export const createComparison = (
-  status: Status,
-  {
-    diff, same,
-  } : Partial<{ diff: ValuePair, same: ValuePair }> = {},
-): Comparison => {
-  const {
-    Left, LeftSame, RightSame, Right,
-  } = ComparisonDataIndex;
-  const result = new Array<ComparisonData>(4) as Result;
-  if (diff) {
-    result[Left] = diff.left;
-    result[Right] = diff.right;
+// Type and exception-safe conversions of any JS value to a string, if conversion
+// is natural.  Will not show data contained in objects. Allows fallback for
+// more sophisticated mappings.  When all else fails, return empty string.
+export const anyToString = (v: unknown, fallback?: (v: unknown) => string): string => {
+  let s;
+  try {
+    s = v?.constructor.name || `${v}`;
+  } catch (err) {
+    if (fallback) {
+      s = fallback(v);
+    }
+  } finally {
+    if (typeof s !== 'string') {
+      s = '';
+    }
   }
-  if (same) {
-    result[LeftSame] = same.left;
-    result[RightSame] = same.right;
+  return s;
+};
+
+export const verifyObject = (
+  obj: unknown,
+  validators: Record<string, (v: unknown) => boolean>,
+  skipUndefined: boolean,
+  errs?: Array<string>,
+): boolean => {
+  if (!isStandardObject(obj)) {
+    return false;
   }
-  return { result, status };
-};
+  const objKeys = Object.keys(obj);
+  const validKeySet = new Set(Object.keys(validators));
+  const unknownKeys = objKeys.filter((k) => !validKeySet.has(k));
 
-export const spliceKeyIndexValues = (kivs: KeyIndexValue[], stopIndex: number) : Array<KeyIndexValue> => {
-  const limit = kivs.findIndex(({ indexValue: { index } }) => index >= stopIndex);
-  const spliceLen = limit === -1 ? kivs.length + 1 : limit;
-  return kivs.splice(0, spliceLen);
-};
+  if (unknownKeys.length) {
+    errs?.push(...unknownKeys.map((k) => `property ${k} unknown`));
+    return false;
+  }
 
-export const sparseEntriesToStdObject = (entries: Array<StdObjectEntry | undefined>): StdObject => {
-  const condensedArray = Object.values(entries) as Array<StdObjectEntry>;
-  return Object.fromEntries(condensedArray.map(
-    ([s, v]: StdObjectEntry) => [s, (Array.isArray(v) ? sparseEntriesToStdObject(v as Array<StdObjectEntry>) : v)],
-  ));
+  if (!objKeys.length) {
+    errs?.push(`need at least one of ${[...validKeySet].join(', ')}`);
+    return false;
+  }
+
+  const invalidSettings = Object.entries(validators).reduce((acc, [setting, check]) => {
+    if (skipUndefined && obj[setting] === undefined) {
+      return acc;
+    }
+    if (!check(obj[setting])) {
+      return [...acc, setting];
+    }
+    return acc;
+  }, [] as Array<string>);
+
+  if (invalidSettings.length) {
+    errs?.push(...invalidSettings.map((s) => `field ${s} has invalid value`));
+    return false;
+  }
+
+  return true;
 };

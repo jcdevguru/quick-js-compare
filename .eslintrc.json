@@ -1,13 +1,13 @@
 {
   "parser": "@typescript-eslint/parser",
-  "ignorePatterns": ["dist/**","main.ts"],
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json"
+  },
+  "ignorePatterns": ["dist/**","main.ts","coverage/**"],
   "env": {
     "node": true,
     "jest": true
   }, 
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  },
   "plugins": ["@typescript-eslint"],
   "rules": {
     "max-len": ["error", 140, 2, {
