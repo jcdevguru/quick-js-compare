@@ -35,28 +35,22 @@ export type StdObjectCompareFunc = CompareFunc<StdObjectEntry>;
 export type MapObjectCompareFunc = CompareFunc<MapObject>;
 export type SetObjectCompareFunc = CompareFunc<SetObject>;
 
-export enum ComparisonDataIndex {
+export enum ComparisonResultArrayIndex {
   Left = 0,
   LeftSame = 1,
   RightSame = 2,
   Right = 3,
 }
 
-export interface ValuePairN<T extends Value = Value> {
+export interface ComparisonResultObject<T extends Value = Value> {
   left: T,
   right: T
 }
 
-export interface ValuePair<T extends Value = Value> {
-  left: T,
-  right: T
-}
+export type ComparisonResultArray = TupleOf<Value, 4>;
 
-export type ComparisonData = Value;
-export type Result = TupleOf<ComparisonData, 4>;
-
-export interface Comparison {
-  result: Result,
+export interface ComparisonResult {
+  result: ComparisonResultArray,
   status: Status,
 }
 

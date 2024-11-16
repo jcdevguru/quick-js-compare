@@ -7,8 +7,6 @@ import {
   type AtLeastOne,
 } from '../util';
 
-import OptionError from '../error-classes/option-error';
-
 // Types
 // Render option types
 export interface RenderOptionObject {
@@ -41,26 +39,4 @@ export const isMinimalRenderOptionObject = (v: unknown, errs?: Array<string>): v
   debug: isBoolean,
 }, true, errs);
 
-export const isRenderAppOption = (v: unknown): v is RenderAppOption => isRenderToken(v) || isMinimalRenderOptionObject(v);
-
-export const validateRenderAppOption = (v: unknown): v is RenderAppOption => {
-  const errors: Array<string> = [];
-
-  if (isRenderToken(v)) {
-    return true;
-  }
-
-  if (isRenderFunction(v)) {
-    return true;
-  }
-
-  if (!isMinimalRenderOptionObject(v, errors)) {
-    let s = 'render option object is not valid';
-    if (errors.length) {
-      s = `${s}: errors: ${errors.join(', ')}`;
-    }
-    throw new OptionError(s);
-  }
-
-  return true;
-};
+export const isRenderOption = (v: unknown): v is RenderOption => isRenderToken(v) || isMinimalRenderOptionObject(v);

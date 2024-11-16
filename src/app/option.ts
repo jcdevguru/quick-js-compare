@@ -6,8 +6,6 @@ import {
   type AtLeastOne,
 } from '../util';
 
-import OptionError from '../error-classes/option-error';
-
 export interface AppOptionObject {
   compare: CompareAppOption
   render: RenderAppOption
@@ -27,22 +25,5 @@ export const isMinimalAppOptionObject = (v: unknown, errs?: Array<string>): v is
 }, true, errs);
 
 export type AppOptions = AppOptionToken | MinimalAppOptionObject;
-export const isAppOptions = (v: unknown): v is AppOptions => isAppOptionToken(v) || isMinimalAppOptionObject(v);
-
-export const validateAppOptions = (v: unknown): v is CompareAppOption => {
-  const errors: Array<string> = [];
-
-  if (isAppOptionToken(v)) {
-    return true;
-  }
-
-  if (!isMinimalAppOptionObject(v, errors)) {
-    let s = 'app option object is not valid';
-    if (errors.length) {
-      s = `${s}: errors: ${errors.join(', ')}`;
-    }
-    throw new OptionError(s);
-  }
-
-  return true;
-};
+export const isAppOptions = (v: unknown, errors?: Array<string>): v is AppOptions =>
+  isAppOptionToken(v) || isMinimalAppOptionObject(v, errors);

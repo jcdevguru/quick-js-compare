@@ -40,7 +40,7 @@ export interface CompareOptionObject {
 
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
 
-export type CompareAppOption = CompareOptionToken | MinimalCompareOptionObject | CompareFunc;
+export type CompareOption = CompareOptionToken | MinimalCompareOptionObject | CompareFunc;
 
 // Methods
 export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => COMPARE_OPTION_TOKENS.includes(v as CompareOptionToken);

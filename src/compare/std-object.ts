@@ -1,15 +1,16 @@
 import CoreCompare from '.';
 
 import {
-  type Comparison,
+  type ComparisonResult,
   type Value,
-  type ValuePair,
+  type ComparisonResultObject,
   type StdObject,
   type StdObjectEntry,
   type KeyIndexValue,
   type IndexValueCompareOp,
   type Status,
-  ComparisonDataIndex,
+  ComparisonResultArrayIndex,
+  IndexValue,
 } from './types';
 
 import {
@@ -19,13 +20,15 @@ import {
   spliceKeyIndexValues,
 } from './util';
 
-import {
-  type CompareAppOption,
-} from './option';
+import { AppOptionObject } from '../app/option';
+
+const ivp = (index: number, value: unknown): IndexValue => ({ index, value: value as Value });
+
+const kivp = (key: string, index: number, value: unknown): KeyIndexValue => ({ key, indexValue: ivp(index, value) });
 
 const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
   if (!keySet.has(key)) {
-    acc.push({ key, indexValue: { index, value: obj[key] as Value } });
+    acc.push(kivp(key, index, obj[key]));
   }
   return acc;
 };
@@ -36,17 +39,17 @@ export const alignStdObjects = (left: StdObject, right: StdObject) => {
   const rightKeyMap = new Map(rightKeys.map((k, i) => [k, i]));
   const sameKeySet = new Set(leftKeys.filter((k) => rightKeyMap.has(k)));
 
-  const corresponding = leftKeys.reduce((acc, key, leftIndex) => {
+  const corresponding = leftKeys.reduce((acc: Array<IndexValueCompareOp>, key: string, leftIndex: number) => {
     const rightIndex = rightKeyMap.get(key);
     if (rightIndex !== undefined) {
       acc.push({
         key,
-        leftIndexValue: { index: leftIndex, value: left[key] as Value },
-        rightIndexValue: { index: rightIndex, value: right[key] as Value },
+        leftIndexValue: ivp(leftIndex, left[key]),
+        rightIndexValue: ivp(rightIndex, right[key]),
       });
     }
     return acc;
-  }, [] as Array<IndexValueCompareOp>);
+  }, []);
 
   const leftOnly = leftKeys.reduce(stdObjectReducer(sameKeySet, left), []);
   const rightOnly = rightKeys.reduce(stdObjectReducer(sameKeySet, right), []);
@@ -55,14 +58,12 @@ export const alignStdObjects = (left: StdObject, right: StdObject) => {
 };
 
 export class StdObjectCompare extends CoreCompare {
-  // Incomplete - should not be specific to StdObjects
 
-  public constructor() {
-    super({ compare: 'General' as CompareAppOption });
-    // incomplete
+  public constructor(options?: AppOptionObject) {
+    super(options ?? { compare: 'Exact', render: 'Standard' });
   }
 
-  compare(left: Value, right: Value) : Comparison {
+  compare(left: Value, right: Value) : ComparisonResult {
     const baseResult = super.compare(left, right);
     if (baseResult.status !== undefined) {
       return baseResult;
@@ -76,15 +77,15 @@ export class StdObjectCompare extends CoreCompare {
       return baseResult;
     }
 
-    const diff: ValuePair<Array<StdObjectEntry>> = { left: [], right: [] };
-    const same: ValuePair<Array<StdObjectEntry>> = { left: [], right: [] };
+    const diff: ComparisonResultObject<Array<StdObjectEntry>> = { left: [], right: [] };
+    const same: ComparisonResultObject<Array<StdObjectEntry>> = { left: [], right: [] };
 
     const {
       Left,
       LeftSame,
       RightSame,
       Right,
-    } = ComparisonDataIndex;
+    } = ComparisonResultArrayIndex;
 
     const {
       leftOnly,

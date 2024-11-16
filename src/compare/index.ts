@@ -1,14 +1,14 @@
 import type {
   CompareFunc,
   Value,
-  Comparison,
+  ComparisonResult,
   Status,
   ReferenceObject,
 } from './types';
 
 import {
   type AppOptions,
-  validateAppOptions,
+  isAppOptions,
 } from '../app/option';
 
 import {
@@ -20,6 +20,8 @@ import {
   createComparisonResult,
   valIsReference,
 } from './util';
+
+import OptionError from '../error-classes/option-error';
 
 type RefSet = WeakSet<ReferenceObject>;
 
@@ -72,17 +74,16 @@ export default class CoreCompare {
     return rc;
   }
 
-  constructor(appOptions?: AppOptions) {
-    if (appOptions && !validateAppOptions(appOptions)) {
-      // Probably not needed since validateAppOptions throws
-      throw new Error('Invalid app options');
+  constructor(appOptions: AppOptions = { compare: 'Exact', render: 'Standard' }) {
+    const errs: Array<string> = [];
+    if (appOptions && !isAppOptions(appOptions, errs)) {
+      throw new OptionError(`Invalid app options: ${errs.join(', ')}`);
     }
-    // TODO: apply defaults
-    this.match = CoreCompare.createMatchFromOptions(appOptions || 'Exact');
-    this.appOptions = appOptions as AppOptions;
+    this.match = CoreCompare.createMatchFromOptions(appOptions);
+    this.appOptions = appOptions;
   }
 
-  compare(left: Value, right: Value): Comparison {
+  compare(left: Value, right: Value): ComparisonResult {
     let status: Status;
     if (CoreCompare.alreadyTraversed(left, this.refSets.left)
       && CoreCompare.alreadyTraversed(right, this.refSets.right)
