@@ -1,11 +1,7 @@
-import type {
-  RenderFunc,
-} from './types';
 
-import {
-  verifyObject,
-  type AtLeastOne,
-} from '../lib/util';
+import { type AtLeastOne } from '../lib/types';
+import { verifyObject } from '../lib/util';
+import { type RenderFunc } from './types';
 
 // Types
 // Render option types

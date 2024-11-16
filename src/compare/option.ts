@@ -1,12 +1,8 @@
-import type {
-  CompareFunc,
-} from './types';
 
-import {
-  verifyObject,
-  type AtLeastOne,
-} from '../lib/util';
 
+import { type CompareFunc } from './types';
+import { type AtLeastOne } from '../lib/types';
+import { verifyObject } from '../lib/util';
 import { OptionError } from '../lib/error';
 
 // Types

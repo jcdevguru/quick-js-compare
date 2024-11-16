@@ -1,3 +1,9 @@
+
+import {
+  type AppOptions,
+  isAppOptions,
+} from '../lib/option';
+
 import { OptionError } from '../lib/error';
 
 import type {
@@ -7,11 +13,6 @@ import type {
   Status,
   ReferenceObject,
 } from './types';
-
-import {
-  type AppOptions,
-  isAppOptions,
-} from '../lib/option';
 
 import {
   GeneralComparer,

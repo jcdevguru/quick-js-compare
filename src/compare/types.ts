@@ -1,5 +1,5 @@
 // Types for comparison operations
-import { type TupleOf } from '../lib/util';
+import { type TupleOf } from '../lib/types';
 import { type AppOptions } from '../lib/option';
 
 // private type to work around self-reference restrictions
