@@ -3,7 +3,7 @@
 
 import CoreCompare from '../compare';
 import type { AppOptions } from '../lib/option';
-import OptionError from '../error-classes/option-error';
+import { OptionError } from '../lib/error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {

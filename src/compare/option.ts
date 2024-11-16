@@ -7,7 +7,7 @@ import {
   type AtLeastOne,
 } from '../lib/util';
 
-import OptionError from '../error-classes/option-error';
+import { OptionError } from '../lib/error';
 
 // Types
 

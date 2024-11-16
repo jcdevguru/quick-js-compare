@@ -1,3 +1,5 @@
+import { OptionError } from '../lib/error';
+
 import type {
   CompareFunc,
   Value,
@@ -20,8 +22,6 @@ import {
   createComparisonResult,
   valIsReference,
 } from './util';
-
-import OptionError from '../error-classes/option-error';
 
 type RefSet = WeakSet<ReferenceObject>;
 
