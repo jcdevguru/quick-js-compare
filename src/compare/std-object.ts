@@ -20,7 +20,7 @@ import {
   spliceKeyIndexValues,
 } from './util';
 
-import { AppOptionObject } from '../app/option';
+import { AppOptionObject } from '../lib/option';
 
 const ivp = (index: number, value: unknown): IndexValue => ({ index, value: value as Value });
 

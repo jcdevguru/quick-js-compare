@@ -9,7 +9,7 @@ import type {
 import {
   type AppOptions,
   isAppOptions,
-} from '../app/option';
+} from '../lib/option';
 
 import {
   GeneralComparer,

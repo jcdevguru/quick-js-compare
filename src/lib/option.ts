@@ -4,7 +4,7 @@ import { RenderAppOption, isRenderAppOption } from '../render/option';
 import {
   verifyObject,
   type AtLeastOne,
-} from '../util';
+} from './util';
 
 export interface AppOptionObject {
   compare: CompareAppOption

@@ -5,7 +5,7 @@ import type {
 import {
   verifyObject,
   type AtLeastOne,
-} from '../util';
+} from '../lib/util';
 
 import OptionError from '../error-classes/option-error';
 
