@@ -20,7 +20,7 @@ import {
   spliceKeyIndexValues,
 } from './util';
 
-import { AppOptionObject } from '../lib/option';
+import { OptionObject } from '../lib/option';
 
 const ivp = (index: number, value: unknown): IndexValue => ({ index, value: value as Value });
 
@@ -59,7 +59,7 @@ export const alignStdObjects = (left: StdObject, right: StdObject) => {
 
 export class StdObjectCompare extends CoreCompare {
 
-  public constructor(options?: AppOptionObject) {
+  public constructor(options?: OptionObject) {
     super(options ?? { compare: 'Exact', render: 'Standard' });
   }
 

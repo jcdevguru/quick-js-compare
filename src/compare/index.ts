@@ -1,7 +1,7 @@
 
 import {
-  type AppOptions,
-  isAppOptions,
+  type Option,
+  isOption,
 } from '../lib/option';
 
 import { OptionError } from '../lib/error';
@@ -34,14 +34,14 @@ export default class CoreCompare {
     right: new WeakSet<ReferenceObject>(),
   };
 
-  private appOptions: AppOptions;
+  private option: Option;
 
-  private static createMatchFromOptions = (appOptions: AppOptions): CompareFunc => {
-    const optionsType = typeof appOptions;
+  private static createMatchFromOptions = (option: Option): CompareFunc => {
+    const optionType = typeof option;
     // incomplete
-    switch (optionsType) {
+    switch (optionType) {
       case 'string': {
-        const optString = appOptions as string;
+        const optString = option as string;
         switch (optString) {
           case 'General':
             return GeneralComparer;
@@ -56,7 +56,7 @@ export default class CoreCompare {
         break;
 
       default:
-        throw new Error(`Unsupported options type ${optionsType}`);
+        throw new Error(`Unsupported options type ${optionType}`);
     }
     // Incomplete
     return ExactComparer;
@@ -75,13 +75,13 @@ export default class CoreCompare {
     return rc;
   }
 
-  constructor(appOptions: AppOptions = { compare: 'Exact', render: 'Standard' }) {
+  constructor(option: Option = { compare: 'Exact', render: 'Standard' }) {
     const errs: Array<string> = [];
-    if (appOptions && !isAppOptions(appOptions, errs)) {
+    if (option && !isOption(option, errs)) {
       throw new OptionError(`Invalid app options: ${errs.join(', ')}`);
     }
-    this.match = CoreCompare.createMatchFromOptions(appOptions);
-    this.appOptions = appOptions;
+    this.match = CoreCompare.createMatchFromOptions(option);
+    this.option = option;
   }
 
   compare(left: Value, right: Value): ComparisonResult {
@@ -89,7 +89,7 @@ export default class CoreCompare {
     if (CoreCompare.alreadyTraversed(left, this.refSets.left)
       && CoreCompare.alreadyTraversed(right, this.refSets.right)
     ) {
-      status = this.match(left, right, this.appOptions);
+      status = this.match(left, right, this.option);
     }
 
     const result = createComparisonResult(status, {

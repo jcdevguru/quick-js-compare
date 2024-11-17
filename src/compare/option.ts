@@ -34,9 +34,9 @@ export interface CompareOptionObject {
   compareSet: CompareCollectionSpec
 }
 
-export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
+export type MinimalCompareOption = AtLeastOne<CompareOptionObject>;
 
-export type CompareOption = CompareOptionToken | MinimalCompareOptionObject | CompareFunc;
+export type CompareOption = CompareOptionToken | MinimalCompareOption | CompareFunc;
 
 // Methods
 export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => COMPARE_OPTION_TOKENS.includes(v as CompareOptionToken);
@@ -53,7 +53,7 @@ export const isCompareCollectionSpec = (v: unknown): v is CompareCollectionSpec 
 
 export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
 
-export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOptionObject => verifyObject(v, {
+export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOption => verifyObject(v, {
   compareValue: isComparePrimitiveSpec,
   compareObject: isCompareObjectSpec,
   compareMap: isCompareObjectSpec,
@@ -61,11 +61,11 @@ export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): 
   compareSet: isCompareCollectionSpec,
 }, true, errs);
 
-export const isCompareAppOption = (v: unknown): v is CompareAppOption => (
+export const isCompareOption = (v: unknown): v is CompareOption => (
   isCompareOptionToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v)
 );
 
-export const validateCompareAppOption = (v: unknown): v is CompareAppOption => {
+export const validateCompareOption = (v: unknown): v is CompareOption => {
   const errors: Array<string> = [];
 
   if (isCompareOptionToken(v)) {

@@ -13,7 +13,7 @@ export interface RenderOptionObject {
   debug: boolean
 }
 
-export type MinimalRenderOptionObject = AtLeastOne<RenderOptionObject>;
+export type MinimalRenderOption = AtLeastOne<RenderOptionObject>;
 
 const RENDER_OPTION_TOKENS = ['StatusOnly', 'Standard'] as const;
 export type RenderToken = typeof RENDER_OPTION_TOKENS[number];
@@ -23,16 +23,16 @@ export const isRenderToken = (v: unknown): v is RenderToken =>
 
 export const isRenderFunction = (v: unknown): v is RenderFunc => typeof v === 'function';
 
-export type RenderAppOption = RenderToken | RenderOptionObject | RenderFunc;
+export type RenderOption = RenderToken | RenderOptionObject | RenderFunc;
 
 const isBoolean = (v: unknown) : v is boolean => typeof v === 'boolean';
 const isNumber = (v: unknown): v is number => typeof v === 'number';
 
-export const isMinimalRenderOptionObject = (v: unknown, errs?: Array<string>): v is MinimalRenderOptionObject => verifyObject(v, {
+export const isMinimalRenderOption = (v: unknown, errs?: Array<string>): v is MinimalRenderOption => verifyObject(v, {
   jsSetAsArray: isBoolean,
   maxDepth: isNumber,
   includeSame: isBoolean,
   debug: isBoolean,
 }, true, errs);
 
-export const isRenderOption = (v: unknown): v is RenderOption => isRenderToken(v) || isMinimalRenderOptionObject(v);
+export const isRenderOption = (v: unknown): v is RenderOption => isRenderToken(v) || isMinimalRenderOption(v);

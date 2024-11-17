@@ -2,13 +2,13 @@
 // compare options provided through the top-level function
 
 import CoreCompare from '../compare';
-import type { AppOptions } from '../lib/option';
+import type { Option } from '../lib/option';
 import { OptionError } from '../lib/error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      const c = new CoreCompare(options as AppOptions);
+      const c = new CoreCompare(options as Option);
       expect(c).toBeInstanceOf(CoreCompare);
     });
   };
@@ -21,7 +21,7 @@ describe('successful construction', () => {
 describe('invalid constructor calls', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      expect(() => new CoreCompare(options as AppOptions)).toThrow(OptionError);
+      expect(() => new CoreCompare(options as Option)).toThrow(OptionError);
     });
   };
 

@@ -1,6 +1,6 @@
 import { ComparisonResultArray } from '../compare/types';
-import { type AppOptionObject } from '../lib/option';
+import { type OptionObject } from '../lib/option';
 
 export interface RenderFunc<T extends ComparisonResultArray = ComparisonResultArray> {
-  (result: T, options: AppOptionObject): unknown;
+  (result: T, options: OptionObject): unknown;
 }
