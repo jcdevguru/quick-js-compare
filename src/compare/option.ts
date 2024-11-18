@@ -1,8 +1,6 @@
-
-
 import { type CompareFunc } from './types';
 import { type AtLeastOne } from '../lib/types';
-import { verifyObject } from '../lib/util';
+import { validateMinimalObject } from '../lib/util';
 import { OptionError } from '../lib/error';
 
 // Types
@@ -53,36 +51,49 @@ export const isCompareCollectionSpec = (v: unknown): v is CompareCollectionSpec 
 
 export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
 
-export const isMinimalCompareOptionObject = (v: unknown, errs?: Array<string>): v is MinimalCompareOption => verifyObject(v, {
-  compareValue: isComparePrimitiveSpec,
-  compareObject: isCompareObjectSpec,
-  compareMap: isCompareObjectSpec,
-  compareArray: isCompareCollectionSpec,
-  compareSet: isCompareCollectionSpec,
-}, true, errs);
+export const validateCompareOptionObject = (v: unknown): boolean => validateMinimalObject(v, {
+    compareValue: isComparePrimitiveSpec,
+    compareObject: isCompareObjectSpec,
+    compareMap: isCompareObjectSpec,
+    compareArray: isCompareCollectionSpec,
+    compareSet: isCompareCollectionSpec,
+  }
+);
+
+export const isMinimalCompareOptionObject = (v: unknown): v is MinimalCompareOption => {
+  try {
+    return validateCompareOptionObject(v);
+  } catch {
+    return false;
+  }
+};
 
 export const isCompareOption = (v: unknown): v is CompareOption => (
   isCompareOptionToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v)
 );
 
-export const validateCompareOption = (v: unknown): v is CompareOption => {
-  const errors: Array<string> = [];
+export const validateCompareOption = (v: unknown): v is CompareOption => {  
+  switch (typeof v) {
+    case 'string':
+      if (!isCompareOptionToken(v)) {
+        throw new OptionError('String is not a valid render option', v);
+      }
+      break;
 
-  if (isCompareOptionToken(v)) {
-    return true;
+    case 'function':
+      if (!isCompareFunction(v)) {
+        throw new OptionError('Function is invalid compare option', v.toString());
+      }
+      break;
+
+    default:
+      try {
+        if (!validateCompareOptionObject(v)) {
+          throw new OptionError('Invalid compare option');
+        }
+      } catch (e) {
+        throw new OptionError(e as string);
+      }
   }
-
-  if (isCompareFunction(v)) {
-    return true;
-  }
-
-  if (!isMinimalCompareOptionObject(v, errors)) {
-    let s = 'compare option object is not valid';
-    if (errors.length) {
-      s = `${s}: errors: ${errors.join(', ')}`;
-    }
-    throw new OptionError(s);
-  }
-
   return true;
 };

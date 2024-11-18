@@ -60,7 +60,7 @@ export const alignStdObjects = (left: StdObject, right: StdObject) => {
 export class StdObjectCompare extends CoreCompare {
 
   public constructor(options?: OptionObject) {
-    super(options ?? { compare: 'Exact', render: 'Standard' });
+    super(options);
   }
 
   compare(left: Value, right: Value) : ComparisonResult {

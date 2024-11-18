@@ -11,43 +11,38 @@ export const toArray = (...v: Array<unknown>) => [...v].flat();
 // Will be false with an array, set, map, etc.
 export const isStandardObject = (v: unknown): v is Record<string, unknown> => v?.constructor.name === 'Object';
 
-
-export const verifyObject = (
+export const validateMinimalObject = (
   obj: unknown,
   validators: Record<string, (v: unknown) => boolean>,
-  skipUndefined: boolean,
-  errs?: Array<string>,
 ): boolean => {
   if (!isStandardObject(obj)) {
     return false;
   }
+
   const objKeys = Object.keys(obj);
   const validKeySet = new Set(Object.keys(validators));
   const unknownKeys = objKeys.filter((k) => !validKeySet.has(k));
 
   if (unknownKeys.length) {
-    errs?.push(...unknownKeys.map((k) => `property ${k} unknown`));
-    return false;
+    throw new Error(`property ${unknownKeys.join(',')} unknown`);
   }
 
   if (!objKeys.length) {
-    errs?.push(`need at least one of ${[...validKeySet].join(', ')}`);
-    return false;
+    throw new Error(`need at least one of ${[...validKeySet].join(',')}`);
   }
 
-  const invalidSettings = Object.entries(validators).reduce((acc, [setting, check]) => {
-    if (skipUndefined && obj[setting] === undefined) {
+  const invalidSettings = Object.entries(validators).reduce((acc: Array<string>, [setting, check]) => {
+    if (obj[setting] === undefined) {
       return acc;
     }
     if (!check(obj[setting])) {
       return [...acc, setting];
     }
     return acc;
-  }, [] as Array<string>);
+  }, []);
 
   if (invalidSettings.length) {
-    errs?.push(...invalidSettings.map((s) => `field ${s} has invalid value`));
-    return false;
+    throw new Error(`fields ${invalidSettings.join(',')} contain invalid values`);
   }
 
   return true;

@@ -13,9 +13,7 @@ describe('successful construction', () => {
     });
   };
 
-  testConstructor('constructor, no options');
-  testConstructor('constructor, General', 'General');
-  testConstructor('constructor, Exact', 'Exact');
+  testConstructor('no options');
 });
 
 describe('invalid constructor calls', () => {
@@ -25,8 +23,10 @@ describe('invalid constructor calls', () => {
     });
   };
 
-  testConstructor('constructor, empty options', {});
-  testConstructor('constructor, unknown string', 'not an option');
-  testConstructor('constructor, not object, string, or function', 123);
-  testConstructor('constructor, function', () => true);
+  testConstructor('empty options', {});
+  testConstructor('string', 'not an option');
+  testConstructor('number', 123);
+  testConstructor('function', () => true);
+  testConstructor('invalid compare option', { compare: 'not an option' });
+  testConstructor('invalid render option', { render: 'not an option' });
 });

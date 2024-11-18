@@ -1,28 +1,37 @@
-import { CompareOption, isCompareOption } from '../compare/option';
-import { RenderOption, isRenderOption } from '../render/option';
+import { CompareOption, validateCompareOption } from '../compare/option';
+import { RenderOption, validateRenderOption } from '../render/option';
+import { OptionError } from './error';
 
 import { type AtLeastOne } from './types';
 
-import { verifyObject } from './util';
+import { validateMinimalObject } from './util';
 
 export interface OptionObject {
   compare: CompareOption
   render: RenderOption
 }
 
-// Predefined tokens
-const OPTION_TOKENS = ['Exact', 'General'] as const;
-export type OptionToken = typeof OPTION_TOKENS[number];
-export const isOptionToken = (v: unknown): v is OptionToken => 
-  OPTION_TOKENS.includes(v as OptionToken);
+export type Option = AtLeastOne<OptionObject>;
 
-export type MinimalOptionObject = AtLeastOne<OptionObject>;
+export const validateOption = (v: unknown): v is Option => { 
+  try {
+    return validateMinimalObject(v, {
+      compare: validateCompareOption,
+      render: validateRenderOption,
+    }); 
+  } catch (e) {
+    if (e instanceof OptionError) {
+      throw e;
+    } else {
+      throw new OptionError('Invalid option');
+    }
+  }
+};
 
-export const isMinimalOptionObject = (v: unknown, errs?: Array<string>): v is MinimalOptionObject => verifyObject(v, {
-  compare: isCompareOption,
-  render: isRenderOption,
-}, true, errs);
-
-export type Option = OptionToken | MinimalOptionObject;
-export const isOption = (v: unknown, errors?: Array<string>): v is Option =>
-  isOptionToken(v) || isMinimalOptionObject(v, errors);
+export const isOption = (v: unknown): v is Option => { 
+  try {
+    return validateOption(v);
+  } catch {
+    return false;
+  }
+};

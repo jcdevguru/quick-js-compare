@@ -1,8 +1,11 @@
 
 import {
   type Option,
-  isOption,
+  type OptionObject,
+  validateOption,
 } from '../lib/option';
+
+import { CompareOption } from './option';
 
 import { OptionError } from '../lib/error';
 
@@ -15,7 +18,6 @@ import type {
 } from './types';
 
 import {
-  GeneralComparer,
   ExactComparer,
 } from './stock-methods';
 
@@ -34,30 +36,10 @@ export default class CoreCompare {
     right: new WeakSet<ReferenceObject>(),
   };
 
-  private option: Option;
+  private option: OptionObject;
 
-  private static createMatchFromOptions = (option: Option): CompareFunc => {
-    const optionType = typeof option;
-    // incomplete
-    switch (optionType) {
-      case 'string': {
-        const optString = option as string;
-        switch (optString) {
-          case 'General':
-            return GeneralComparer;
-          case 'Exact':
-            return ExactComparer;
-          default:
-            throw new Error(`Unsupported options string '${optString}`);
-        }
-      }
-
-      case 'object':
-        break;
-
-      default:
-        throw new Error(`Unsupported options type ${optionType}`);
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private static createMatchFromOptions = (option: CompareOption): CompareFunc => {
     // Incomplete
     return ExactComparer;
   };
@@ -75,13 +57,12 @@ export default class CoreCompare {
     return rc;
   }
 
-  constructor(option: Option = { compare: 'Exact', render: 'Standard' }) {
-    const errs: Array<string> = [];
-    if (option && !isOption(option, errs)) {
-      throw new OptionError(`Invalid app options: ${errs.join(', ')}`);
+  constructor(option?: Option) {
+    if (option && !validateOption(option)) {
+      throw new OptionError('Invalid option');
     }
-    this.match = CoreCompare.createMatchFromOptions(option);
-    this.option = option;
+    this.option = { compare: 'Exact', render: 'Standard', ...option };
+    this.match = CoreCompare.createMatchFromOptions(this.option.compare);
   }
 
   compare(left: Value, right: Value): ComparisonResult {
