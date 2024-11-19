@@ -122,7 +122,7 @@ will result in:
 
 ## Options
 
-Quick JS Compare accepts an `options` arguyment to customize the comparison and data rendering behavior (`*` denotes default setting).
+Quick JS Compare accepts an `options` argument to customize the comparison and data rendering behavior (`*` denotes default setting).
 
 ```js
 {
@@ -156,8 +156,6 @@ The following combinations of properties and values are supported when options f
     * `"ignore"`: do not compare primitive values
     * *function*: use function to compare (see below)
 
-    Default: `abstract`
-
   * `compareObject`: for comparison of standard objects with named keys, e.g., `{ a: 1, b: 2 }`
     * `"reference"`: match only when identical as references, i.e., when compared objects are references to the same object in memory
     * `"keyValueOrder"`*: match when compared objects have matching key/value pairs in identical order 
@@ -168,8 +166,6 @@ The following combinations of properties and values are supported when options f
     * `"valueOnly"`: match when compared objects have matching values, regardless of their order or their keys 
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
-
-    Default: `keyValue`
 
   * `compareMap`: for comparison of objects of type `Map`, e.g., created from `new Map([['a', 1],['b', 2]])`
     Same settings as `compareObject`. 
@@ -182,8 +178,6 @@ The following combinations of properties and values are supported when options f
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
 
-    Default: `"valueOrder"`
-  
   * `compareSet`: for comparison of objects of type `Set`, e.g., created from `new Set([1, 7, 'a', true])`
     Same settings as `compareArray`, but the default will be `valueOnly`, since elements in a Set have an undefined order.
 
