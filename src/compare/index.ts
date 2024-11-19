@@ -44,7 +44,7 @@ export default class CoreCompare {
     return ExactComparer;
   };
 
-  private static alreadyTraversed(value: Value, refSet: RefSet): boolean {
+  private static nonCircular(value: Value, refSet: RefSet): boolean {
     let rc = true;
     if (valIsReference(value)) {
       if (refSet.has(value)) {
@@ -67,8 +67,8 @@ export default class CoreCompare {
 
   compare(left: Value, right: Value): ComparisonResult {
     let status: Status;
-    if (CoreCompare.alreadyTraversed(left, this.refSets.left)
-      && CoreCompare.alreadyTraversed(right, this.refSets.right)
+    if (CoreCompare.nonCircular(left, this.refSets.left)
+      && CoreCompare.nonCircular(right, this.refSets.right)
     ) {
       status = this.match(left, right, this.option);
     }
