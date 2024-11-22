@@ -1,14 +1,15 @@
-import type { Value, Status } from './types';
+import type { Value, ComparisonResult } from './types';
 import {
   actualType,
   typeIsSupported,
   typeIsPrimitive,
+  hasDifferences,
 } from './util';
 
-export const ExactComparer = (leftValue: Value, rightValue: Value) : Status => {
+export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonResult => {
   // always check for strict match
   if (leftValue === rightValue) {
-    return true;
+    return { leftSame: leftValue, rightSame: rightValue };
   }
 
   const leftType = actualType(leftValue);
@@ -16,25 +17,22 @@ export const ExactComparer = (leftValue: Value, rightValue: Value) : Status => {
 
   // if we can't support the comparison, don't try
   if (!typeIsSupported(leftType) || !typeIsSupported(rightType)) {
-    return undefined;
+    return {};
   }
 
-  if (leftType !== rightType) {
-    return false;
+  if (leftType !== rightType || typeIsPrimitive(leftType)) {
+    return { left: leftValue, right: rightValue };
   }
 
-  if (typeIsPrimitive(leftType)) {
-    return false;
-  }
-
-  return undefined;
+  return {};
 };
 
-export const GeneralComparer = (leftValue: Value, rightValue: Value) : Status => {
+export const GeneralComparer = (leftValue: Value, rightValue: Value) : ComparisonResult => {
   // always check for strict match
   const st = ExactComparer(leftValue, rightValue);
-  if (!st) {
-    return leftValue == rightValue;
+  // incomplete
+  if (hasDifferences(st) && leftValue === rightValue) {
+    return { leftSame: leftValue, rightSame: rightValue };
   }
 
   return st;

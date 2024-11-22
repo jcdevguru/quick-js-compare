@@ -1,4 +1,3 @@
-
 import {
   type Option,
   type OptionObject,
@@ -12,19 +11,13 @@ import { OptionError } from '../lib/error';
 import type {
   CompareFunc,
   Value,
-  ComparisonResult,
-  Status,
   ReferenceObject,
+  ComparisonResult,
 } from './types';
 
-import {
-  ExactComparer,
-} from './stock-methods';
+import { ExactComparer } from './stock-methods';
 
-import {
-  createComparisonResult,
-  valIsReference,
-} from './util';
+import { valIsReference } from './util';
 
 type RefSet = WeakSet<ReferenceObject>;
 
@@ -66,16 +59,10 @@ export default class CoreCompare {
   }
 
   compare(left: Value, right: Value): ComparisonResult {
-    let status: Status;
-    if (CoreCompare.nonCircular(left, this.refSets.left)
-      && CoreCompare.nonCircular(right, this.refSets.right)
-    ) {
-      status = this.match(left, right, this.option);
+    if (CoreCompare.nonCircular(left, this.refSets.left) && CoreCompare.nonCircular(right, this.refSets.right)) {
+      return this.match(left, right, this.option);
     }
 
-    const result = createComparisonResult(status, {
-      ...(status === false ? { diff: { left, right } } : { same: { left, right } }),
-    });
-    return result;
+    return {};
   }
 }

@@ -1,23 +1,19 @@
 import CoreCompare from '.';
 
-import {
-  type ComparisonResult,
-  type Value,
-  type ComparisonResultObject,
-  type StdObject,
-  type StdObjectEntry,
-  type KeyIndexValue,
-  type IndexValueCompareOp,
-  type Status,
-  ComparisonResultArrayIndex,
+import type {
+  Value,
+  ComparisonResult,
+  StdObject,
+  StdObjectEntry,
+  KeyIndexValue,
+  IndexValueCompareOp,
   IndexValue,
 } from './types';
 
 import {
   actualType,
   typeIsStdObject,
-  createComparisonResult,
-  spliceKeyIndexValues,
+  hasDifferences,
 } from './util';
 
 import { OptionObject } from '../lib/option';
@@ -65,7 +61,7 @@ export class StdObjectCompare extends CoreCompare {
 
   compare(left: Value, right: Value) : ComparisonResult {
     const baseResult = super.compare(left, right);
-    if (baseResult.status !== undefined) {
+    if (hasDifferences(baseResult)) {
       return baseResult;
     }
 
@@ -77,15 +73,7 @@ export class StdObjectCompare extends CoreCompare {
       return baseResult;
     }
 
-    const diff: ComparisonResultObject<Array<StdObjectEntry>> = { left: [], right: [] };
-    const same: ComparisonResultObject<Array<StdObjectEntry>> = { left: [], right: [] };
-
-    const {
-      Left,
-      LeftSame,
-      RightSame,
-      Right,
-    } = ComparisonResultArrayIndex;
+    const result: ComparisonResult<Array<StdObjectEntry>> = {};
 
     const {
       leftOnly,
@@ -93,52 +81,43 @@ export class StdObjectCompare extends CoreCompare {
       corresponding,
     } = alignStdObjects(left as StdObject, right as StdObject);
 
-    let status: Status;
+    if (leftOnly.length > 0) {
+      result.leftOnly = [];
+    }
 
-    corresponding.forEach(({ key, leftIndexValue, rightIndexValue }) => {
-      const { index: cLeftIndex, value: cLeftValue } = leftIndexValue;
-      const { index: cRightIndex, value: cRightValue } = rightIndexValue;
+    if (rightOnly.length > 0) {
+      result.rightOnly = [];
+    }
 
-      spliceKeyIndexValues(leftOnly, cLeftIndex).forEach(({ key: leftKey, indexValue: { index, value } }) => {
-        diff.left[index] = [leftKey, value];
+    if (corresponding.length > 0) {
+      result.left = [];
+      result.right = [];
+
+      corresponding.forEach(({ key, leftIndexValue, rightIndexValue }) => {
+        const r = this.compare(leftIndexValue.value, rightIndexValue.value);
+        if (r.left) {
+          result.left![leftIndexValue.index] = [key, r.left];
+        }
+        if (r.right) {
+          result.right![rightIndexValue.index] = [key, r.right];
+        }
       });
+    }
 
-      spliceKeyIndexValues(rightOnly, cRightIndex).forEach(({ key: rightKey, indexValue: { index, value } }) => {
-        diff.right[index] = [rightKey, value];
+    if (leftOnly.length > 0) {
+      result.leftOnly = [];
+      leftOnly.forEach(({ key: leftKey, indexValue: { index, value } }) => {
+        result.leftOnly![index] = [leftKey, value];
       });
+    }
 
-      if (diff.left.length || diff.right.length) {
-        status = false;
-      }
+    if (rightOnly.length > 0) {
+      result.rightOnly = [];
+      rightOnly.forEach(({ key: rightKey, indexValue: { index, value } }) => {
+        result.rightOnly![index] = [rightKey, value];
+      });
+    }
 
-      const cmpResult = this.compare(cLeftValue, cRightValue);
-
-      if (cmpResult.result[Left]) {
-        diff.left[cLeftIndex] = [key, cmpResult.result[Left]];
-      }
-      if (cmpResult.result[LeftSame]) {
-        same.left[cLeftIndex] = [key, cmpResult.result[LeftSame]];
-      }
-      if (cmpResult.result[RightSame]) {
-        same.right[cRightIndex] = [key, cmpResult.result[RightSame]];
-      }
-      if (cmpResult.result[Right]) {
-        diff.right[cRightIndex] = [key, cmpResult.result[Right]];
-      }
-
-      if (status !== false && cmpResult.status !== undefined) {
-        status = cmpResult.status;
-      }
-    });
-
-    leftOnly.forEach(({ key: leftKey, indexValue: { index, value } }) => {
-      diff.left[index] = [leftKey, value];
-    });
-
-    rightOnly.forEach(({ key: rightKey, indexValue: { index, value } }) => {
-      diff.right[index] = [rightKey, value];
-    });
-
-    return createComparisonResult(status, { diff, same });
+    return result;
   }
 }
