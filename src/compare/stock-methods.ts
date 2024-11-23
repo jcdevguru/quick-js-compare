@@ -1,12 +1,12 @@
 import type { Value } from '../lib/types';
-import type { ComparisonResult } from './types';
-
 import {
   actualType,
   typeIsSupported,
   typeIsPrimitive,
-  hasDifferences,
-} from './util';
+  type ComparisonResult
+} from './types';
+
+import { hasDifferences } from './util';
 
 export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonResult => {
   // always check for strict match
