@@ -1,9 +1,10 @@
-import {
-  type StdObjectEntry,
-  type StdObject,
-  type ReferenceObject,
-  Comparison,
-} from './types';
+import type {
+  StdObjectEntry,
+  StdObject,
+  ReferenceObject,
+} from '../lib/types';
+
+import type { Comparison } from './types';
 
 // Utility methods for handling comparisons at runtime
 

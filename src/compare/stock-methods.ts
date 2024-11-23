@@ -1,4 +1,6 @@
-import type { Value, ComparisonResult } from './types';
+import type { Value } from '../lib/types';
+import type { ComparisonResult } from './types';
+
 import {
   actualType,
   typeIsSupported,

@@ -1,13 +1,18 @@
 import CoreCompare from '.';
 
+
 import type {
   Value,
-  ComparisonResult,
   StdObject,
   StdObjectEntry,
+} from '../lib/types';
+
+import type {
+  ComparisonResult,
   KeyIndexValue,
   IndexValueCompareOp,
   IndexValue,
+  Comparison,
 } from './types';
 
 import {

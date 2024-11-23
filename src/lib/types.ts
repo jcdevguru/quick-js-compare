@@ -12,3 +12,28 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
+
+// -------------------------------------------------------------------------------------------------
+// Types we support for comparison and rendering
+type ValueBase = NonNullable<unknown>;
+
+export type Primitive = ValueBase & (string | number | boolean | undefined | symbol | bigint);
+
+export type StdObject = Record<string, ValueBase>;
+export type MapObject = Map<unknown, ValueBase>;
+export type ArrayObject = Array<ValueBase>;
+export type SetObject = Set<ValueBase>;
+
+// Contains multiple values, accessed via keys
+export type KeyedObject = StdObject | MapObject | ArrayObject;
+
+// Contains multiple values, can be accessed in groups
+export type CollectionObject = ArrayObject | SetObject;
+
+export type ReferenceObject = KeyedObject | CollectionObject;
+
+export type Value = ValueBase & (Primitive | ReferenceObject);
+
+export type StdObjectEntry = [keyof StdObject, Value];
+
+export type Status = boolean | undefined;

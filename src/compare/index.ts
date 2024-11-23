@@ -1,19 +1,22 @@
+import type {
+  Value,
+  ReferenceObject,
+} from '../lib/types';
+
 import {
   type Option,
   type OptionObject,
   validateOption,
 } from '../lib/option';
 
-import { CompareOption } from './option';
-
 import { OptionError } from '../lib/error';
 
 import type {
   CompareFunc,
-  Value,
-  ReferenceObject,
   ComparisonResult,
 } from './types';
+
+import { CompareOption } from './option';
 
 import { ExactComparer } from './stock-methods';
 
