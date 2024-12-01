@@ -17,20 +17,24 @@ export type NonEmptyArray<T> = [T, ...T[]];
 // Types we support for comparison and rendering
 type ValueBase = NonNullable<unknown>;
 
-export type Primitive = ValueBase & (string | number | boolean | undefined | symbol | bigint);
+export type Primitive = ValueBase & (string | number | boolean | undefined | symbol | bigint | null | undefined);
+export type MapKey = ValueBase & (string | number | symbol);
 
 export type StdObject = Record<string, ValueBase>;
-export type MapObject = Map<unknown, ValueBase>;
+export type MapObject = Map<MapKey, ValueBase>;
 export type ArrayObject = Array<ValueBase>;
 export type SetObject = Set<ValueBase>;
 
+// Contains multiple values, accessed via numeric index
+export type IndexedObject = StdObject | MapObject | ArrayObject;
+
 // Contains multiple values, accessed via keys
-export type KeyedObject = StdObject | MapObject | ArrayObject;
+export type KeyedObject = StdObject | MapObject;
 
 // Contains multiple values, can be accessed in groups
 export type CollectionObject = ArrayObject | SetObject;
 
-export type ReferenceObject = KeyedObject | CollectionObject;
+export type ReferenceObject = IndexedObject | KeyedObject | CollectionObject;
 
 export type Value = ValueBase & (Primitive | ReferenceObject);
 

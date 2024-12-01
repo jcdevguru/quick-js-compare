@@ -1,8 +1,6 @@
 import type {
   Primitive,
-  StdObjectEntry,
   MapObject,
-  SetObject,
   Value,
   StdObject,
 } from '../lib/types';
@@ -63,6 +61,9 @@ const supportedTypes = new Set([
 
 export type SupportedType = (typeof supportedTypes extends Set<infer T> ? T : never);
 
+export type PrimitiveType = (typeof primitiveTypes extends Set<infer T> ? T : never);
+export type ReferenceType = (typeof referenceTypes extends Set<infer T> ? T : never);
+
 // Note 't' in argument should be return from 'actualType()', not value of 'typeof'
 export const typeIsSupported = (t: string): boolean => supportedTypes.has(t);
 export const typeIsObject = (t: string): boolean => objectTypes.has(t);
@@ -94,40 +95,38 @@ export const deriveValueType = (v: unknown): string => {
   return t;
 };
 
-export type PrimitiveCompareFunc = CompareFunc<Primitive>;
-export type StdObjectCompareFunc = CompareFunc<StdObjectEntry>;
-export type MapObjectCompareFunc = CompareFunc<MapObject>;
-export type SetObjectCompareFunc = CompareFunc<SetObject>;
+export interface CompareFunc {
+  (left: Value, right: Value, options: Option): ComparisonResult;
+};
 
-export interface Comparison<T extends Value = Value> {
-  leftOnly: T,
-  left: T,
-  leftSame: T,
-  rightSame: T,
-  right: T,
-  rightOnly: T,
-}
+export interface ComparedItem {
+  typeName: SupportedType,
+  value: Value,
+  comparisonResult?: ComparisonResult,
+};
 
-export type ComparisonResult<T extends Value = Value> = Partial<Comparison<T>>;
-
-export interface CompareFunc<T extends Value = Value> {
-  (left: T, right: T, options: Option): ComparisonResult<T>;
-}
-
-// for objects with enumerable values
-export interface IndexValue {
+export interface IndexedItem extends ComparedItem {
   index: number
-  value: Value
-}
+};
 
-export interface KeyIndexValue {
-  key: string
-  indexValue: IndexValue
-}
+export interface KeyedObjectItem<K extends Primitive> extends IndexedItem {
+  key: K
+};
 
-export interface IndexValueCompareOp {
-  key: string
-  leftIndexValue: IndexValue
-  rightIndexValue: IndexValue
-}
+export type StdObjectItem = KeyedObjectItem<keyof StdObject>;
+export type MapObjectItem = KeyedObjectItem<keyof MapObject>;
+export type ArrayObjectItem = IndexedItem;
 
+export interface Comparison<T extends ComparedItem = ComparedItem> {
+  leftOnly: Array<T>,
+  left: Array<T>,
+  leftSame: Array<T>,
+  rightSame: Array<T>,
+  right: Array<T>,
+  rightOnly: Array<T>,
+};
+
+// Returned from .compare()
+export type ComparisonResult = Partial<Comparison>;
+
+// type of .compare()
