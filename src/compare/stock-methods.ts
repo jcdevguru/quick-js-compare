@@ -1,7 +1,7 @@
 import type { Value } from '../lib/types';
 import {
   typeIsSupported,
-  typeIsPrimitive,
+  typeIsScalar,
   type ComparisonResult
 } from './types';
 
@@ -25,7 +25,7 @@ export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonR
     return { leftSame: [leftItem], rightSame: [rightItem] };
   }
 
-  if (leftType !== rightType || typeIsPrimitive(leftType)) {
+  if (leftType !== rightType || typeIsScalar(leftType)) {
     return { left: [leftItem], right: [rightItem] };
   }
 

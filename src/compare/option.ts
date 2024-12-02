@@ -8,8 +8,8 @@ import { OptionError } from '../lib/error';
 const COMPARE_OPTION_TOKENS = ['Exact', 'General', 'ExactStructure', 'GeneralStructure'] as const;
 export type CompareOptionToken = typeof COMPARE_OPTION_TOKENS[number];
 
-const CMP_PRIMITIVE_TOKENS = ['strict', 'abstract', 'typeOnly', 'ignore'] as const;
-export type CmpPrimitiveToken = typeof CMP_PRIMITIVE_TOKENS[number];
+const CMP_SCALAR_TOKENS = ['strict', 'abstract', 'typeOnly', 'ignore'] as const;
+export type CmpScalarToken = typeof CMP_SCALAR_TOKENS[number];
 
 const CMP_OBJECT_TOKENS = ['reference', 'valueOnly', 'ignore'] as const;
 export type CmpObjectToken = typeof CMP_OBJECT_TOKENS[number];
@@ -20,12 +20,12 @@ export type CmpKeyedObjectToken = typeof CMP_KEYED_OBJECT_TOKENS[number];
 const CMP_COLLECTION_TOKENS = ['valueOrder', 'valueOnly', 'sizeOnly'] as const;
 export type CmpCollectionToken = typeof CMP_COLLECTION_TOKENS[number];
 
-export type CompareValueSpec = CmpPrimitiveToken;
+export type CompareScalarSpec = CmpScalarToken;
 export type CompareObjectSpec = CmpObjectToken | CmpKeyedObjectToken;
 export type CompareCollectionSpec = CmpObjectToken | CmpCollectionToken;
 
 export interface CompareOptionObject {
-  compareValue: CompareValueSpec
+  compareScalar: CompareScalarSpec
   compareObject: CompareObjectSpec
   compareMap: CompareObjectSpec
   compareArray: CompareCollectionSpec
@@ -39,7 +39,7 @@ export type CompareOption = CompareOptionToken | MinimalCompareOption | CompareF
 // Methods
 export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => COMPARE_OPTION_TOKENS.includes(v as CompareOptionToken);
 
-export const isComparePrimitiveSpec = (v: unknown): v is CompareValueSpec => CMP_PRIMITIVE_TOKENS.includes(v as CmpPrimitiveToken);
+export const isCompareScalarSpec = (v: unknown): v is CompareScalarSpec => CMP_SCALAR_TOKENS.includes(v as CmpScalarToken);
 
 export const isCompareObjectSpec = (v: unknown): v is CompareObjectSpec => (
   CMP_OBJECT_TOKENS.includes(v as CmpObjectToken) || CMP_KEYED_OBJECT_TOKENS.includes(v as CmpKeyedObjectToken)
@@ -52,7 +52,7 @@ export const isCompareCollectionSpec = (v: unknown): v is CompareCollectionSpec 
 export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
 
 export const validateCompareOptionObject = (v: unknown): boolean => validateMinimalObject(v, {
-    compareValue: isComparePrimitiveSpec,
+    compareScalar: isCompareScalarSpec,
     compareObject: isCompareObjectSpec,
     compareMap: isCompareObjectSpec,
     compareArray: isCompareCollectionSpec,

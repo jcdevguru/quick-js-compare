@@ -2,7 +2,7 @@
 
 Comparing two values in JavaScript is a common task and simple in description, but issues with circular references, strict vs. abstract comparisons, key ordering, and performance can make the task surprisingly complicated and easy to get wrong.  For example, automated tests will often pass or fail based on inadequate comparison between expected and actual results, with differences rendered as long JSON strings that need to be sorted through manually.
 
-Quick JS Compare is a utility library for performing quick comparisons between any two values in JavaScript or TypeScript. It directly supports comparison of primitive types, objects, Maps, and Sets, but can be tailored to compare any sort of data in any way. Flexibility is provided through an options object that accepts both parameters and callback functions, permitting you to specify comparison in any way that is needed.
+Quick JS Compare is a utility library for performing quick comparisons between any two values in JavaScript or TypeScript. It directly supports comparison of scalar types, objects, Maps, and Sets, but can be tailored to compare any sort of data in any way. Flexibility is provided through an options object that accepts both parameters and callback functions, permitting you to specify comparison in any way that is needed.
 
 Most of all, it's quick and lightweight.  Care is taken in the implementation to avoid redundant operations or unnecessary storage.  It also does not use JSON serialization or parsing in any operation.
 
@@ -45,9 +45,9 @@ How the comparisons are computed depends on the options used.
 
 ## Examples
 
-### Primitives
+### Scalars
 
-Quick Object Compare will handle primitive values, such as `string`, `number`, or `boolean`.  A simple use case shows its default behavior (no options):
+Quick Object Compare will handle scalar types (i.e., data stores with only one value, such as `number`, `boolean`, or `string`).  A simple use case shows its default behavior (no options):
 
 ```js
 const value1 = 'hello';
@@ -143,17 +143,17 @@ The following combinations of properties and values are supported when options f
 
 ```js
 {
-  compareValue: "strict",
+  compareScalar: "strict",
   compareObject: "keyValueOrder",
   ...
 }
 ```
 
-  * `"compareValue"`: for comparison of primitive values (e.g., `"string"`, `"number"`, `"boolean"`)
+  * `"compareScalar"`: for comparison of scalar values (e.g., `"number"`, `"boolean"`, or `"string"`)
     * `"strict"`*: match only when identical in both value and type, i.e., as with `"==="`
     * `"abstract"`: match when identical or when functionally equivalent, i.e., as with `"=="`
     * `"typeOnly"`: match when identical in type only, without comparing values
-    * `"ignore"`: do not compare primitive values
+    * `"ignore"`: do not compare scalar values
     * *function*: use function to compare (see below)
 
   * `compareObject`: for comparison of standard objects with named keys, e.g., `{ a: 1, b: 2 }`
@@ -192,21 +192,21 @@ String values for the `compare` option behave as shorthand for a style of compar
 
 
 * `Exact`: (default) compare for identical match in type, value, and structure. True when the two objects can be used interchangeably.
-  * `compareValue`: `"strict"`
+  * `compareScalar`: `"strict"`
   * `compareObject`: `"keyValueOrder"`
   * `compareArray`: `"valueOrder"`
   * `compareMap`: `"keyValueOrder"`
   * `compareSet`: `"valueOnly"`
 
 * `General`: compare for functional equivalence
-  * `compareValue`: `"abstract"`
+  * `compareScalar`: `"abstract"`
   * `compareObject`: `"keyValue"`
   * `compareArray`: `"valueOnly"`
   * `compareMap`: `"keyValue"`
   * `compareSet`: `"valueOnly"`
 
 * `Structure`: compare for identical structure by comparing only the types and keys of keyed objects and sizes of collection objects
-  * `compareValue`: `"ignore"`
+  * `compareScalar`: `"ignore"`
   * `compareObject`: `"keyOnly"`
   * `compareArray`: `"sizeOnly"`
   * `compareMap`: `"keyOnly"`
