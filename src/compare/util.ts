@@ -9,7 +9,7 @@ import {
   actualType,
   type Comparison,
   type StdObjectItem,
-  deriveValueType,
+  deriveType,
   ComparedItem,
 } from './types';
 
@@ -19,7 +19,7 @@ export const valIsReference = (v: unknown): v is ReferenceObject => typeIsRefere
 export const hasDifferences = (result: Partial<Comparison>): boolean =>
   Boolean(result.leftOnly) || Boolean(result.left) || Boolean(result.right) || Boolean(result.rightOnly);
 
-export const valueToComparedItem = (value: Value): ComparedItem => ({ typeName: deriveValueType(value), value});
+export const valueToComparedItem = (value: Value): ComparedItem => ({ typeName: deriveType(value), value});
 
 export const stdObjectEntriesByKey = (obj: StdObject): Record<string, StdObjectItem> => 
   Object.entries(obj).reduce((acc: Record<string, StdObjectItem>, [key, value], index) => {

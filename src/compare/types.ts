@@ -83,7 +83,7 @@ const unsupportedType = 'UnsupportedType';
 
 export type UnsupportedType = typeof unsupportedType;
 
-export const deriveValueType = (v: unknown): string => {
+export const deriveType = (v: unknown): string => {
   let t = actualType(v);
   if (typeIsStdObject(t)) {
     t = 'StdObject';
