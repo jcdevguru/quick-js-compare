@@ -15,15 +15,16 @@ export type NonEmptyArray<T> = [T, ...T[]];
 
 // -------------------------------------------------------------------------------------------------
 // Types we support for comparison and rendering
-type ValueBase = NonNullable<unknown>;
+export type Scalar = string | number | boolean | undefined | symbol | bigint | null | undefined;
+export type MapKey = string | number | symbol;
 
-export type Scalar = ValueBase & (string | number | boolean | undefined | symbol | bigint | null | undefined);
-export type MapKey = ValueBase & (string | number | symbol);
+export type StdObject = {
+    [key: string]: Value;
+};
 
-export type StdObject = Record<string, ValueBase>;
-export type MapObject = Map<MapKey, ValueBase>;
-export type ArrayObject = Array<ValueBase>;
-export type SetObject = Set<ValueBase>;
+export type MapObject = Map<MapKey, Value>;
+export type ArrayObject = Array<Value>;
+export type SetObject = Set<Value>;
 
 // Contains multiple values, accessed via numeric index
 export type IndexedObject = StdObject | MapObject | ArrayObject;
@@ -36,7 +37,7 @@ export type CollectionObject = ArrayObject | SetObject;
 
 export type ReferenceObject = IndexedObject | KeyedObject | CollectionObject;
 
-export type Value = ValueBase & (Scalar | ReferenceObject);
+export type Value = Scalar | ReferenceObject;
 
 export type StdObjectEntry = [keyof StdObject, Value];
 
