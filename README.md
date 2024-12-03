@@ -163,7 +163,8 @@ The following combinations of properties and values are supported when options f
     * `"keyOrder"`: match when compared objects have matching keys in the same order, regardless of their values
     * `"valueOrder"`: match when compared objects have matching values in the same order, regardless of their keys 
     * `"keyOnly"`: match when compared objects have matching keys, regardless of their order or their values 
-    * `"valueOnly"`: match when compared objects have matching values, regardless of their order or their keys 
+    * `"valueOnly"`: match when compared objects have matching values, regardless of their order or their keys
+    * `"typeOnly"`: match when identical in type only, without comparing values
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
 
@@ -172,15 +173,23 @@ The following combinations of properties and values are supported when options f
 
   * `compareArray`: for comparison of array objects, e.g., `[1, 7, 'a', true]`
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
+    * `"indexValue"`: match when compared arrays have matching in the same positions (same as `valueOrder` when neither array is sparse)
     * `"valueOrder"`*: match when compared arrays have matching values in the same order 
     * `"valueOnly"`: match when compared arrays have matching values, regardless of their order
+    * `"indexOnly"`: match when compared arrays have same indexes (same as `sizeOnly` when neither array is sparse)
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
+    * `"typeOnly"`: match when identical in type only, without comparing values
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
 
   * `compareSet`: for comparison of objects of type `Set`, e.g., created from `new Set([1, 7, 'a', true])`
-    Same settings as `compareArray`, but the default will be `valueOnly`, since elements in a Set have an undefined order.
-
+    * `"reference"`: match only when identical as references, i.e., when compared sets are references to the same object in memory
+    * `"valueOnly"`*: match when compared sets have matching values
+    * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
+    * `"typeOnly"`: match when identical in type only, without comparing values
+    * `"ignore"`: do not compare objects
+    * *function*: use function to compare (see below)
+  
   * If `compareMap` is omitted, objects of type `Map` will be compared according to settings in `compareObject`
   * If `compareSet` is omitted, objects of type `Set` will be compared according to settings in `compareArray`
 
@@ -188,8 +197,7 @@ The following combinations of properties and values are supported when options f
 
 #### Options as strings
 
-String values for the `compare` option behave as shorthand for a style of comparison.  Their function is described by their equivalent representations in the previously described option object.
-
+String values for the `compare` option behave as shorthand helpers for a style of comparison.  Their function is described by their equivalent representations in the previously described option object.
 
 * `Exact`: (default) compare for identical match in type, value, and structure. True when the two objects can be used interchangeably.
   * `compareScalar`: `"strict"`
@@ -205,7 +213,7 @@ String values for the `compare` option behave as shorthand for a style of compar
   * `compareMap`: `"keyValue"`
   * `compareSet`: `"valueOnly"`
 
-* `Structure`: compare for identical structure by comparing only the types and keys of keyed objects and sizes of collection objects
+* `Structure`: compare for identical structure by comparing only the keys of keyed objects and sizes of collection objects
   * `compareScalar`: `"ignore"`
   * `compareObject`: `"keyOnly"`
   * `compareArray`: `"sizeOnly"`
