@@ -13,6 +13,10 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
 
+
+// Add this type helper
+export type SetToUnion<T> = T extends Set<infer U> ? U : never;
+
 // -------------------------------------------------------------------------------------------------
 // Types we support for comparison and rendering
 export type Scalar = string | number | boolean | undefined | symbol | bigint | null | undefined;

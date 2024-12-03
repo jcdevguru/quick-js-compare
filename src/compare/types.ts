@@ -3,6 +3,7 @@ import type {
   MapObject,
   Value,
   StdObject,
+  SetToUnion,
 } from '../lib/types';
 
 import { type Option } from '../lib/option';
@@ -59,10 +60,10 @@ const supportedTypes = new Set([
   ...objectTypes,
 ]);
 
-export type SupportedType = (typeof supportedTypes extends Set<infer T> ? T : never);
+export type SupportedType = SetToUnion<typeof supportedTypes>;
 
-export type ScalarType = (typeof scalarTypes extends Set<infer T> ? T : never);
-export type ReferenceType = (typeof referenceTypes extends Set<infer T> ? T : never);
+export type ScalarType = SetToUnion<typeof scalarTypes>;
+export type ReferenceType = SetToUnion<typeof referenceTypes>;
 
 // Note 't' in argument should be return from 'actualType()', not value of 'typeof'
 export const typeIsSupported = (t: string): boolean => supportedTypes.has(t);
