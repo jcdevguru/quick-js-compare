@@ -1,7 +1,10 @@
-import type { Value } from '../lib/types';
 import {
+  type Value,
   typeIsSupported,
-  typeIsScalar,
+  typeIsScalar
+} from '../lib/types';
+
+import {
   type ComparisonResult
 } from './types';
 

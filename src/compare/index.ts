@@ -1,6 +1,6 @@
 import type {
   Value,
-  ReferenceObject,
+  Reference,
 } from '../lib/types';
 
 import {
@@ -22,14 +22,14 @@ import { ExactComparer } from './stock-methods';
 
 import { valIsReference } from './util';
 
-type RefSet = WeakSet<ReferenceObject>;
+type RefSet = WeakSet<Reference>;
 
 export default class CoreCompare {
   private match: CompareFunc;
 
   private refSets = {
-    left: new WeakSet<ReferenceObject>(),
-    right: new WeakSet<ReferenceObject>(),
+    left: new WeakSet<Reference>(),
+    right: new WeakSet<Reference>(),
   };
 
   private option: OptionObject;

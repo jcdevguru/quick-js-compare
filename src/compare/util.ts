@@ -1,20 +1,20 @@
-import type {
-  StdObject,
-  ReferenceObject,
-  Value,
-} from '../lib/types';
-
 import {
   typeIsReference,
-  actualType,
-  type Comparison,
-  type StdObjectItem,
   deriveType,
+  actualType,
+  type StdObject,
+  type Reference,
+  type Value,
+} from '../lib/types';
+
+import type {
+  Comparison,
+  StdObjectItem,
   ComparedItem,
 } from './types';
 
 // Utility methods for handling comparisons at runtime
-export const valIsReference = (v: unknown): v is ReferenceObject => typeIsReference(actualType(v));
+export const valIsReference = (v: unknown): v is Reference => typeIsReference(actualType(v));
 
 export const hasDifferences = (result: Partial<Comparison>): boolean =>
   Boolean(result.leftOnly) || Boolean(result.left) || Boolean(result.right) || Boolean(result.rightOnly);
