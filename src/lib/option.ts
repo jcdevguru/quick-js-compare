@@ -1,5 +1,6 @@
-import { CompareOption, validateCompareOption } from '../compare/option';
-import { RenderOption, validateRenderOption } from '../render/option';
+import { validateCompareOption } from '../compare/option';
+import { type CompareOption } from '../compare/types';
+import { type RenderOption, validateRenderOption } from '../render/option';
 import { OptionError } from './error';
 
 import { type AtLeastOne } from './types';

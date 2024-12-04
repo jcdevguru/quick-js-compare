@@ -14,9 +14,8 @@ import { OptionError } from '../lib/error';
 import type {
   CompareFunc,
   ComparisonResult,
+  CompareOption
 } from './types';
-
-import { CompareOption } from './option';
 
 import { ExactComparer } from './stock-methods';
 

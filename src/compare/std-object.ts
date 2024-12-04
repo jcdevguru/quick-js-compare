@@ -1,16 +1,16 @@
 import CoreCompare from '.';
 
-import type {
-  Value,
-  StdObject,
-} from '../lib/types';
-
 import {
-  type ComparisonResult,
-  type StdObjectItem,
-  type Comparison,
+  type Value,
+  type StdObject,
   actualType,
   typeIsStdObject,
+} from '../lib/types';
+
+import type {
+  ComparisonResult,
+  StdObjectItem,
+  Comparison,
 } from './types';
 
 import {
