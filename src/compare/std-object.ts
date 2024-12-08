@@ -1,61 +1,20 @@
 import CoreCompare from '.';
 
 import {
-  type ComparisonResult,
-  type Value,
-  type ComparisonResultObject,
   type StdObject,
-  type StdObjectEntry,
-  type KeyIndexValue,
-  type IndexValueCompareOp,
-  type Status,
-  ComparisonResultArrayIndex,
-  IndexValue,
+} from '../lib/types';
+
+import type {
+  ComparisonResult,
+  StdObjectItem,
+  Comparison,
 } from './types';
 
 import {
-  actualType,
-  typeIsStdObject,
-  createComparisonResult,
-  spliceKeyIndexValues,
+  stdObjectEntriesByKey,
 } from './util';
 
 import { OptionObject } from '../lib/option';
-
-const ivp = (index: number, value: unknown): IndexValue => ({ index, value: value as Value });
-
-const kivp = (key: string, index: number, value: unknown): KeyIndexValue => ({ key, indexValue: ivp(index, value) });
-
-const stdObjectReducer = (keySet: Set<string>, obj: StdObject) => (acc: Array<KeyIndexValue>, key: string, index: number) => {
-  if (!keySet.has(key)) {
-    acc.push(kivp(key, index, obj[key]));
-  }
-  return acc;
-};
-
-export const alignStdObjects = (left: StdObject, right: StdObject) => {
-  const leftKeys = Object.keys(left);
-  const rightKeys = Object.keys(right);
-  const rightKeyMap = new Map(rightKeys.map((k, i) => [k, i]));
-  const sameKeySet = new Set(leftKeys.filter((k) => rightKeyMap.has(k)));
-
-  const corresponding = leftKeys.reduce((acc: Array<IndexValueCompareOp>, key: string, leftIndex: number) => {
-    const rightIndex = rightKeyMap.get(key);
-    if (rightIndex !== undefined) {
-      acc.push({
-        key,
-        leftIndexValue: ivp(leftIndex, left[key]),
-        rightIndexValue: ivp(rightIndex, right[key]),
-      });
-    }
-    return acc;
-  }, []);
-
-  const leftOnly = leftKeys.reduce(stdObjectReducer(sameKeySet, left), []);
-  const rightOnly = rightKeys.reduce(stdObjectReducer(sameKeySet, right), []);
-
-  return { leftOnly, rightOnly, corresponding };
-};
 
 export class StdObjectCompare extends CoreCompare {
 
@@ -63,82 +22,70 @@ export class StdObjectCompare extends CoreCompare {
     super(options);
   }
 
-  compare(left: Value, right: Value) : ComparisonResult {
-    const baseResult = super.compare(left, right);
-    if (baseResult.status !== undefined) {
-      return baseResult;
-    }
+  compare(left: StdObject, right: StdObject) : ComparisonResult {
+    const leftEntries = stdObjectEntriesByKey(left);
+    const rightEntries = stdObjectEntriesByKey(right);
 
-    const leftType = actualType(left);
-    const rightType = actualType(right);
+    const rightEntrySet = new Set(Object.keys(right));
 
-    if (!typeIsStdObject(leftType) || !typeIsStdObject(rightType)) {
-      // (incomplete) - punt
-      return baseResult;
-    }
+    const cmp: Comparison<StdObjectItem> = {
+      leftOnly: [],
+      left: [],
+      leftSame: [],
+      rightSame: [],
+      right: [],      
+      rightOnly: [],
+    };
 
-    const diff: ComparisonResultObject<Array<StdObjectEntry>> = { left: [], right: [] };
-    const same: ComparisonResultObject<Array<StdObjectEntry>> = { left: [], right: [] };
+    Object.entries(leftEntries).forEach(([k, leftEntry]) => {
+      const rightEntry = rightEntries[k];
+      if (!rightEntry) {
+        cmp.leftOnly.push(leftEntry);
+        return;
+      }
 
-    const {
-      Left,
-      LeftSame,
-      RightSame,
-      Right,
-    } = ComparisonResultArrayIndex;
+      const entryResult = super.compare(leftEntry.value, rightEntry.value);
+      let item: StdObjectItem;
+      let hasDiff = false;
 
-    const {
-      leftOnly,
-      rightOnly,
-      corresponding,
-    } = alignStdObjects(left as StdObject, right as StdObject);
+      Object.keys(entryResult).forEach((subKey) => {
+        switch (subKey) {
+          case 'leftOnly':
+          case 'left':
+            hasDiff = true;
 
-    let status: Status;
+          case 'leftSame':
+            item = leftEntry;
+            break;
+          
+          case 'rightOnly':
+            hasDiff = true;
 
-    corresponding.forEach(({ key, leftIndexValue, rightIndexValue }) => {
-      const { index: cLeftIndex, value: cLeftValue } = leftIndexValue;
-      const { index: cRightIndex, value: cRightValue } = rightIndexValue;
+          case 'right':
+          case 'rightSame':
+            item = rightEntry;
+            break;
 
-      spliceKeyIndexValues(leftOnly, cLeftIndex).forEach(({ key: leftKey, indexValue: { index, value } }) => {
-        diff.left[index] = [leftKey, value];
+          default:
+            return;
+        }
+        item.comparisonResult = { ...item.comparisonResult, [subKey]: entryResult[subKey] };
       });
 
-      spliceKeyIndexValues(rightOnly, cRightIndex).forEach(({ key: rightKey, indexValue: { index, value } }) => {
-        diff.right[index] = [rightKey, value];
-      });
-
-      if (diff.left.length || diff.right.length) {
-        status = false;
-      }
-
-      const cmpResult = this.compare(cLeftValue, cRightValue);
-
-      if (cmpResult.result[Left]) {
-        diff.left[cLeftIndex] = [key, cmpResult.result[Left]];
-      }
-      if (cmpResult.result[LeftSame]) {
-        same.left[cLeftIndex] = [key, cmpResult.result[LeftSame]];
-      }
-      if (cmpResult.result[RightSame]) {
-        same.right[cRightIndex] = [key, cmpResult.result[RightSame]];
-      }
-      if (cmpResult.result[Right]) {
-        diff.right[cRightIndex] = [key, cmpResult.result[Right]];
-      }
-
-      if (status !== false && cmpResult.status !== undefined) {
-        status = cmpResult.status;
+      if (hasDiff) {
+        cmp.left.push(leftEntry);
+        cmp.right.push(rightEntry);
+        rightEntrySet.delete(k);
+      } else {
+        cmp.leftSame.push(leftEntry);
+        cmp.rightSame.push(rightEntry);
       }
     });
 
-    leftOnly.forEach(({ key: leftKey, indexValue: { index, value } }) => {
-      diff.left[index] = [leftKey, value];
-    });
+    cmp.rightOnly = Array.from(rightEntrySet).map((key) => rightEntries[key]);
 
-    rightOnly.forEach(({ key: rightKey, indexValue: { index, value } }) => {
-      diff.right[index] = [rightKey, value];
-    });
+    const result: ComparisonResult = Object.fromEntries(Object.entries(cmp).filter(([, v]) => v.length));
 
-    return createComparisonResult(status, { diff, same });
+    return result;
   }
 }
