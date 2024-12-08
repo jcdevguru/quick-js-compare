@@ -1,10 +1,7 @@
 import CoreCompare from '.';
 
 import {
-  type Value,
   type StdObject,
-  actualType,
-  typeIsStdObject,
 } from '../lib/types';
 
 import type {
@@ -14,7 +11,6 @@ import type {
 } from './types';
 
 import {
-  hasDifferences,
   stdObjectEntriesByKey,
 } from './util';
 
@@ -26,23 +22,11 @@ export class StdObjectCompare extends CoreCompare {
     super(options);
   }
 
-  compare(left: Value, right: Value) : ComparisonResult {
-    const baseResult = super.compare(left, right);
-    if (hasDifferences(baseResult)) {
-      return baseResult;
-    }
+  compare(left: StdObject, right: StdObject) : ComparisonResult {
+    const leftEntries = stdObjectEntriesByKey(left);
+    const rightEntries = stdObjectEntriesByKey(right);
 
-    const leftType = actualType(left);
-    const rightType = actualType(right);
-
-    if (!typeIsStdObject(leftType) || !typeIsStdObject(rightType)) {
-      return baseResult;
-    }
-
-    const leftEntries = stdObjectEntriesByKey(left as StdObject);
-    const rightEntries = stdObjectEntriesByKey(right as StdObject);
-
-    const rightEntrySet = new Set(Object.keys(right as StdObject));
+    const rightEntrySet = new Set(Object.keys(right));
 
     const cmp: Comparison<StdObjectItem> = {
       leftOnly: [],

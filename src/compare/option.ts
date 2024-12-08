@@ -1,10 +1,11 @@
 import { OptionError } from '../lib/error';
-
 import {
   isCompareFunction,
   isCompareOptionHelperToken,
   validateCompareOptionObject,
-  type CompareOption
+  type CompareOption,
+  type CompareOptionObject,
+  type CompareOptionHelperToken,
 } from './types';
 
 
@@ -33,3 +34,30 @@ export const validateCompareOption = (v: unknown): v is CompareOption => {
   }
   return true;
 };
+
+// Map string-based comparison options to their object-based equivalents
+const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject> = {
+  Exact: {
+    compareScalar: 'strict',
+    compareObject: 'keyValueOrder',
+    compareMap: 'keyValueOrder',
+    compareArray: 'valueOrder',
+    compareSet: 'valueOnly',
+  },
+  General: {
+    compareScalar: 'abstract',
+    compareObject: 'keyValue',
+    compareMap: 'keyValue',
+    compareArray: 'valueOnly',
+    compareSet: 'valueOnly',
+  },
+  Structure: {
+    compareScalar: 'ignore',
+    compareObject: 'typeOnly',
+    compareMap: 'typeOnly',
+    compareArray: 'typeOnly',
+    compareSet: 'typeOnly',
+  },
+};
+
+export const helperTokenToObjectMap = (token: CompareOptionHelperToken): CompareOptionObject => helperTokenObjectMap[token];

@@ -13,7 +13,6 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
 
-// Add this type helper
 export type SetToUnion<T> = T extends Set<infer U> ? U : never;
 
 // -------------------------------------------------------------------------------------------------
@@ -24,15 +23,18 @@ export type SetToUnion<T> = T extends Set<infer U> ? U : never;
 // 'null' is excluded because 'typeof'
 // returns 'object' on null value.
 // supported types only here
-const scalarTypes = new Set([
+const scalars = [
   'string',
   'number',
   'boolean',
   'undefined',
-  'symbol',
   'bigint',
-]);
-export type Scalar = string | number | boolean | undefined | symbol | bigint;
+  'Date',
+];
+
+const scalarTypes = new Set(scalars);
+
+export type Scalar = string | number | boolean | undefined | bigint | Date;
 
 // Works with [...]
 const collectionTypes = new Set([
@@ -71,7 +73,7 @@ const functionTypes = new Set([
 const supportedTypes = new Set([
   ...scalarTypes,
   ...objectTypes,
-]);
+] as const);
 
 export type SupportedType = SetToUnion<typeof supportedTypes>;
 
@@ -79,9 +81,9 @@ export type SupportedType = SetToUnion<typeof supportedTypes>;
 export const typeIsSupported = (t: string): boolean => supportedTypes.has(t);
 export const typeIsObject = (t: string): boolean => objectTypes.has(t);
 export const typeIsGenericObject = (t: string): boolean => t === 'object';
-export const typeIsScalar = (t: string) : boolean => scalarTypes.has(t);
-export const typeIsStdObject = (t: string) : boolean => t === 'Object';
-export const typeIsKeyedObject = (t: string) : boolean => keyedTypes.has(t);
+export const typeIsScalar = (t: string): boolean => scalarTypes.has(t);
+export const typeIsStdObject = (t: string): boolean => t === 'Object';
+export const typeIsKeyedObject = (t: string): boolean => keyedTypes.has(t);
 export const typeIsFunction = (t: string) : boolean => functionTypes.has(t);
 export const typeIsReference = (t: string) : boolean => referenceTypes.has(t);
 
@@ -90,6 +92,7 @@ export const actualType = (v: unknown): string => {
   switch (t) {
     case 'object':
     case 'function':
+      // null would return 'object'
       return v?.constructor.name || t;
   }
   return t;
@@ -120,7 +123,7 @@ export type Value = Scalar | Reference;
 
 export type StdObjectEntry = [keyof StdObject, Value];
 
-export type Status = boolean | undefined;
+export type RefSet = WeakSet<Reference>;
 
 export const deriveType = (v: unknown): string => {
   let t = actualType(v);
@@ -130,6 +133,6 @@ export const deriveType = (v: unknown): string => {
 
   if (!typeIsSupported(t)) {
     return 'UnsupportedType';
-  }
+  } 
   return t;
 };

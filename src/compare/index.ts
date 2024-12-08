@@ -1,6 +1,7 @@
 import type {
   Value,
   Reference,
+  RefSet,
 } from '../lib/types';
 
 import {
@@ -14,15 +15,13 @@ import { OptionError } from '../lib/error';
 import type {
   CompareFunc,
   ComparisonResult,
-  CompareOption
+  CompareOption,
+  ComparisonStatus,
 } from './types';
 
 import { ExactComparer } from './stock-methods';
 
-import { valIsReference } from './util';
-
-type RefSet = WeakSet<Reference>;
-
+import { valIsReference, valueToComparedItem } from './util';
 export default class CoreCompare {
   private match: CompareFunc;
 
@@ -61,10 +60,24 @@ export default class CoreCompare {
   }
 
   compare(left: Value, right: Value): ComparisonResult {
-    if (CoreCompare.nonCircular(left, this.refSets.left) && CoreCompare.nonCircular(right, this.refSets.right)) {
-      return this.match(left, right, this.option);
+    let status: ComparisonStatus;
+    if (
+      CoreCompare.nonCircular(left, this.refSets.left) && 
+      CoreCompare.nonCircular(right, this.refSets.right)
+    ) {
+      status = this.match(left, right, this.option);
+      if (status !== undefined) {
+        const leftItem = valueToComparedItem(left);
+        const rightItem = valueToComparedItem(right);
+        if (status) {
+          return { leftSame: [leftItem], rightSame: [rightItem] };
+        }
+        return { left: [leftItem], right: [rightItem] };
+      }
     }
 
+    // Incomplete
+    // Undefined or circular reference
     return {};
   }
 }

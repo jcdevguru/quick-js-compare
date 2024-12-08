@@ -1,66 +1,123 @@
 import {
   type Value,
   typeIsSupported,
-  typeIsScalar
+  typeIsScalar,
+  deriveType
 } from '../lib/types';
 
 import {
-  type ComparisonResult
+  isCompareOptionToken,
+  type CompareFunc,
+  type CompareOptionObject,
+  type ComparisonStatus,
+  type MinimalCompareOptionObject,
 } from './types';
 
-import { hasDifferences, valueToComparedItem } from './util';
-
-export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonResult => {
-  // always check for strict match
-
-  const leftItem = valueToComparedItem(leftValue);
-  const rightItem = valueToComparedItem(rightValue);
-
-  const leftType = leftItem.typeName;
-  const rightType = rightItem.typeName;
-
-  // if we can't support the comparison, don't try
-  if (!typeIsSupported(leftType) || !typeIsSupported(rightType)) {
-    return {};
-  }
-
+export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonStatus => {
   if (leftValue === rightValue) {
-    return { leftSame: [leftItem], rightSame: [rightItem] };
+    return true;
   }
 
-  if (leftType !== rightType || typeIsScalar(leftType)) {
-    return { left: [leftItem], right: [rightItem] };
+  const leftType = deriveType(leftValue);
+
+  if (typeIsScalar(leftType)) {
+    return false;
+  } else if (!typeIsSupported(leftType)) {
+    return undefined;
   }
 
-  return {};
-};
-
-export const GeneralComparer = (leftValue: Value, rightValue: Value) : ComparisonResult => {
-  // always check for strict match
-  const st = ExactComparer(leftValue, rightValue);
-  if (!hasDifferences(st)) {
-    return st;
+  const rightType = deriveType(rightValue);
+  if (typeIsSupported(rightType) && leftType !== rightType) {
+    return false;
   }
 
   // incomplete
-  const result: ComparisonResult = {};
-  if (st.leftOnly) {
-    result.leftOnly = st.leftOnly;
-  }
-  
-  if (st.rightOnly) {
-    result.rightOnly = st.rightOnly;
+  return undefined;
+};
+
+export const GeneralComparer = (leftValue: Value, rightValue: Value) : ComparisonStatus => {
+  // general match
+  if (leftValue == rightValue) {
+    return true;
   }
 
-  if (st.left && st.right) {
-    if (leftValue == rightValue) {
-      result.leftSame = st.left;
-      result.rightSame = st.right;
-    } else {
-      result.left = st.left;
-      result.right = st.right;
+  const leftType = deriveType(leftValue); 
+  if (typeIsScalar(leftType)) {
+    return false;
+  } else if (!typeIsSupported(leftType)) {
+    return undefined;
+  }
+
+  const rightType = deriveType(rightValue);
+  if (!typeIsSupported(rightType)) {
+    return undefined;
+  }
+
+  // incomplete
+  return undefined;
+};
+ 
+const strict = (left: Value, right: Value) => left === right;
+const reference = strict;
+const abstract = (left: Value, right: Value) => left == right;
+const typeOnly = (left: unknown, right: unknown): boolean => deriveType(left) === deriveType(right);
+const ignore = () => true;
+
+const tokenToFunctionMap: Record<keyof CompareOptionObject, Record<string, CompareFunc>> = {
+  compareScalar: { strict, abstract, typeOnly, ignore },
+  compareObject: {
+    reference,
+    keyValueOrder: (left, right) => left === right, // TODO: implement
+    keyValue: (left, right) => left === right, // TODO: implement
+    keyOrder: (left, right) => left === right, // TODO: implement
+    valueOrder: (left, right) => left === right, // TODO: implement
+    keyOnly: (left, right) => left === right, // TODO: implement
+    valueOnly: (left, right) => left === right, // TODO: implement
+    typeOnly,
+    ignore,
+  },
+  compareMap: {
+    reference,
+    keyValueOrder: (left, right) => left === right, // TODO: implement
+    keyValue: (left, right) => left === right, // TODO: implement
+    typeOnly,
+    ignore,
+  },
+  compareArray: {
+    reference,
+    indexValue: (left, right) => left === right, // TODO: implement
+    valueOrder: (left, right) => left === right, // TODO: implement
+    valueOnly: (left, right) => left === right, // TODO: implement
+    indexOnly: (left, right) => left === right, // TODO: implement
+    sizeOnly: (left, right) => left === right, // TODO: implement
+    typeOnly,
+    ignore,
+  },
+  compareSet: {
+    reference,
+    valueOnly: (left, right) => left === right, // TODO: implement
+    sizeOnly: (left, right) => left === right, // TODO: implement
+    typeOnly,
+    ignore,
+  },
+};
+
+const defaultComparisonObject: MinimalCompareOptionObject = {
+  compareScalar: 'strict',
+  compareObject: 'keyValueOrder',
+  compareMap: 'keyValueOrder',
+  compareArray: 'valueOrder',
+  compareSet: 'valueOnly',
+};
+
+// Incomplete
+export const normalizeComparisonObject = (comparisonObject: MinimalCompareOptionObject): MinimalCompareOptionObject => {
+  const result: MinimalCompareOptionObject = comparisonObject;
+  for (const k of Object.keys(tokenToFunctionMap) as (keyof MinimalCompareOptionObject)[]) {
+    const spec = comparisonObject[k] ?? defaultComparisonObject[k];
+    if (isCompareOptionToken(spec)) {
+      result[k] = tokenToFunctionMap[k][spec] as CompareFunc;
     }
   }
-
   return result;
 };

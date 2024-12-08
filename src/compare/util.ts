@@ -26,4 +26,3 @@ export const stdObjectEntriesByKey = (obj: StdObject): Record<string, StdObjectI
     acc[key] = { key, index, ...valueToComparedItem(value) };
     return acc;
   }, {});
-

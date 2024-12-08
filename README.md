@@ -13,10 +13,12 @@ For now, this is a WIP.  Feel free to give feedback on any topic from this READM
 - Use Yarn or NPM to install Quick JS Compare.
 - In TypeScript or JavaScript, access the base method from the module:
 
-```js
+```ts
 import { compare } from 'quick-js-compare'; // TypeScript, NodeJS
 ```
+
 or
+
 ```js
 const { compare } = require('quick-js-compare'); // Other JS
 ```
@@ -30,18 +32,37 @@ const value2 = ...<any other value>...;
 const comparison = compare(value1, value2);
 ```
 
-The returned object will contain the following:
-- `result`: result array, which by index contains:
-  - 0: data in `value1` not matched in `value2`
-  - 1: data in `value1` matched in `value2`
-  - 2: data in `value2` matched in `value1`
-  - 3: data in `value2` not matched in `value1`
-- `status`:
-  - `true`: if `value1` and `value2` matched
-  - `false`: if `value1` and `value2` did not match
-  - `undefined`: if result couls not be determined
+### Directly supported types
 
-How the comparisons are computed depends on the options used.
+The broad categories of data supported in this package are ones whose primary use is to hold data.  These types include the native data types defined in the [ES2020+ spec](https://tc39.es/ecma262/2020/) and are categorized as follows:
+
+* **Scalar**: Instances of data that have a single value. Scalar values supported in this package are:
+  * `string` - character values, e.g., `"abc"`
+  * `number` - [numeric values](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) expressed in 64-bit binary format, e.g, `0`, `-2`, `3.1416`
+  * `boolean` - `true` or `false`
+  * `undefined` - value `undefined`, i.e., no meaningful value
+  * `bigint` - [numeric values too large](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) to be represented as 64 bits
+  * `Date` - The native `Date` object - i.e., created with the `Date` constructor
+
+* **Composite**: Instances of data that have multiple values. Composite values supported in this package:
+  * "Standard" or record objects, i.e., those expressed in object literal notation as `{ <string-property1>: <value1>, <string-property2>: <value2> }`
+  * Array objects, i.e., a collection of values indexed by whole numbers, those expressed in object literal notation as `[<value1>, <value2>]`
+  * Map objects, i.e., objects created by ECMA's `Map` constructor
+  * Set object, i.e., objects created by ECMA's `Set` constructor
+  * Function objects, which hold values through specific properties
+
+Because this package provides comparison only and is meant for practical use, types of data are categorized around their behavior in representing data and not around their formal definitions.  For example, data of type `string` or `Date` can be said to hold multiple values, but are compared as scalars, since most JavaScript programming works with these types as single values.  Or, although a function is primarily used for programming, its capacity to hold values as propeties makes it supportable as a composite data type.
+
+The returned object will contain the following.  Values are determined to be exclusive, differing, or the same between the values by the comparison methods that are applied.  In all cases, a `result` object will be returned with the following fields:
+
+* `leftOnly`: (composite values only) data only in `value1`
+* `left`: data in `value1` that differs from `value2`.
+* `leftSame`: data in `value1` that is the same as `value2`.
+* `rightSame`: data in `value2` that is the same as `value1`.
+* `right`: data in `value2` that differs from `value1`.
+* `rightOnly`: (composite values only) data only in `value2`
+
+Each of these fields are arrays of objects that describe the comparison results that contain at least the type and value of the compared item.  If there is no result, the field is not included.
 
 ## Examples
 
@@ -61,15 +82,22 @@ will result in:
 
 ```js
 {
-  "result": [
-    "hello",
-    undefined,
-    undefined,
-    "world"
+  "left": [
+    {
+      "typeName": "string",
+      "value": "hello"
+    }
   ],
-  "status": false
+  "right": [
+    {
+      "typeName": "string",
+      "value": "world"
+    }
+  ]
 }
 ```
+
+//TODO - need more
 
 ### Objects (Property/Value)
 
@@ -169,7 +197,7 @@ The following combinations of properties and values are supported when options f
     * *function*: use function to compare (see below)
 
   * `compareMap`: for comparison of objects of type `Map`, e.g., created from `new Map([['a', 1],['b', 2]])`
-    Same settings as `compareObject`. 
+    Same settings and default as `compareObject`. 
 
   * `compareArray`: for comparison of array objects, e.g., `[1, 7, 'a', true]`
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
@@ -193,7 +221,7 @@ The following combinations of properties and values are supported when options f
   * If `compareMap` is omitted, objects of type `Map` will be compared according to settings in `compareObject`
   * If `compareSet` is omitted, objects of type `Set` will be compared according to settings in `compareArray`
 
-  TODO: explain functions
+In all cases, a comparison operation may be supplied as a function whose job is to compare the two arguments, and return `true` if considered the same, `false` if considered different, or `undefined` if it cannot be determined.  The two arguments may be assumed to be of compatible types when called.  // TODO - pass options to function?  Object??
 
 #### Options as strings
 
