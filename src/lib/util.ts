@@ -47,3 +47,12 @@ export const validateMinimalObject = (
 
   return true;
 };
+
+// Helper function to define the union and type guard with caching
+export const defineUnionForType = <T extends string[]>(...values: T) => {
+  const set = new Set(values);
+  return {
+    type: values,
+    is: (value: string): value is T[number] => set.has(value),
+  } as { type: T; is: (value: string) => value is T[number] };
+};

@@ -1,13 +1,22 @@
 import { OptionError } from '../lib/error';
+import { type Value } from '../lib/types';
+
 import {
-  isCompareFunction,
-  isCompareOptionHelperToken,
-  validateCompareOptionObject,
   type CompareOption,
   type CompareOptionObject,
   type CompareOptionHelperToken,
+  type CompareFunc,
+  type CompareOptionMethodObject,
+  type MinimalCompareOptionObject,
+  type ComparisonStatus,
+  isMinimalCompareOptionObject,
+  isCompareFunction,
+  isCompareOptionHelperToken,
+  isCompareOptionToken,
+  validateCompareOptionObject,
 } from './types';
 
+import { optionTokenToStockMethodMap } from './stock-methods';
 
 export const validateCompareOption = (v: unknown): v is CompareOption => {  
   switch (typeof v) {
@@ -60,4 +69,45 @@ const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject
   },
 };
 
-export const helperTokenToObjectMap = (token: CompareOptionHelperToken): CompareOptionObject => helperTokenObjectMap[token];
+const defaultComparisonObject: MinimalCompareOptionObject = {
+  compareScalar: 'strict',
+  compareObject: 'keyValueOrder',
+  compareMap: 'keyValueOrder',
+  compareArray: 'valueOrder',
+  compareSet: 'valueOnly',
+};
+
+export const compareOptionObjectToMethodObject = (compareOptionObject: MinimalCompareOptionObject): CompareOptionMethodObject => {
+  const result = compareOptionObject as CompareOptionMethodObject;
+  for (const k of Object.keys(optionTokenToStockMethodMap) as (keyof MinimalCompareOptionObject)[]) {
+    const spec = compareOptionObject[k] ?? defaultComparisonObject[k];
+    if (isCompareOptionToken(spec)) {
+      result[k] = optionTokenToStockMethodMap[k][spec] as CompareFunc;
+    }
+  }
+  return result;
+};
+
+export const compareOptionToFunction = (option: CompareOption): CompareFunc => {
+  if (isCompareFunction(option)) {
+    return option;
+  }
+
+  let optionObject: MinimalCompareOptionObject;
+
+  if (isMinimalCompareOptionObject(option)) {
+    optionObject = option;
+  } else if (isCompareOptionHelperToken(option)) {
+    optionObject = helperTokenObjectMap[option];
+  } else {
+    throw new Error('Internal error: unhandled compare option');
+  }
+
+  const methodObject = compareOptionObjectToMethodObject(optionObject);
+
+  // incomplete
+  return (left: Value, right: Value, option = { compare: methodObject}): ComparisonStatus =>
+    methodObject.compareScalar(left, right, option);
+};
+
+

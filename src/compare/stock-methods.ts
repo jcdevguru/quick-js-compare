@@ -5,12 +5,10 @@ import {
   deriveType
 } from '../lib/types';
 
-import {
-  isCompareOptionToken,
-  type CompareFunc,
-  type CompareOptionObject,
-  type ComparisonStatus,
-  type MinimalCompareOptionObject,
+import type {
+  CompareFunc,
+  CompareOptionObject,
+  ComparisonStatus,
 } from './types';
 
 export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonStatus => {
@@ -31,7 +29,8 @@ export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonS
     return false;
   }
 
-  // incomplete
+  // now compare per-type
+  // TODO: implement
   return undefined;
 };
 
@@ -53,7 +52,9 @@ export const GeneralComparer = (leftValue: Value, rightValue: Value) : Compariso
     return undefined;
   }
 
-  // incomplete
+  // Now perform general comparisons
+  // Might compare different types
+  //
   return undefined;
 };
  
@@ -63,7 +64,7 @@ const abstract = (left: Value, right: Value) => left == right;
 const typeOnly = (left: unknown, right: unknown): boolean => deriveType(left) === deriveType(right);
 const ignore = () => true;
 
-const tokenToFunctionMap: Record<keyof CompareOptionObject, Record<string, CompareFunc>> = {
+export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Record<string, CompareFunc>> = {
   compareScalar: { strict, abstract, typeOnly, ignore },
   compareObject: {
     reference,
@@ -100,24 +101,4 @@ const tokenToFunctionMap: Record<keyof CompareOptionObject, Record<string, Compa
     typeOnly,
     ignore,
   },
-};
-
-const defaultComparisonObject: MinimalCompareOptionObject = {
-  compareScalar: 'strict',
-  compareObject: 'keyValueOrder',
-  compareMap: 'keyValueOrder',
-  compareArray: 'valueOrder',
-  compareSet: 'valueOnly',
-};
-
-// Incomplete
-export const normalizeComparisonObject = (comparisonObject: MinimalCompareOptionObject): MinimalCompareOptionObject => {
-  const result: MinimalCompareOptionObject = comparisonObject;
-  for (const k of Object.keys(tokenToFunctionMap) as (keyof MinimalCompareOptionObject)[]) {
-    const spec = comparisonObject[k] ?? defaultComparisonObject[k];
-    if (isCompareOptionToken(spec)) {
-      result[k] = tokenToFunctionMap[k][spec] as CompareFunc;
-    }
-  }
-  return result;
 };
