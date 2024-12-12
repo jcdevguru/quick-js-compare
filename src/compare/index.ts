@@ -1,8 +1,8 @@
 import {
   type Value,
-  type Reference,
+  type Composite,
   type RefSet,
-  isReference,
+  isComposite,
 } from '../lib/types';
 
 import {
@@ -25,7 +25,7 @@ import { valueToComparedItem } from './util';
 
 const nonCircular = (value: Value, refSet: RefSet): boolean => {
   let rc = true;
-  if (isReference(value)) {
+  if (isComposite(value)) {
     if (refSet.has(value)) {
       rc = false;
     } else {
@@ -38,8 +38,8 @@ const nonCircular = (value: Value, refSet: RefSet): boolean => {
 
 export default class CoreCompare {
   private refSets = {
-    left: new WeakSet<Reference>(),
-    right: new WeakSet<Reference>(),
+    left: new WeakSet<Composite>(),
+    right: new WeakSet<Composite>(),
   };
 
   // incomplete

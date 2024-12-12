@@ -59,7 +59,7 @@ export interface ComparisonResultGenerator<T extends ComparedItem = ComparedItem
 const cmpOptionHelperTokenUnion = defineUnionForType('Exact', 'General', 'Structure');
 export type CompareOptionHelperToken = typeof cmpOptionHelperTokenUnion.type[number];
 
-const CMP_REFERENCE_TOKENS = ['reference', 'valueOnly', 'typeOnly', 'ignore'];
+const CMP_COMPOSITE_TOKENS = ['reference', 'valueOnly', 'typeOnly', 'ignore'];
 const CMP_KEYED_OBJECT_TOKENS = ['keyValueOrder', 'keyValue', 'keyOrder', 'keyOnly'];
 const CMP_COLLECTION_TOKENS = ['valueOnly', 'sizeOnly'];
 const CMP_INDEXED_OBJECT_TOKENS = ['indexValue', 'valueOrder', 'valueOnly', 'indexOnly', 'sizeOnly'];
@@ -67,26 +67,26 @@ const CMP_INDEXED_OBJECT_TOKENS = ['indexValue', 'valueOrder', 'valueOnly', 'ind
 const cmpScalarTokenUnion = defineUnionForType('strict', 'abstract', 'typeOnly', 'ignore');
 export type CompareScalarToken = typeof cmpScalarTokenUnion.type[number];
 
-const cmpReferenceTokenUnion = defineUnionForType(...CMP_REFERENCE_TOKENS, ...CMP_KEYED_OBJECT_TOKENS);
-export type CompareReferenceToken = typeof cmpReferenceTokenUnion.type[number];
+const cmpCompositeTokenUnion = defineUnionForType(...CMP_COMPOSITE_TOKENS, ...CMP_KEYED_OBJECT_TOKENS);
+export type CompareCompositeToken = typeof cmpCompositeTokenUnion.type[number];
 
-const cmpMapTokenUnion = defineUnionForType(...CMP_REFERENCE_TOKENS, ...CMP_KEYED_OBJECT_TOKENS, ...CMP_INDEXED_OBJECT_TOKENS);
+const cmpMapTokenUnion = defineUnionForType(...CMP_COMPOSITE_TOKENS, ...CMP_KEYED_OBJECT_TOKENS, ...CMP_INDEXED_OBJECT_TOKENS);
 export type CompareMapToken = typeof cmpMapTokenUnion.type[number];
 
-const cmpArrayTokenUnion = defineUnionForType(...CMP_REFERENCE_TOKENS, ...CMP_COLLECTION_TOKENS, ...CMP_INDEXED_OBJECT_TOKENS);
+const cmpArrayTokenUnion = defineUnionForType(...CMP_COMPOSITE_TOKENS, ...CMP_COLLECTION_TOKENS, ...CMP_INDEXED_OBJECT_TOKENS);
 export type CompareArrayToken = typeof cmpArrayTokenUnion.type[number];
 
-const cmpSetTokenUnion = defineUnionForType(...CMP_REFERENCE_TOKENS, ...CMP_COLLECTION_TOKENS);
+const cmpSetTokenUnion = defineUnionForType(...CMP_COMPOSITE_TOKENS, ...CMP_COLLECTION_TOKENS);
 export type CompareSetToken = typeof cmpSetTokenUnion.type[number];
 
 // Create a type that can be a token or a function
 export type CompareScalar = CompareScalarToken | CompareFunc;
-export type CompareObject = CompareReferenceToken | CompareFunc;
+export type CompareObject = CompareCompositeToken | CompareFunc;
 export type CompareArray = CompareArrayToken | CompareFunc;
 export type CompareMap = CompareMapToken | CompareFunc;
 export type CompareSet = CompareSetToken | CompareFunc;
 
-export type CompareOptionToken = CompareScalarToken | CompareReferenceToken | CompareMapToken | CompareArrayToken | CompareSetToken;
+export type CompareOptionToken = CompareScalarToken | CompareCompositeToken | CompareMapToken | CompareArrayToken | CompareSetToken;
 
 export interface CompareOptionObject {
   compareScalar: CompareScalar
@@ -109,12 +109,10 @@ export type ComparerFromOptionMethodObject = (compareOptionMethodObject: Compare
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
 export type CompareOption = CompareOptionHelperToken | MinimalCompareOptionObject | CompareFunc;
 
-
 export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
-// Methods
 export const isCompareOptionHelperToken = (v: unknown): v is CompareOptionHelperToken => cmpOptionHelperTokenUnion.is(v as string);
 export const isCompareScalarToken = (v: unknown): v is CompareScalarToken => cmpScalarTokenUnion.is(v as string);
-export const isCompareObjectToken = (v: unknown): v is CompareObject => cmpReferenceTokenUnion.is(v as string);
+export const isCompareObjectToken = (v: unknown): v is CompareObject => cmpCompositeTokenUnion.is(v as string);
 export const isCompareArrayToken = (v: unknown): v is CompareArray => cmpArrayTokenUnion.is(v as string);
 export const isCompareMapToken = (v: unknown): v is CompareMapToken => cmpMapTokenUnion.is(v as string);
 export const isCompareSetToken = (v: unknown): v is CompareSetToken => cmpSetTokenUnion.is(v as string);

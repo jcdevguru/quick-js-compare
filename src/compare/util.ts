@@ -1,8 +1,8 @@
 import {
-  isReference,
+  isComposite,
   actualType,
   type StdObject,
-  type Reference,
+  type Composite,
   type Value,
 } from '../lib/types';
 
