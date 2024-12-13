@@ -1,64 +1,40 @@
 import {
-  isComposite,
   actualType,
-  type StdObject,
-  type Composite,
   type Value,
 } from '../lib/types';
 
 import type {
-  Comparison,
-  StdObjectItem,
-  ComparedItem,
-  ComparisonResult,
-  CompareFunc,
-  ComparisonStatus,
+  ValueResult,
+  CompareResult,
+  ValueResultProps,
 } from './types';
 
-import { Option } from '../lib/option';
+export const resultHasDifferences = (result: CompareResult): boolean =>
+  Boolean(result.leftOnly) || Boolean(result.rightOnly) || Boolean(result.left) && Boolean(result.right);
 
-export const hasDifferences = (result: Partial<Comparison>): boolean =>
-  Boolean(result.leftOnly) || Boolean(result.left) || Boolean(result.right) || Boolean(result.rightOnly);
+export const resultHasSame = (result: CompareResult): boolean =>
+  Boolean(result.leftSame) && Boolean(result.rightSame);
 
-export const valueToComparedItem = (value: Value): ComparedItem => ({ typeName: actualType(value), value});
+export const resultIsUndefined = (result: CompareResult): boolean =>
+  !resultHasDifferences(result) && !resultHasSame(result);
 
-export const stdObjectEntriesByKey = (obj: StdObject): Record<string, StdObjectItem> => 
-  Object.entries(obj).reduce((acc: Record<string, StdObjectItem>, [key, value], index) => {
-    acc[key] = { key, index, ...valueToComparedItem(value) };
-    return acc;
-  }, {});
+export const resultIsValid = (result: CompareResult): boolean =>
+  +resultIsUndefined(result) + +resultHasDifferences(result) + +resultHasSame(result) === 1;
 
-// incomplete
-export const wrapComparer = (comparer: CompareFunc) => (left: Value, right: Value, options: Option): ComparisonResult => {
-  const comparisonStatus = comparer(left, right, options);
-  const result: ComparisonResult = {};
+export const valueToValueResult = (value: Value, props: ValueResultProps = {}): ValueResult =>
+  ({ typeName: actualType(value), value, ...props });
 
-  switch (comparisonStatus) {
-    case true:
-      result.leftSame = [];
-      result.rightSame = [];
-      break;
-    case false:
-      result.left = [];
-      result.right = [];
-      break;
+export const mergeComparisonResults = (
+  mergeTo: CompareResult, 
+  from: CompareResult, 
+  keys?: Array<keyof CompareResult>
+): CompareResult => {
+  if (!keys) {
+    keys = Object.keys(from) as Array<keyof CompareResult>;
   }
-  return result;
-};
-
-
-export const statusToResult = (leftItem: ComparedItem, rightItem: ComparedItem, status: ComparisonStatus): ComparisonResult => {
-  const result: ComparisonResult = {};
-
-  switch (status) {
-    case true:
-      result.leftSame = [leftItem];
-      result.rightSame = [rightItem];
-      break;
-    case false:
-      result.left = [leftItem];
-      result.right = [rightItem];
-      break;
-  }
-  return result;
+  keys.forEach((key) => {
+    mergeTo[key] = [...(mergeTo[key] ?? []), ...(from[key] ?? [])];
+  });
+  
+  return mergeTo;
 };

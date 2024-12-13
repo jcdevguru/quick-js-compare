@@ -1,10 +1,10 @@
-import { ComparisonResult } from '../compare/types';
+import { CompareResult } from '../compare/types';
 import { type OptionObject } from '../lib/option';
 import { AtLeastOne } from '../lib/types';
 import { validateMinimalObject } from '../lib/util';
 
 export interface RenderFunc {
-  (result: ComparisonResult, options: OptionObject): unknown;
+  (result: CompareResult, options: OptionObject): unknown;
 }
 
 // Types for render option object
@@ -27,7 +27,8 @@ export const isRenderToken = (v: unknown): v is RenderToken =>
 
 export const isRenderFunction = (v: unknown): v is RenderFunc => typeof v === 'function';
 
-export type RenderOption = RenderToken | RenderOptionObject | RenderFunc;
+export type CoreRenderOption = RenderOptionObject | RenderFunc;
+export type RenderOption = RenderToken | CoreRenderOption;
 
 const isBoolean = (v: unknown) : v is boolean => typeof v === 'boolean';
 const isNumber = (v: unknown): v is number => typeof v === 'number';

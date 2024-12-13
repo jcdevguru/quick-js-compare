@@ -1,27 +1,38 @@
 import {
   type Value,
-  type Composite,
+  type Reference,
   type RefSet,
   isComposite,
+  actualType,
+  isSupportedType,
+  isCompositeType,
 } from '../lib/types';
 
 import {
   type Option,
+  type CoreOptionObject,
   validateOption,
 } from '../lib/option';
 
-import { compareOptionToFunction } from './option';
+import { hydrateCompareOption } from './option';
+import { stockComparer } from './stock-methods';
 import { OptionError } from '../lib/error';
 
 import {
-  type ComparisonResult,
-  type ComparisonStatus,
-  type CompareFunc,
-  CompareOptionHelperToken,
+  type CompareResult,
+  type CompareFunction,
+  isCompareFunction,
+  isMinimalCompareOptionObject,
+  isCompareOptionHelperToken,
+  CoreCompareOption,
+  CompareOptionMethodObject,
 } from './types';
 
-import { valueToComparedItem } from './util';
-
+import {
+  resultIsUndefined,
+  valueToValueResult,
+  mergeComparisonResults
+} from './util';
 
 const nonCircular = (value: Value, refSet: RefSet): boolean => {
   let rc = true;
@@ -37,40 +48,114 @@ const nonCircular = (value: Value, refSet: RefSet): boolean => {
 }
 
 export default class CoreCompare {
+  private static defaultOptions: Option = { compare: 'Exact', render: 'Standard' };
+
   private refSets = {
-    left: new WeakSet<Composite>(),
-    right: new WeakSet<Composite>(),
+    left: new WeakSet<Reference>(),
+    right: new WeakSet<Reference>(),
   };
 
-  // incomplete
-  private compareOptions: CompareFunc;
+  private comparisonResult: CompareResult = {};
+  private comparer: CompareFunction = stockComparer;
 
-  constructor(left: Value, right: Value, options?: Option) {
-    if (options && !validateOption(options)) {
+  private coreOptions!: CoreOptionObject;
+
+  private processOptions(options: Option) {
+    if (!validateOption(options)) {
       throw new OptionError('Invalid options');
     }
 
-    const option = { compare: 'Exact' as CompareOptionHelperToken, ...options }.compare;
-
-    this.compareOptions = compareOptionToFunction(option);
+    if (isCompareFunction(options.compare)) {
+      this.comparer = options.compare;
+    } else if (isMinimalCompareOptionObject(options.compare) || isCompareOptionHelperToken(options.compare)) {
+      const methodObject: CompareOptionMethodObject = hydrateCompareOption(options.compare);
+      this.coreOptions = { ...this.coreOptions, compare: methodObject };
+    } else {
+      throw new Error('Internal error: unhandled compare option state');
+    }
   }
 
-  public compare(): ComparisonResult {
-    let status: ComparisonStatus;
-    if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
-      status = this.match(left, right, this.option);
-      if (status !== undefined) {
-        const leftItem = valueToComparedItem(left);
-        const rightItem = valueToComparedItem(right);
-        if (status) {
-          return { leftSame: [leftItem], rightSame: [rightItem] };
+  constructor(options?: Option) {
+    this.processOptions(options ?? CoreCompare.defaultOptions);
+  }
+
+  private coreCompare = (left: Value, right: Value): CompareResult => {
+    const leftType = actualType(left);
+    const rightType = actualType(right);
+    const result: CompareResult = {};
+
+    // types of operands must be supported
+    // and circular references must be detected and ignored
+    if (
+      nonCircular(left, this.refSets.left) &&
+      nonCircular(right, this.refSets.right) &&
+      isSupportedType(leftType) &&
+      isSupportedType(rightType)
+    ) {
+        const leftResult = valueToValueResult(left);
+        const rightResult = valueToValueResult(right);
+        
+        // a scalar is always considered different from a composite
+        if (isCompositeType(leftType) !== isCompositeType(rightType)) {
+           result.left = [leftResult];
+           result.right = [rightResult];
+        } else {
+          const subResult: CompareResult = {};
+          const comparisonStatus = this.comparer(left, right, this, subResult);
+          if (comparisonStatus) {
+            if (!resultIsUndefined(subResult)) {
+              leftResult.comparisonResult = subResult;
+              rightResult.comparisonResult = subResult;
+            }
+            result.leftSame = [leftResult];
+            result.rightSame = [rightResult];
+          } else if (comparisonStatus === false) {
+              leftResult.comparisonResult = mergeComparisonResults({}, subResult, ['leftOnly', 'left']);
+              rightResult.comparisonResult = mergeComparisonResults({}, subResult, ['right', 'rightOnly']);
+              result.left = [leftResult];
+              result.right = [rightResult];
+          }
         }
-        return { left: [leftItem], right: [rightItem] };
-      }
     }
 
-    // Incomplete
-    // Undefined or circular reference
-    return {};
+    return result;
+  }
+
+  public compare(left: Value, right: Value): CoreCompare {
+    this.comparisonResult = this.coreCompare(left, right);
+    
+    return this;
+  }
+
+  public recompare(options: Option): CoreCompare {
+    if (this.isComplete) {
+      return this;
+    }
+
+    this.processOptions(options);
+
+    const { leftSame = [], rightSame = [] } = this.comparisonResult;
+
+    // Since arrays are same length, we just use leftSame for the length
+    const comparisonResult: CompareResult = {};
+    for (let i = 0; i < leftSame.length; i++) {
+      const result = this.coreCompare(leftSame[i].value, rightSame[i].value);
+      mergeComparisonResults(comparisonResult, result);
+    }
+    this.comparisonResult = comparisonResult;
+    return this;
+  }
+
+  get isComplete(): boolean {
+    const { leftSame = [] } = this.comparisonResult;
+    return !leftSame.length;
+  }
+
+  get result(): CompareResult {
+    return this.comparisonResult;
+  }
+
+  get compareOptions(): CoreCompareOption {
+    return this.coreOptions.compare;
   }
 }

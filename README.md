@@ -190,7 +190,7 @@ The following combinations of properties and values are supported when options f
     * *function*: use function to compare (see below)
 
   * `compareMap`: for comparison of objects of type `Map` (JavaScript type `Map`)
-    Same settings and default as `compareObject`. 
+    Same settings and default as `compareObject`. If omitted, `compareObject` settings will be used.
 
   * `compareArray`: for comparison of arrays
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
@@ -212,9 +212,6 @@ The following combinations of properties and values are supported when options f
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
-  
-  * If `compareMap` is omitted, objects of type `Map` will be compared according to settings in `compareObject`
-  * If `compareSet` is omitted, objects of type `Set` will be compared according to settings in `compareArray`
 
 In all cases, a comparison operation may be supplied as a function whose job is to compare the two arguments, and return `true` if considered the same, `false` if considered different, or `undefined` if it cannot be determined.  The two arguments may be assumed to be of compatible types when called.  // TODO - pass options to function?  Object??
 

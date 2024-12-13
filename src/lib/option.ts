@@ -1,16 +1,21 @@
-import { validateCompareOption } from '../compare/option';
-import { type RenderOption } from '../render/types';
-import { type CompareOption } from '../compare/types';
-import { validateRenderOption } from '../render/option';
-import { OptionError } from './error';
 
 import { type AtLeastOne } from './types';
-
 import { validateMinimalObject } from './util';
+import { OptionError } from './error';
+
+import { validateCompareOption } from '../compare/option';
+import { type RenderOption } from '../render/types';
+import type { CoreCompareOption, CompareOption } from '../compare/types';
+import { validateRenderOption } from '../render/option';
 
 export interface OptionObject {
   compare: CompareOption
   render: RenderOption
+}
+
+export interface CoreOptionObject extends OptionObject {
+  compare: CoreCompareOption
+  render: RenderOption // TODO: change to CoreRenderOption
 }
 
 export type Option = AtLeastOne<OptionObject>;

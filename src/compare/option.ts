@@ -1,14 +1,12 @@
 import { OptionError } from '../lib/error';
-import { type Value } from '../lib/types';
 
 import {
   type CompareOption,
   type CompareOptionObject,
   type CompareOptionHelperToken,
-  type CompareFunc,
+  type CompareFunction,
   type CompareOptionMethodObject,
   type MinimalCompareOptionObject,
-  type ComparisonStatus,
   isMinimalCompareOptionObject,
   isCompareFunction,
   isCompareOptionHelperToken,
@@ -81,21 +79,23 @@ const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject
 const defaultComparisonObject = ExactComparisonObject;
 
 export const compareOptionObjectToMethodObject = (compareOptionObject: MinimalCompareOptionObject): CompareOptionMethodObject => {
-  const result = compareOptionObject as CompareOptionMethodObject;
+  // Use compareObject settings for compareMap if compareMap not set explicitly
+  const methodObject = {
+    ...{ compareMap: compareOptionObject.compareObject },
+    ...compareOptionObject
+  } as CompareOptionMethodObject;
+  
   for (const k of Object.keys(optionTokenToStockMethodMap) as (keyof MinimalCompareOptionObject)[]) {
     const spec = compareOptionObject[k] ?? defaultComparisonObject[k];
     if (isCompareOptionToken(spec)) {
-      result[k] = optionTokenToStockMethodMap[k][spec] as CompareFunc;
+      methodObject[k] = optionTokenToStockMethodMap[k][spec] as CompareFunction;
     }
   }
-  return result;
+
+  return methodObject;
 };
 
-export const compareOptionToFunction = (option: CompareOption): CompareFunc => {
-  if (isCompareFunction(option)) {
-    return option;
-  }
-
+export const hydrateCompareOption = (option: CompareOption): CompareOptionMethodObject => {
   let optionObject: MinimalCompareOptionObject;
 
   if (isMinimalCompareOptionObject(option)) {
@@ -106,11 +106,7 @@ export const compareOptionToFunction = (option: CompareOption): CompareFunc => {
     throw new Error('Internal error: unhandled compare option');
   }
 
-  const methodObject = compareOptionObjectToMethodObject(optionObject);
-
-  // incomplete
-  return (left: Value, right: Value, option = { compare: methodObject }): ComparisonStatus =>
-    methodObject.compareScalar(left, right, option);
+  return compareOptionObjectToMethodObject(optionObject);
 };
 
 

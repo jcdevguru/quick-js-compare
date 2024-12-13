@@ -63,7 +63,7 @@ export const actualType = (v: unknown): string => {
     let n = v?.constructor.name;
     if (n === 'Object') {
       n = 'StdObject';
-    } else if (n) {
+    } else if (isSupportedType(n)) {
       return n;
     }
   }
@@ -88,7 +88,7 @@ export type StdObject = {
     [key: string]: Value;
 };
 
-export type Scalar = string | number | boolean | bigint | null | undefined | Date;
+export type Scalar = string | number | boolean | bigint | null | undefined | symbol | Date;
 export type MapObject = Map<MapKey, Value>;
 export type ArrayObject = Array<Value>;
 export type SetObject = Set<Value>;
@@ -107,6 +107,8 @@ export type Composite = IndexedObject | KeyedObject | CollectionObject | Functio
 
 export type Value = Scalar | Composite;
 
+export type Reference = Composite;
+
 export type StdObjectEntry = [keyof StdObject, Value];
 
 export const isScalar = (v: unknown): v is Scalar => isScalarType(actualType(v));
@@ -119,6 +121,7 @@ export const isCollection = (v: unknown): v is CollectionObject => isCollectionT
 export const isFunctionObject = (v: unknown): v is FunctionObject => isFunctionType(actualType(v));
 export const isIndexedObject = (v: unknown): v is IndexedObject => isIndexedObjectType(actualType(v));
 export const isComposite = (v: unknown): v is Composite => isCompositeType(actualType(v));
+export const isReference = (v: unknown): v is Reference => isComposite(v);
 export const isValue = (v: unknown): v is Value => isScalar(v) || isComposite(v);
 export const isSupported = isValue;
 

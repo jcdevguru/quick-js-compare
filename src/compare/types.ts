@@ -1,8 +1,7 @@
 import type {
   AtLeastOne,
   Value,
-  StdObject,
-  MapObject,
+  Scalar,
 } from '../lib/types';
 
 import {
@@ -10,41 +9,28 @@ import {
   defineUnionForType,
 } from '../lib/util';
 
-import { type Option } from '../lib/option';
+import CoreCompare from '.';
 
 export type ComparisonStatus = boolean | undefined;
 
-export type CompareFunc = (left: Value, right: Value, options: Option) => ComparisonStatus;
-
-export interface ComparedItem {
-  typeName: string,
-  value: Value,
-  comparisonResult?: ComparisonResult,
-};
-
-export interface IndexedItem extends ComparedItem {
-  index: number
-};
-
-export interface KeyedObjectItem<K> extends IndexedItem {
-  key: K
-};
-
-export type StdObjectItem = KeyedObjectItem<keyof StdObject>;
-export type MapObjectItem = KeyedObjectItem<keyof MapObject>;
-export type ArrayObjectItem = IndexedItem;
+export type CompareFunction = (
+  left: Value,
+  right: Value,
+  compareInstance: CoreCompare,
+  compositeComparisonResult: CompareResult
+) => ComparisonStatus;
 
 export interface Comparison {
-  leftOnly: Array<ComparedItem>,
-  left: Array<ComparedItem>,
-  leftSame: Array<ComparedItem>,
-  rightSame: Array<ComparedItem>,
-  right: Array<ComparedItem>,
-  rightOnly: Array<ComparedItem>,
+  leftOnly: Array<ValueResult>,
+  left: Array<ValueResult>,
+  leftSame: Array<ValueResult>,
+  rightSame: Array<ValueResult>,
+  right: Array<ValueResult>,
+  rightOnly: Array<ValueResult>,
 };
 
 // Returned from .compare()
-export type ComparisonResult = Partial<Comparison>;
+export type CompareResult = Partial<Comparison>;
 
 // Types
 const cmpOptionHelperTokenUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
@@ -71,11 +57,11 @@ const cmpSetTokenUnion = defineUnionForType(...CMP_COMPOSITE_TOKENS, ...CMP_COLL
 export type CompareSetToken = typeof cmpSetTokenUnion.type[number];
 
 // Create a type that can be a token or a function
-export type CompareScalar = CompareScalarToken | CompareFunc;
-export type CompareObject = CompareCompositeToken | CompareFunc;
-export type CompareArray = CompareArrayToken | CompareFunc;
-export type CompareMap = CompareMapToken | CompareFunc;
-export type CompareSet = CompareSetToken | CompareFunc;
+export type CompareScalar = CompareScalarToken | CompareFunction;
+export type CompareObject = CompareCompositeToken | CompareFunction;
+export type CompareArray = CompareArrayToken | CompareFunction;
+export type CompareMap = CompareMapToken | CompareFunction;
+export type CompareSet = CompareSetToken | CompareFunction;
 
 export type CompareOptionToken = CompareScalarToken | CompareCompositeToken | CompareMapToken | CompareArrayToken | CompareSetToken;
 
@@ -88,19 +74,18 @@ export interface CompareOptionObject {
 }
 
 export interface CompareOptionMethodObject extends CompareOptionObject {
-  compareScalar: CompareFunc
-  compareObject: CompareFunc
-  compareMap: CompareFunc
-  compareArray: CompareFunc
-  compareSet: CompareFunc
+  compareScalar: CompareFunction
+  compareObject: CompareFunction
+  compareMap: CompareFunction
+  compareArray: CompareFunction
+  compareSet: CompareFunction
 }
 
-export type ComparerFromOptionMethodObject = (compareOptionMethodObject: CompareOptionMethodObject) => CompareFunc;
-
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
-export type CompareOption = CompareOptionHelperToken | MinimalCompareOptionObject | CompareFunc;
+export type CoreCompareOption = CompareFunction | CompareOptionMethodObject;
+export type CompareOption = CompareOptionHelperToken | MinimalCompareOptionObject | CoreCompareOption;
 
-export const isCompareFunction = (v: unknown): v is CompareFunc => typeof v === 'function' && v.length >= 3;
+export const isCompareFunction = (v: unknown): v is CompareFunction => typeof v === 'function' && v.length >= 2 && v.length <= 4;
 export const isCompareOptionHelperToken = (v: unknown): v is CompareOptionHelperToken => cmpOptionHelperTokenUnion.is(v as string);
 export const isCompareScalarToken = (v: unknown): v is CompareScalarToken => cmpScalarTokenUnion.is(v as string);
 export const isCompareObjectToken = (v: unknown): v is CompareObject => cmpCompositeTokenUnion.is(v as string);
@@ -135,3 +120,14 @@ export const isMinimalCompareOptionObject = (v: unknown): v is MinimalCompareOpt
 
 export const isCompareOption = (v: unknown): v is CompareOption =>
   isCompareOptionHelperToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v);
+
+export type ValueResultProps = {
+  index?: number,
+  key?: Scalar,
+  comparisonResult?: CompareResult,
+};
+
+export type ValueResult = {
+  typeName: string,
+  value: Value,
+} & ValueResultProps;

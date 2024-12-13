@@ -5,8 +5,8 @@ import {
 } from '../lib/types';
 
 import type {
-  ComparisonResult,
-  StdObjectItem,
+  CompareResult,
+  StdObjectResult,
   Comparison,
 } from './types';
 
@@ -22,13 +22,13 @@ export class StdObjectCompare extends CoreCompare {
     super(options);
   }
 
-  compare(left: StdObject, right: StdObject) : ComparisonResult {
+  compare(left: StdObject, right: StdObject) : CompareResult {
     const leftEntries = stdObjectEntriesByKey(left);
     const rightEntries = stdObjectEntriesByKey(right);
 
     const rightEntrySet = new Set(Object.keys(right));
 
-    const cmp: Comparison<StdObjectItem> = {
+    const cmp: Comparison<StdObjectResult> = {
       leftOnly: [],
       left: [],
       leftSame: [],
@@ -45,7 +45,7 @@ export class StdObjectCompare extends CoreCompare {
       }
 
       const entryResult = super.compare(leftEntry.value, rightEntry.value);
-      let item: StdObjectItem;
+      let item: StdObjectResult;
       let hasDiff = false;
 
       Object.keys(entryResult).forEach((subKey) => {
@@ -84,7 +84,7 @@ export class StdObjectCompare extends CoreCompare {
 
     cmp.rightOnly = Array.from(rightEntrySet).map((key) => rightEntries[key]);
 
-    const result: ComparisonResult = Object.fromEntries(Object.entries(cmp).filter(([, v]) => v.length));
+    const result: CompareResult = Object.fromEntries(Object.entries(cmp).filter(([, v]) => v.length));
 
     return result;
   }
