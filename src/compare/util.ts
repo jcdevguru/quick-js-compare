@@ -12,11 +12,10 @@ import type {
   ComparedItem,
   ComparisonResult,
   CompareFunc,
+  ComparisonStatus,
 } from './types';
 
 import { Option } from '../lib/option';
-// Utility methods for handling comparisons at runtime
-export const valIsReference = (v: unknown): v is Reference => isReference(actualType(v));
 
 export const hasDifferences = (result: Partial<Comparison>): boolean =>
   Boolean(result.leftOnly) || Boolean(result.left) || Boolean(result.right) || Boolean(result.rightOnly);
@@ -30,9 +29,9 @@ export const stdObjectEntriesByKey = (obj: StdObject): Record<string, StdObjectI
   }, {});
 
 // incomplete
-export const wrapComparer = (comparer: CompareFunc) => <T extends ComparisonResult>(left: Value, right: Value, options: Option): T => {
+export const wrapComparer = (comparer: CompareFunc) => (left: Value, right: Value, options: Option): ComparisonResult => {
   const comparisonStatus = comparer(left, right, options);
-  const result: T = {} as T;
+  const result: ComparisonResult = {};
 
   switch (comparisonStatus) {
     case true:
@@ -42,6 +41,23 @@ export const wrapComparer = (comparer: CompareFunc) => <T extends ComparisonResu
     case false:
       result.left = [];
       result.right = [];
+      break;
+  }
+  return result;
+};
+
+
+export const statusToResult = (leftItem: ComparedItem, rightItem: ComparedItem, status: ComparisonStatus): ComparisonResult => {
+  const result: ComparisonResult = {};
+
+  switch (status) {
+    case true:
+      result.leftSame = [leftItem];
+      result.rightSame = [rightItem];
+      break;
+    case false:
+      result.left = [leftItem];
+      result.right = [rightItem];
       break;
   }
   return result;

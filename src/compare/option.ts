@@ -44,13 +44,22 @@ export const validateCompareOption = (v: unknown): v is CompareOption => {
   return true;
 };
 
+const ExactComparisonObject: CompareOptionObject = {
+  compareScalar: 'strict',
+  compareObject: 'strict',
+  compareMap: 'strict',
+  compareArray: 'strict',
+  compareSet: 'strict',
+};
+
 // Map string-based comparison options to their object-based equivalents
 const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject> = {
-  Exact: {
+  Exact: ExactComparisonObject,
+  Equivalent: {
     compareScalar: 'strict',
     compareObject: 'keyValueOrder',
     compareMap: 'keyValueOrder',
-    compareArray: 'valueOrder',
+    compareArray: 'indexValue',
     compareSet: 'valueOnly',
   },
   General: {
@@ -69,13 +78,7 @@ const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject
   },
 };
 
-const defaultComparisonObject: MinimalCompareOptionObject = {
-  compareScalar: 'strict',
-  compareObject: 'keyValueOrder',
-  compareMap: 'keyValueOrder',
-  compareArray: 'valueOrder',
-  compareSet: 'valueOnly',
-};
+const defaultComparisonObject = ExactComparisonObject;
 
 export const compareOptionObjectToMethodObject = (compareOptionObject: MinimalCompareOptionObject): CompareOptionMethodObject => {
   const result = compareOptionObject as CompareOptionMethodObject;
@@ -106,7 +109,7 @@ export const compareOptionToFunction = (option: CompareOption): CompareFunc => {
   const methodObject = compareOptionObjectToMethodObject(optionObject);
 
   // incomplete
-  return (left: Value, right: Value, option = { compare: methodObject}): ComparisonStatus =>
+  return (left: Value, right: Value, option = { compare: methodObject }): ComparisonStatus =>
     methodObject.compareScalar(left, right, option);
 };
 

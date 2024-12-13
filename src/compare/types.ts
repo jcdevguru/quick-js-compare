@@ -1,7 +1,6 @@
 import type {
   AtLeastOne,
   Value,
-  SupportedType,
   StdObject,
   MapObject,
 } from '../lib/types';
@@ -15,11 +14,7 @@ import { type Option } from '../lib/option';
 
 export type ComparisonStatus = boolean | undefined;
 
-export type CompareFunc<T extends Value = Value> = (left: T, right: T, options: Option) => ComparisonStatus;
-
-export interface Comparer<T extends Value> {
-  compare: (left: T, right: T) => boolean;
-}
+export type CompareFunc = (left: Value, right: Value, options: Option) => ComparisonStatus;
 
 export interface ComparedItem {
   typeName: string,
@@ -39,27 +34,23 @@ export type StdObjectItem = KeyedObjectItem<keyof StdObject>;
 export type MapObjectItem = KeyedObjectItem<keyof MapObject>;
 export type ArrayObjectItem = IndexedItem;
 
-export interface Comparison<T extends ComparedItem = ComparedItem> {
-  leftOnly: Array<T>,
-  left: Array<T>,
-  leftSame: Array<T>,
-  rightSame: Array<T>,
-  right: Array<T>,
-  rightOnly: Array<T>,
+export interface Comparison {
+  leftOnly: Array<ComparedItem>,
+  left: Array<ComparedItem>,
+  leftSame: Array<ComparedItem>,
+  rightSame: Array<ComparedItem>,
+  right: Array<ComparedItem>,
+  rightOnly: Array<ComparedItem>,
 };
 
 // Returned from .compare()
-export type ComparisonResult<T extends ComparedItem = ComparedItem> = Partial<Comparison<T>>;
-
-export interface ComparisonResultGenerator<T extends ComparedItem = ComparedItem> {
-  (typeName: SupportedType, value: Value, options: Option): ComparisonResult<T>;
-}
+export type ComparisonResult = Partial<Comparison>;
 
 // Types
-const cmpOptionHelperTokenUnion = defineUnionForType('Exact', 'General', 'Structure');
+const cmpOptionHelperTokenUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
 export type CompareOptionHelperToken = typeof cmpOptionHelperTokenUnion.type[number];
 
-const CMP_COMPOSITE_TOKENS = ['reference', 'valueOnly', 'typeOnly', 'ignore'];
+const CMP_COMPOSITE_TOKENS = ['strict', 'reference', 'valueOnly', 'typeOnly', 'ignore'];
 const CMP_KEYED_OBJECT_TOKENS = ['keyValueOrder', 'keyValue', 'keyOrder', 'keyOnly'];
 const CMP_COLLECTION_TOKENS = ['valueOnly', 'sizeOnly'];
 const CMP_INDEXED_OBJECT_TOKENS = ['indexValue', 'valueOrder', 'valueOnly', 'indexOnly', 'sizeOnly'];
@@ -125,7 +116,7 @@ const isCompareMap = (v: unknown): v is CompareMap => isCompareMapToken(v) || is
 const isCompareArray = (v: unknown): v is CompareArray => isCompareArrayToken(v) || isCompareFunction(v);
 const isCompareSet = (v: unknown): v is CompareSet => isCompareSetToken(v) || isCompareFunction(v);
 
-export const validateCompareOptionObject = (v: unknown): boolean => validateMinimalObject(v, {
+export const validateCompareOptionObject = (v: unknown): v is MinimalCompareOptionObject => validateMinimalObject(v, {
     compareScalar: isCompareScalar,
     compareObject: isCompareObject,
     compareMap: isCompareMap,

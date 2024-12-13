@@ -1,73 +1,25 @@
 import {
   type Value,
-  typeIsSupported,
-  typeIsScalar,
-  deriveType
+  actualType
 } from '../lib/types';
 
 import type {
   CompareFunc,
   CompareOptionObject,
-  ComparisonStatus,
 } from './types';
 
-export const ExactComparer = (leftValue: Value, rightValue: Value) : ComparisonStatus => {
-  if (leftValue === rightValue) {
-    return true;
-  }
 
-  const leftType = deriveType(leftValue);
-
-  if (typeIsScalar(leftType)) {
-    return false;
-  } else if (!typeIsSupported(leftType)) {
-    return undefined;
-  }
-
-  const rightType = deriveType(rightValue);
-  if (typeIsSupported(rightType) && leftType !== rightType) {
-    return false;
-  }
-
-  // now compare per-type
-  // TODO: implement
-  return undefined;
-};
-
-export const GeneralComparer = (leftValue: Value, rightValue: Value) : ComparisonStatus => {
-  // general match
-  if (leftValue == rightValue) {
-    return true;
-  }
-
-  const leftType = deriveType(leftValue); 
-  if (typeIsScalar(leftType)) {
-    return false;
-  } else if (!typeIsSupported(leftType)) {
-    return undefined;
-  }
-
-  const rightType = deriveType(rightValue);
-  if (!typeIsSupported(rightType)) {
-    return undefined;
-  }
-
-  // Now perform general comparisons
-  // Might compare different types
-  //
-  return undefined;
-};
- 
-const strict = (left: Value, right: Value) => left === right;
-const reference = strict;
+const exact = (left: Value, right: Value) => left === right;
+const reference = exact;
 const abstract = (left: Value, right: Value) => left == right;
-const typeOnly = (left: unknown, right: unknown): boolean => deriveType(left) === deriveType(right);
+const typeOnly = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
 const ignore = () => true;
 
 export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Record<string, CompareFunc>> = {
-  compareScalar: { strict, abstract, typeOnly, ignore },
+  compareScalar: { strict: exact, abstract, typeOnly, ignore },
   compareObject: {
     reference,
+    strict: exact, // TODO: implement
     keyValueOrder: (left, right) => left === right, // TODO: implement
     keyValue: (left, right) => left === right, // TODO: implement
     keyOrder: (left, right) => left === right, // TODO: implement
@@ -79,6 +31,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
   },
   compareMap: {
     reference,
+    strict: exact, // TODO: implement
     keyValueOrder: (left, right) => left === right, // TODO: implement
     keyValue: (left, right) => left === right, // TODO: implement
     typeOnly,
@@ -86,6 +39,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
   },
   compareArray: {
     reference,
+    strict: exact, // TODO: implement
     indexValue: (left, right) => left === right, // TODO: implement
     valueOrder: (left, right) => left === right, // TODO: implement
     valueOnly: (left, right) => left === right, // TODO: implement
@@ -96,6 +50,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
   },
   compareSet: {
     reference,
+    strict: exact, // TODO: implement
     valueOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly,

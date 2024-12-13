@@ -167,26 +167,19 @@ The following settings are supported as values for the `compare` property.  When
 
 #### Options as object
 
-The following combinations of properties and values are supported when options for comparison are specified in an object, e.g.,
-
-```js
-{
-  compareScalar: "strict",
-  compareObject: "keyValueOrder",
-  ...
-}
-```
+The following combinations of properties and values are supported when options for comparison are specified in an object:
 
   * `"compareScalar"`: for comparison of scalar values (e.g., `"number"`, `"boolean"`, or `"string"`)
     * `"strict"`*: match only when identical in both value and type, i.e., as with `"==="`
-    * `"abstract"`: match when identical or when functionally equivalent, i.e., as with `"=="`
+    * `"abstract"`: match when identical or when semantically equivalent, i.e., as with `"=="` (a "truthy" or "falsy" match condition)
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"ignore"`: do not compare scalar values
     * *function*: use function to compare (see below)
 
-  * `compareObject`: for comparison of standard objects with named keys, e.g., `{ a: 1, b: 2 }`
+  * `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`)
     * `"reference"`: match only when identical as references, i.e., when compared objects are references to the same object in memory
-    * `"keyValueOrder"`*: match when compared objects have matching key/value pairs in identical order 
+    * `"strict"`*: match when objects have same type and matching key/value pairs in identical order
+    * `"keyValueOrder"`: match when compared objects have matching key/value pairs in identical order 
     * `"keyValue"`: match when compared objects have matching key/value pairs, regardless of order
     * `"keyOrder"`: match when compared objects have matching keys in the same order, regardless of their values
     * `"valueOrder"`: match when compared objects have matching values in the same order, regardless of their keys 
@@ -196,13 +189,14 @@ The following combinations of properties and values are supported when options f
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
 
-  * `compareMap`: for comparison of objects of type `Map`, e.g., created from `new Map([['a', 1],['b', 2]])`
+  * `compareMap`: for comparison of objects of type `Map` (JavaScript type `Map`)
     Same settings and default as `compareObject`. 
 
-  * `compareArray`: for comparison of array objects, e.g., `[1, 7, 'a', true]`
+  * `compareArray`: for comparison of arrays
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
-    * `"indexValue"`: match when compared arrays have matching in the same positions (same as `valueOrder` when neither array is sparse)
-    * `"valueOrder"`*: match when compared arrays have matching values in the same order 
+    * `"strict"`*: match when objects have same type and matching values in same positions
+    * `"indexValue"`: match when compared arrays have matching values in the same positions (same as `valueOrder` when neither array is sparse)
+    * `"valueOrder"`: match when compared arrays have matching values in the same order 
     * `"valueOnly"`: match when compared arrays have matching values, regardless of their order
     * `"indexOnly"`: match when compared arrays have same indexes (same as `sizeOnly` when neither array is sparse)
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
@@ -210,9 +204,10 @@ The following combinations of properties and values are supported when options f
     * `"ignore"`: do not compare objects
     * *function*: use function to compare (see below)
 
-  * `compareSet`: for comparison of objects of type `Set`, e.g., created from `new Set([1, 7, 'a', true])`
+  * `compareSet`: for comparison of sets (JavaScript type `Set`)
     * `"reference"`: match only when identical as references, i.e., when compared sets are references to the same object in memory
-    * `"valueOnly"`*: match when compared sets have matching values
+    * `"strict"`*: match when objects have same type and values in same positions
+    * `"valueOnly"`: match when compared sets have matching values
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"ignore"`: do not compare objects
@@ -227,45 +222,56 @@ In all cases, a comparison operation may be supplied as a function whose job is 
 
 String values for the `compare` option behave as shorthand helpers for a style of comparison.  Their function is described by their equivalent representations in the previously described option object.
 
-* `Exact`: (default) compare for identical match in type, value, and structure. True when the two objects can be used interchangeably.
+* `Exact`: (default) compare for identical type, value, and structure. Values considered matching if they can be used interchangeably.
+  * `compareScalar`: `"strict"`
+  * `compareObject`: `"strict"`
+  * `compareMap`: `"strict"`
+  * `compareArray`: `"strict"`
+  * `compareSet`: `"strict"`
+
+* `Equivalent`: compare for functional equivalence. Scalar values are considered matching only if identical by type and value. Keyed objects of any type will be considered matching if their key/value pairs match identically and if keys are in same order.  
   * `compareScalar`: `"strict"`
   * `compareObject`: `"keyValueOrder"`
-  * `compareArray`: `"valueOrder"`
   * `compareMap`: `"keyValueOrder"`
+  * `compareArray`: `"indexValue"`
   * `compareSet`: `"valueOnly"`
 
-* `General`: compare for functional equivalence
+* `General`: compare for general equivalence. Scalar values will be considered matching by "truthy" or "falsy" comparisons. Keyed objects of any type will be considered matching if their key/value pairs match identically by key and value, regardless of order.  Arrays and sets will be considered matching if they contain the same values.
   * `compareScalar`: `"abstract"`
   * `compareObject`: `"keyValue"`
-  * `compareArray`: `"valueOnly"`
   * `compareMap`: `"keyValue"`
+  * `compareArray`: `"valueOnly"`
   * `compareSet`: `"valueOnly"`
 
-* `Structure`: compare for identical structure by comparing only the keys of keyed objects and sizes of collection objects
+* `Structure`: compare for identical form, not content
   * `compareScalar`: `"ignore"`
   * `compareObject`: `"keyOnly"`
-  * `compareArray`: `"sizeOnly"`
   * `compareMap`: `"keyOnly"`
+  * `compareArray`: `"sizeOnly"`
   * `compareSet`: `"sizeOnly"`
 
 ### Render options
 
+(incomplete)
+
 The following properties are supported in an option object passed through the `render` property.
 
-* `render`: 
-  * `mapAsObject`: boolean
-  * `setAsArray`: boolean
-  * `maxDepth`: number
-  * `same`: boolean
-  * `report`: boolean
+* `keyedAsObject`: (`true`/`false`*) When true, return value of any keyed object as a standard object, i.e., key/value pairs of strings as keys
+* `setAsArray`: (`true`/`false`*) When true, return value of sets as an array
+* `maxDepth`: (integer >= `0`*) Maximum depth from top level of comparison to show.  When set to 0, it is all levels.
+* `diffOnly`: (`true`/`false`*) Render differences only
+* `verbose`: (`true`/`false`*) Include performance, statistics
 
-(TODO: explain render options.)
-* `Standard`:
+#### Options as strings
+
+String values for the `render` option behave as shorthand helpers for a style of rendering.  Their function is described by their equivalent representations in the previously described option object.
+
+* `General`:
   * `mapAsObject`: true
   * `setAsArray`: true
   * `maxDepth`: 0
-  * `same`: false
-  * `report`: false
+  * `diffOnly`: true
+  * `verbose`: false
 
 * `Verbose`:
   * `mapAsObject`: true
