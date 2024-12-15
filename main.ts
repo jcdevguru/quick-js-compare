@@ -1,7 +1,7 @@
-import CoreCompare from './src/compare';
+import Compare from './src/compare';
 // import type { Value, StdObjectEntry } from './src/lib/types';
 
-const cmp = new CoreCompare();
+const cmp = new Compare();
 
 // const asString = (o: any) => {
 //   let v;

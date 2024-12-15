@@ -1,15 +1,15 @@
 // These tests tha are for validations and functinos of
 // compare options provided through the top-level function
 
-import CoreCompare from '../compare';
+import Compare from '../compare';
 import type { Option } from '../lib/option';
 import { OptionError } from '../lib/error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      const c = new CoreCompare(options as Option);
-      expect(c).toBeInstanceOf(CoreCompare);
+      const c = new Compare(options as Option);
+      expect(c).toBeInstanceOf(Compare);
     });
   };
 
@@ -19,7 +19,7 @@ describe('successful construction', () => {
 describe('invalid constructor calls', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      expect(() => new CoreCompare(options as Option)).toThrow(OptionError);
+      expect(() => new Compare(options as Option)).toThrow(OptionError);
     });
   };
 

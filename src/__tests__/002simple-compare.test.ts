@@ -1,7 +1,7 @@
 // These tests tha are for validations and functinos of
 // compare options provided through the top-level function
 
-import CoreCompare from '../compare';
+import Compare from '../compare';
 
 describe('successful compare', () => {
   const testCompare = (testName: string) => {
@@ -9,7 +9,7 @@ describe('successful compare', () => {
     test(testName, () => {
       const left = testValue;
       const right = testValue;
-      const c = new CoreCompare();
+      const c = new Compare();
       const r = c.compare(left, right).result;
       expect(r).toBeInstanceOf(Object);
       expect(r?.leftSame?.[0]?.value).toEqual(left);

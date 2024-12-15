@@ -11,7 +11,7 @@ import type {
   CompareOptionMethodObject,
   CompareResult,
 } from './types';
-import CoreCompare from '.';
+import Compare from '.';
 
 const exact = (left: Value, right: Value) => left === right;
 const reference = exact;
@@ -63,7 +63,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
 };
 
 // Assume that left and right are supported types and are not a mix of composite and scalar
-export const stockComparer = (left: Value, right: Value, compareInst: CoreCompare, result: CompareResult): ComparisonStatus => {
+export const stockComparer = (left: Value, right: Value, compareInst: Compare, result: CompareResult): ComparisonStatus => {
   const options = compareInst.compareOptions as CompareOptionMethodObject;
   
   let comparer: CompareFunction;

@@ -68,7 +68,7 @@ Each of these fields are arrays of objects that describe the comparison results 
 
 ### Scalars
 
-Quick Object Compare will handle scalar types (i.e., data stores with only one value, such as `number`, `boolean`, or `string`).  A simple use case shows its default behavior (no options):
+Quick JS Compare will handle scalar types (i.e., data stores with only one value, such as `number`, `boolean`, or `string`).  A simple use case shows its default behavior (no options):
 
 ```js
 const value1 = 'hello';

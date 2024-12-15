@@ -47,7 +47,7 @@ const nonCircular = (value: Value, refSet: RefSet): boolean => {
   return rc;
 }
 
-export default class CoreCompare {
+export default class Compare {
   private static defaultOptions: Option = { compare: 'Exact', render: 'Standard' };
 
   private refSets = {
@@ -76,7 +76,7 @@ export default class CoreCompare {
   }
 
   constructor(options?: Option) {
-    this.processOptions(options ?? CoreCompare.defaultOptions);
+    this.processOptions(options ?? Compare.defaultOptions);
   }
 
   private coreCompare = (left: Value, right: Value): CompareResult => {
@@ -121,13 +121,13 @@ export default class CoreCompare {
     return result;
   }
 
-  public compare(left: Value, right: Value): CoreCompare {
+  public compare(left: Value, right: Value): Compare {
     this.comparisonResult = this.coreCompare(left, right);
     
     return this;
   }
 
-  public recompare(options: Option): CoreCompare {
+  public recompare(options: Option): Compare {
     if (this.isComplete) {
       return this;
     }

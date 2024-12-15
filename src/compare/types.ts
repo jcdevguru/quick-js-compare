@@ -9,14 +9,14 @@ import {
   defineUnionForType,
 } from '../lib/util';
 
-import CoreCompare from '.';
+import Compare from '.';
 
 export type ComparisonStatus = boolean | undefined;
 
 export type CompareFunction = (
   left: Value,
   right: Value,
-  compareInstance: CoreCompare,
+  compareInstance: Compare,
   compositeComparisonResult: CompareResult
 ) => ComparisonStatus;
 

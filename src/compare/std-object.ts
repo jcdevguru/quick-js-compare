@@ -1,4 +1,4 @@
-import CoreCompare from '.';
+import Compare from '.';
 
 import {
   type StdObject,
@@ -16,7 +16,7 @@ import {
 
 import { OptionObject } from '../lib/option';
 
-export class StdObjectCompare extends CoreCompare {
+export class StdObjectCompare extends Compare {
 
   public constructor(options?: OptionObject) {
     super(options);
