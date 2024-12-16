@@ -2,7 +2,7 @@ import {
   type Value,
   actualType,
   isScalar,
-} from '../lib/types';
+} from '../../lib/types';
 
 import type {
   CompareFunction,
@@ -10,8 +10,8 @@ import type {
   ComparisonStatus,
   CompareOptionMethodObject,
   CompareResult,
-} from './types';
-import Compare from '.';
+} from '../types';
+import Compare from '..';
 
 const exact = (left: Value, right: Value) => left === right;
 const reference = exact;
