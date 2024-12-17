@@ -9,12 +9,12 @@ import {
 } from '../lib/types';
 
 import {
+  type RawOption,
   type Option,
-  type CoreOptionObject,
-  validateOption,
+  validateRawOption,
 } from '../lib/option';
 
-import { hydrateCompareOption } from './option';
+import { compareOptionObjectToMethodObject, helperTokenToMethodObjectMap } from './option';
 import { stockComparer } from './stock-methods';
 import { OptionError } from '../lib/error';
 
@@ -24,8 +24,8 @@ import {
   isCompareFunction,
   isMinimalCompareOptionObject,
   isCompareOptionHelperToken,
-  CoreCompareOption,
-  CompareOptionMethodObject,
+  CompareOption,
+  RawCompareOption,
 } from './types';
 
 import {
@@ -48,7 +48,7 @@ const nonCircular = (value: Value, refSet: RefSet): boolean => {
 }
 
 export default class Compare {
-  private static defaultOptions: Option = { compare: 'Exact', render: 'Standard' };
+  private static defaultOptions: RawOption = { compare: 'Exact', render: 'Standard' };
 
   private refSets = {
     left: new WeakSet<Reference>(),
@@ -58,24 +58,34 @@ export default class Compare {
   private comparisonResult: CompareResult = {};
   private comparer: CompareFunction = stockComparer;
 
-  private coreOptions!: CoreOptionObject;
+  private option!: Option;
+  private rawOption!: RawOption;
 
-  private processOptions(options: Option) {
-    if (!validateOption(options)) {
+  private processOptions(options: RawOption) {
+    if (!validateRawOption(options)) {
       throw new OptionError('Invalid options');
     }
 
-    if (isCompareFunction(options.compare)) {
-      this.comparer = options.compare;
-    } else if (isMinimalCompareOptionObject(options.compare) || isCompareOptionHelperToken(options.compare)) {
-      const methodObject: CompareOptionMethodObject = hydrateCompareOption(options.compare);
-      this.coreOptions = { ...this.coreOptions, compare: methodObject };
-    } else {
-      throw new Error('Internal error: unhandled compare option state');
+    let rawCompareOption = options.compare;
+    if (isCompareFunction(rawCompareOption)) {
+      this.comparer = rawCompareOption;
+    } else if (isCompareOptionHelperToken(rawCompareOption)) {
+      rawCompareOption = helperTokenToMethodObjectMap(rawCompareOption);
     }
+
+
+    if (isMinimalCompareOptionObject(rawCompareOption)) {
+      this.rawOption = { ...options, compare: rawCompareOption };
+      const methodObject = compareOptionObjectToMethodObject(rawCompareOption);
+      this.option = { ...this.option, compare: methodObject };
+    } else {
+      throw new Error('Internal error: unhandled compare option');
+    }
+
+    // TODO: handle render option
   }
 
-  constructor(options?: Option) {
+  constructor(options?: RawOption) {
     this.processOptions(options ?? Compare.defaultOptions);
   }
 
@@ -127,7 +137,7 @@ export default class Compare {
     return this;
   }
 
-  public recompare(options: Option): Compare {
+  public recompare(options: RawOption): Compare {
     if (this.isComplete) {
       return this;
     }
@@ -155,7 +165,19 @@ export default class Compare {
     return this.comparisonResult;
   }
 
-  get compareOptions(): CoreCompareOption {
-    return this.coreOptions.compare;
+  get options(): Option {
+    return this.option;
+  }
+
+  get compareOptions(): CompareOption {
+    return this.option.compare;
+  }
+
+  get rawOptions(): RawOption {
+    return this.rawOption;
+  }
+
+  get rawCompareOptions(): RawCompareOption | undefined {
+    return this.rawOption.compare;
   }
 }

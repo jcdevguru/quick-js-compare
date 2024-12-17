@@ -7,6 +7,7 @@ import type {
 import {
   validateMinimalObject,
   defineUnionForType,
+  validateObject,
 } from '../lib/util';
 
 import Compare from '.';
@@ -82,8 +83,8 @@ export interface CompareOptionMethodObject extends CompareOptionObject {
 }
 
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
-export type CoreCompareOption = CompareFunction | CompareOptionMethodObject;
-export type CompareOption = CompareOptionHelperToken | MinimalCompareOptionObject | CoreCompareOption;
+export type CompareOption = CompareFunction | CompareOptionMethodObject;
+export type RawCompareOption = CompareOptionHelperToken | MinimalCompareOptionObject | CompareFunction;
 
 export const isCompareFunction = (v: unknown): v is CompareFunction => typeof v === 'function' && v.length >= 2 && v.length <= 4;
 export const isCompareOptionHelperToken = (v: unknown): v is CompareOptionHelperToken => cmpOptionHelperTokenUnion.is(v as string);
@@ -101,7 +102,7 @@ const isCompareMap = (v: unknown): v is CompareMap => isCompareMapToken(v) || is
 const isCompareArray = (v: unknown): v is CompareArray => isCompareArrayToken(v) || isCompareFunction(v);
 const isCompareSet = (v: unknown): v is CompareSet => isCompareSetToken(v) || isCompareFunction(v);
 
-export const validateCompareOptionObject = (v: unknown): v is MinimalCompareOptionObject => validateMinimalObject(v, {
+export const validateMinimalCompareOptionObject = (v: unknown): v is MinimalCompareOptionObject => validateMinimalObject(v, {
     compareScalar: isCompareScalar,
     compareObject: isCompareObject,
     compareMap: isCompareMap,
@@ -110,16 +111,36 @@ export const validateCompareOptionObject = (v: unknown): v is MinimalCompareOpti
   }
 );
 
+export const validateCompareOptionMethodObject = (v: unknown): v is CompareOptionMethodObject => validateObject(v, {
+  compareScalar: isCompareFunction,
+  compareObject: isCompareFunction,
+  compareMap: isCompareFunction,
+  compareArray: isCompareFunction,
+  compareSet: isCompareFunction,
+}
+);
+
 export const isMinimalCompareOptionObject = (v: unknown): v is MinimalCompareOptionObject => {
   try {
-    return validateCompareOptionObject(v);
+    return validateMinimalCompareOptionObject(v);
   } catch {
     return false;
   }
 };
 
-export const isCompareOption = (v: unknown): v is CompareOption =>
+export const isCompareOptionMethodObject = (v: unknown): v is CompareOptionMethodObject => {
+  try {
+    return validateCompareOptionMethodObject(v);
+  } catch {
+    return false;
+  }
+};
+
+export const isRawCompareOption = (v: unknown): v is RawCompareOption =>
   isCompareOptionHelperToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v);
+
+export const isCompareOption = (v: unknown): v is CompareOption =>
+  isCompareOptionMethodObject(v) || isCompareFunction(v);
 
 export type ValueResultProps = {
   index?: number,
