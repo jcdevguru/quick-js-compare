@@ -173,10 +173,12 @@ The following combinations of properties and values are supported when options f
     * `"strict"`*: match only when identical in both value and type, i.e., as with `"==="`
     * `"abstract"`: match when identical or when semantically equivalent, i.e., as with `"=="` (a "truthy" or "falsy" match condition)
     * `"typeOnly"`: match when identical in type only, without comparing values
-    * `"ignore"`: do not compare scalar values
-    * *function*: use function to compare (see below)
+    * `"alwaysSame"`: compared scalars always match, regardless of value or type
+    * `"alwaysDifferent`": compared scalars never match, even if identical
+    * `"alwaysUndefined`": never match nor differ (values not included in results)
+    * *function*: use function to compare (see below)    * *function*: use function to compare (see below)
 
-  * `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`)
+  * `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`), or any two composite values allowed for comparison (see below)
     * `"reference"`: match only when identical as references, i.e., when compared objects are references to the same object in memory
     * `"strict"`*: match when objects have same type and matching key/value pairs in identical order
     * `"keyValueOrder"`: match when compared objects have matching key/value pairs in identical order 
@@ -186,7 +188,9 @@ The following combinations of properties and values are supported when options f
     * `"keyOnly"`: match when compared objects have matching keys, regardless of their order or their values 
     * `"valueOnly"`: match when compared objects have matching values, regardless of their order or their keys
     * `"typeOnly"`: match when identical in type only, without comparing values
-    * `"ignore"`: do not compare objects
+    * `"alwaysSame"`: compared objects always match, regardless of value, type, or structure
+    * `"alwaysDifferent`": compared objects never match, even if identical
+    * `"alwaysUndefined`": never match nor differ (values not included in results)
     * *function*: use function to compare (see below)
 
   * `compareMap`: for comparison of objects of type `Map` (JavaScript type `Map`)
@@ -201,7 +205,9 @@ The following combinations of properties and values are supported when options f
     * `"indexOnly"`: match when compared arrays have same indexes (same as `sizeOnly` when neither array is sparse)
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
     * `"typeOnly"`: match when identical in type only, without comparing values
-    * `"ignore"`: do not compare objects
+    * `"alwaysSame"`: compared arrays always match, regardless of value, type, or size
+    * `"alwaysDifferent`": compared arrays never match, even if identical
+    * `"alwaysUndefined`": never match nor differ (values not included in results)
     * *function*: use function to compare (see below)
 
   * `compareSet`: for comparison of sets (JavaScript type `Set`)
@@ -210,8 +216,9 @@ The following combinations of properties and values are supported when options f
     * `"valueOnly"`: match when compared sets have matching values
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
     * `"typeOnly"`: match when identical in type only, without comparing values
-    * `"ignore"`: do not compare objects
-    * *function*: use function to compare (see below)
+    * `"alwaysSame"`: compared sets always match, regardless of value, type, or size
+    * `"alwaysDifferent`": compared sets never match, even if identical
+    * `"alwaysUndefined`": never match nor differ (values not included in results)    * *function*: use function to compare (see below)
 
 In all cases, a comparison operation may be supplied as a function whose job is to compare the two arguments, and return `true` if considered the same, `false` if considered different, or `undefined` if it cannot be determined.  The two arguments may be assumed to be of compatible types when called.  // TODO - pass options to function?  Object??
 
@@ -241,7 +248,7 @@ String values for the `compare` option behave as shorthand helpers for a style o
   * `compareSet`: `"valueOnly"`
 
 * `Structure`: compare for identical form, not content
-  * `compareScalar`: `"ignore"`
+  * `compareScalar`: `"alwaysSame"`
   * `compareObject`: `"keyOnly"`
   * `compareMap`: `"keyOnly"`
   * `compareArray`: `"sizeOnly"`

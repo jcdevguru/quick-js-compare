@@ -17,10 +17,12 @@ const exact = (left: Value, right: Value) => left === right;
 const reference = exact;
 const abstract = (left: Value, right: Value) => left == right;
 const typeOnly = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
-const ignore = () => true;
+const alwaysSame = () => true;
+const alwaysDifferent = () => false;
+const alwaysUndefined = () => undefined;
 
 export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Record<string, CompareFunction>> = {
-  compareScalar: { strict: exact, abstract, typeOnly, ignore },
+  compareScalar: { strict: exact, abstract, typeOnly, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
     strict: exact, // TODO: implement
@@ -31,7 +33,9 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     keyOnly: (left, right) => left === right, // TODO: implement
     valueOnly: (left, right) => left === right, // TODO: implement
     typeOnly,
-    ignore,
+    alwaysSame,
+    alwaysDifferent,
+    alwaysUndefined,
   },
   compareMap: {
     reference,
@@ -39,7 +43,9 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     keyValueOrder: (left, right) => left === right, // TODO: implement
     keyValue: (left, right) => left === right, // TODO: implement
     typeOnly,
-    ignore,
+    alwaysSame,
+    alwaysDifferent,
+    alwaysUndefined,
   },
   compareArray: {
     reference,
@@ -50,7 +56,9 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     indexOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly,
-    ignore,
+    alwaysSame,
+    alwaysDifferent,
+    alwaysUndefined,
   },
   compareSet: {
     reference,
@@ -58,7 +66,9 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     valueOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly,
-    ignore,
+    alwaysSame,
+    alwaysDifferent,
+    alwaysUndefined,
   },
 };
 

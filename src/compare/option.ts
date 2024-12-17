@@ -68,7 +68,7 @@ const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject
     compareSet: 'valueOnly',
   },
   Structure: {
-    compareScalar: 'ignore',
+    compareScalar: 'alwaysSame',
     compareObject: 'typeOnly',
     compareMap: 'typeOnly',
     compareArray: 'typeOnly',

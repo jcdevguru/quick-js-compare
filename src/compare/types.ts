@@ -36,12 +36,12 @@ export type CompareResult = Partial<Comparison>;
 const cmpOptionHelperTokenUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
 export type CompareOptionHelperToken = typeof cmpOptionHelperTokenUnion.type[number];
 
-const CMP_COMPOSITE_TOKENS = ['strict', 'reference', 'valueOnly', 'typeOnly', 'ignore'];
+const CMP_COMPOSITE_TOKENS = ['strict', 'reference', 'valueOnly', 'typeOnly', 'alwaysSame', 'alwaysDifferent', 'alwaysUndefined'];
 const CMP_KEYED_OBJECT_TOKENS = ['keyValueOrder', 'keyValue', 'keyOrder', 'keyOnly'];
 const CMP_COLLECTION_TOKENS = ['valueOnly', 'sizeOnly'];
 const CMP_INDEXED_OBJECT_TOKENS = ['indexValue', 'valueOrder', 'valueOnly', 'indexOnly', 'sizeOnly'];
 
-const cmpScalarTokenUnion = defineUnionForType('strict', 'abstract', 'typeOnly', 'ignore');
+const cmpScalarTokenUnion = defineUnionForType('strict', 'abstract', 'typeOnly', 'alwaysSame', 'alwaysDifferent', 'alwaysUndefined');
 export type CompareScalarToken = typeof cmpScalarTokenUnion.type[number];
 
 const cmpCompositeTokenUnion = defineUnionForType(...CMP_COMPOSITE_TOKENS, ...CMP_KEYED_OBJECT_TOKENS);
