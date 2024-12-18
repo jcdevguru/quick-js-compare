@@ -13,26 +13,34 @@ import type {
 } from '../types';
 import Compare from '..';
 
+import { compareObject } from './object';
+
+const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
+const strict = (compareFunction: CompareFunction, typeName: string): CompareFunction =>
+  (left, right, compareInst, result) =>
+    actualType(left) === typeName &&
+    matchTypes(left, right) &&
+    compareFunction(left, right, compareInst, result);
+
 const exact = (left: Value, right: Value) => left === right;
 const reference = exact;
 const abstract = (left: Value, right: Value) => left == right;
-const typeOnly = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
 const alwaysSame = () => true;
 const alwaysDifferent = () => false;
 const alwaysUndefined = () => undefined;
 
 export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Record<string, CompareFunction>> = {
-  compareScalar: { strict: exact, abstract, typeOnly, alwaysSame, alwaysDifferent, alwaysUndefined },
+  compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
-    strict: exact, // TODO: implement
+    strict: strict(compareObject, 'StdObject'), // TODO: implement
     keyValueOrder: (left, right) => left === right, // TODO: implement
     keyValue: (left, right) => left === right, // TODO: implement
     keyOrder: (left, right) => left === right, // TODO: implement
     valueOrder: (left, right) => left === right, // TODO: implement
     keyOnly: (left, right) => left === right, // TODO: implement
     valueOnly: (left, right) => left === right, // TODO: implement
-    typeOnly,
+    typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
     alwaysUndefined,
@@ -42,7 +50,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     strict: exact, // TODO: implement
     keyValueOrder: (left, right) => left === right, // TODO: implement
     keyValue: (left, right) => left === right, // TODO: implement
-    typeOnly,
+    typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
     alwaysUndefined,
@@ -55,7 +63,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     valueOnly: (left, right) => left === right, // TODO: implement
     indexOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
-    typeOnly,
+    typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
     alwaysUndefined,
@@ -65,7 +73,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     strict: exact, // TODO: implement
     valueOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
-    typeOnly,
+    typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
     alwaysUndefined,

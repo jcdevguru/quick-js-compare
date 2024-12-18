@@ -14,9 +14,9 @@ import Compare from '.';
 
 export type ComparisonStatus = boolean | undefined;
 
-export type CompareFunction = (
-  left: Value,
-  right: Value,
+export type CompareFunction<T extends Value = Value> = (
+  left: T,
+  right: T,
   compareInstance: Compare,
   compositeComparisonResult: CompareResult
 ) => ComparisonStatus;
@@ -152,3 +152,4 @@ export type ValueResult = {
   typeName: string,
   value: Value,
 } & ValueResultProps;
+

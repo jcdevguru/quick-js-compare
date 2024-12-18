@@ -1,91 +1,97 @@
-import Compare from '.';
+import Compare from '..';
 
 import {
-  type StdObject,
-} from '../lib/types';
-
-import type {
-  CompareResult,
-  StdObjectResult,
-  Comparison,
-} from './types';
+  actualType,
+  isKeyedObjectType,
+  isIndexedObjectType,
+  Value,
+} from '../../lib/types';
 
 import {
-  stdObjectEntriesByKey,
-} from './util';
+  type CompareResult,
+  type ComparisonStatus,
+  type CompareCompositeToken,
+  isMinimalCompareOptionObject,
+  isCompareOptionToken,
+  isCompareFunction,
+  CompareFunction,
+} from '../types';
 
-import { OptionObject } from '../lib/option';
-
-export class StdObjectCompare extends Compare {
-
-  public constructor(options?: OptionObject) {
-    super(options);
+// Because object comparison is supported for values of different types,
+// we use this method to "gracefully degrade" the comparison method if 
+// the two types do not support the same operations.
+const distillComparisonType = (left: Value, right: Value, token: CompareCompositeToken): CompareCompositeToken => {
+  const leftType = actualType(left);
+  const rightType = actualType(right);
+  if (leftType === rightType) {
+    return token;
   }
 
-  compare(left: StdObject, right: StdObject) : CompareResult {
-    const leftEntries = stdObjectEntriesByKey(left);
-    const rightEntries = stdObjectEntriesByKey(right);
-
-    const rightEntrySet = new Set(Object.keys(right));
-
-    const cmp: Comparison<StdObjectResult> = {
-      leftOnly: [],
-      left: [],
-      leftSame: [],
-      rightSame: [],
-      right: [],      
-      rightOnly: [],
-    };
-
-    Object.entries(leftEntries).forEach(([k, leftEntry]) => {
-      const rightEntry = rightEntries[k];
-      if (!rightEntry) {
-        cmp.leftOnly.push(leftEntry);
-        return;
-      }
-
-      const entryResult = super.compare(leftEntry.value, rightEntry.value);
-      let item: StdObjectResult;
-      let hasDiff = false;
-
-      Object.keys(entryResult).forEach((subKey) => {
-        switch (subKey) {
-          case 'leftOnly':
-          case 'left':
-            hasDiff = true;
-
-          case 'leftSame':
-            item = leftEntry;
-            break;
-          
-          case 'rightOnly':
-            hasDiff = true;
-
-          case 'right':
-          case 'rightSame':
-            item = rightEntry;
-            break;
-
-          default:
-            return;
-        }
-        item.comparisonResult = { ...item.comparisonResult, [subKey]: entryResult[subKey] };
-      });
-
-      if (hasDiff) {
-        cmp.left.push(leftEntry);
-        cmp.right.push(rightEntry);
-        rightEntrySet.delete(k);
-      } else {
-        cmp.leftSame.push(leftEntry);
-        cmp.rightSame.push(rightEntry);
-      }
-    });
-
-    cmp.rightOnly = Array.from(rightEntrySet).map((key) => rightEntries[key]);
-
-    const result: CompareResult = Object.fromEntries(Object.entries(cmp).filter(([, v]) => v.length));
-
-    return result;
+  let distilledToken: CompareCompositeToken = token;
+  if (!isKeyedObjectType(leftType) || !isKeyedObjectType(rightType)) {
+    switch (token) {
+      case 'keyValueOrder':
+        distilledToken = 'valueOrder';
+        break;
+      case 'keyValue':
+        distilledToken = 'valueOnly';
+        break;
+      case 'keyOrder':
+      case 'keyOnly':
+        distilledToken = 'alwaysDifferent';
+        break;
+    }
   }
+
+  if (!isIndexedObjectType(leftType) || !isIndexedObjectType(rightType)) {
+    switch (distilledToken) {
+      case 'indexValue':
+      case 'valueOrder':
+        distilledToken = 'valueOnly';
+        break;
+      case 'indexOnly':
+        distilledToken = 'alwaysDifferent';
+        break;
+    }
+  }
+  return distilledToken;
+}
+
+
+const dummyCompare: CompareFunction = () => false;
+
+export const methodMap: Record<CompareCompositeToken, CompareFunction> = {
+  keyValueOrder: dummyCompare,
+  keyValue: dummyCompare,
+  keyOrder: dummyCompare,
+  keyOnly: dummyCompare,
+  valueOrder: dummyCompare,
+  valueOnly: dummyCompare,
+  indexValue: dummyCompare,
+  indexOnly: dummyCompare,
+};
+
+export const compareObject = (
+  left: Value,
+  right: Value,
+  compareInstance: Compare,
+  compositeComparisonResult: CompareResult,
+): ComparisonStatus => {
+  const rawCompareOption = compareInstance.rawOptions.compare;
+  if (isMinimalCompareOptionObject(rawCompareOption)) {
+    // Because these stock methods are invoked via helper tokens only, this condition check
+    // should not be necessary.
+    if (isCompareOptionToken(rawCompareOption.compareObject)) {
+      const compareToken = distillComparisonType(left, right, rawCompareOption.compareObject);
+      return methodMap[compareToken](left, right, compareInstance, compositeComparisonResult);
+    } else if (isCompareFunction(rawCompareOption.compareObject)) {
+      // Can happen for custom compare functions specific to standard object
+      return rawCompareOption.compareObject(left, right, compareInstance, compositeComparisonResult);
+    } else {
+      throw new Error('Unsupported condition: stock method called without a compare option token');
+    }
+  } else {
+    throw new Error('Unsupported condition: rawCompareOption is not a minimal compare option object');
+  }
+  return true;
 }
