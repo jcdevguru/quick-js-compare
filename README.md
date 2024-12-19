@@ -199,10 +199,8 @@ The following combinations of properties and values are supported when options f
   * `compareArray`: for comparison of arrays
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
     * `"strict"`*: match when objects have same type and matching values in same positions
-    * `"indexValue"`: match when compared arrays have matching values in the same positions (same as `valueOrder` when neither array is sparse)
     * `"valueOrder"`: match when compared arrays have matching values in the same order 
     * `"valueOnly"`: match when compared arrays have matching values, regardless of their order
-    * `"indexOnly"`: match when compared arrays have same indexes (same as `sizeOnly` when neither array is sparse)
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"alwaysSame"`: compared arrays always match, regardless of value, type, or size
@@ -237,7 +235,7 @@ String values for the `compare` option behave as shorthand helpers for a style o
   * `compareScalar`: `"strict"`
   * `compareObject`: `"keyValueOrder"`
   * `compareMap`: `"keyValueOrder"`
-  * `compareArray`: `"indexValue"`
+  * `compareArray`: `"valueOrder"`
   * `compareSet`: `"valueOnly"`
 
 * `General`: compare for general equivalence. Scalar values will be considered matching by "truthy" or "falsy" comparisons. Keyed objects of any type will be considered matching if their key/value pairs match identically by key and value, regardless of order.  Arrays and sets will be considered matching if they contain the same values.

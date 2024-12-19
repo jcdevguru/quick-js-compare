@@ -77,7 +77,7 @@ const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject
     compareScalar: 'strict',
     compareObject: 'keyValueOrder',
     compareMap: 'keyValueOrder',
-    compareArray: 'indexValue',
+    compareArray: 'valueOrder',
     compareSet: 'valueOnly',
   },
   General: {

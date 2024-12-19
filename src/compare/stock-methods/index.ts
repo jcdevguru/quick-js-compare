@@ -58,10 +58,8 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
   compareArray: {
     reference,
     strict: exact, // TODO: implement
-    indexValue: (left, right) => left === right, // TODO: implement
     valueOrder: (left, right) => left === right, // TODO: implement
     valueOnly: (left, right) => left === right, // TODO: implement
-    indexOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,

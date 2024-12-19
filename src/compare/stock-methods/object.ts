@@ -45,12 +45,11 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
 
   if (!isIndexedObjectType(leftType) || !isIndexedObjectType(rightType)) {
     switch (distilledToken) {
-      case 'indexValue':
+      case 'keyValueOrder':
+        distilledToken = 'keyValue';
+        break;
       case 'valueOrder':
         distilledToken = 'valueOnly';
-        break;
-      case 'indexOnly':
-        distilledToken = 'alwaysDifferent';
         break;
     }
   }
@@ -66,9 +65,7 @@ export const methodMap: Record<CompareCompositeToken, CompareFunction> = {
   keyOrder: dummyCompare,
   keyOnly: dummyCompare,
   valueOrder: dummyCompare,
-  valueOnly: dummyCompare,
-  indexValue: dummyCompare,
-  indexOnly: dummyCompare,
+  valuesOnly
 };
 
 export const compareObject = (
