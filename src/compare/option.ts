@@ -2,16 +2,15 @@ import { OptionError } from '../lib/error';
 
 import {
   type RawCompareOption,
+  type CompareOption,
   type CompareOptionObject,
   type CompareOptionHelperToken,
-  type CompareFunction,
   type CompareOptionMethodObject,
   type MinimalCompareOptionObject,
   isCompareFunction,
   isCompareOptionHelperToken,
   isCompareOptionToken,
-  validateCompareOptionMethodObject,
-  CompareOption,
+  isCompareOptionMethodObject,
 } from './types';
 
 import { optionTokenToStockMethodMap } from './stock-methods';
@@ -32,7 +31,7 @@ export const validateRawCompareOption = (v: unknown): v is RawCompareOption => {
 
     default:
       try {
-        if (!validateCompareOptionMethodObject(v)) {
+        if (!isCompareOptionMethodObject(v)) {
           throw new OptionError('Invalid compare option');
         }
       } catch (e) {
@@ -52,7 +51,7 @@ export const validateCompareOption = (v: unknown): v is CompareOption => {
 
     default:
       try {
-        if (!validateCompareOptionMethodObject(v)) {
+        if (!isCompareOptionMethodObject(v)) {
           throw new OptionError('Invalid compare option');
         }
       } catch (e) {
@@ -71,46 +70,62 @@ const ExactComparisonObject: CompareOptionObject = {
 };
 
 // Map string-based comparison options to their object-based equivalents
-const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject> = {
-  Exact: ExactComparisonObject,
-  Equivalent: {
-    compareScalar: 'strict',
-    compareObject: 'keyValueOrder',
-    compareMap: 'keyValueOrder',
-    compareArray: 'valueOrder',
-    compareSet: 'valuesOnly',
-  },
-  General: {
-    compareScalar: 'abstract',
-    compareObject: 'keyValue',
-    compareMap: 'keyValue',
-    compareArray: 'valuesOnly',
-    compareSet: 'valuesOnly',
-  },
-  Structure: {
-    compareScalar: 'alwaysSame',
-    compareObject: 'typeOnly',
-    compareMap: 'typeOnly',
-    compareArray: 'typeOnly',
-    compareSet: 'typeOnly',
-  },
+
+
+export const helperTokenToMethodObjectMap = (token: CompareOptionHelperToken): CompareOptionObject => {
+  const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject> = {
+    Exact: ExactComparisonObject,
+    Equivalent: {
+      compareScalar: 'strict',
+      compareObject: 'keyValueOrder',
+      compareMap: 'keyValueOrder',
+      compareArray: 'valueOrder',
+      compareSet: 'valuesOnly',
+    },
+    General: {
+      compareScalar: 'abstract',
+      compareObject: 'keyValue',
+      compareMap: 'keyValue',
+      compareArray: 'valuesOnly',
+      compareSet: 'valuesOnly',
+    },
+    Structure: {
+      compareScalar: 'alwaysSame',
+      compareObject: 'typeOnly',
+      compareMap: 'typeOnly',
+      compareArray: 'typeOnly',
+      compareSet: 'typeOnly',
+    },
+  };
+
+  return helperTokenObjectMap[token];
 };
 
-export const helperTokenToMethodObjectMap = (token: CompareOptionHelperToken): CompareOptionObject =>
-  helperTokenObjectMap[token];
+const rawCompareOptionKeyToMethodObjectKey = (key: keyof MinimalCompareOptionObject) =>
+   `${key}Method` as keyof CompareOptionMethodObject;
 
 export const compareOptionObjectToMethodObject = (compareOptionObject: MinimalCompareOptionObject): CompareOptionMethodObject => {
-  // Use compareObject settings for compareMap if compareMap not set explicitly
-  const methodObject = {
-    ...{ compareMap: compareOptionObject.compareObject },
-    ...compareOptionObject
-  } as CompareOptionMethodObject;
+  const methodObject: CompareOptionMethodObject = {} as CompareOptionMethodObject;
   
   for (const k of Object.keys(optionTokenToStockMethodMap) as (keyof MinimalCompareOptionObject)[]) {
     const spec = compareOptionObject[k] ?? ExactComparisonObject[k];
-    if (isCompareOptionToken(spec)) {
-      methodObject[k] = optionTokenToStockMethodMap[k][spec] as CompareFunction;
+    let compareMethod;
+    if (isCompareFunction(spec)) {
+      compareMethod = spec;
+    } else if (isCompareOptionToken(spec)) { 
+      compareMethod = optionTokenToStockMethodMap[k][spec];
+    } else {
+      throw new Error('Error: unexpected compare option specfication');
     }
+    methodObject[rawCompareOptionKeyToMethodObjectKey(k)] = compareMethod;
+  }
+
+  if (!methodObject.compareMapMethod) {
+    methodObject.compareMapMethod = methodObject.compareObjectMethod;
+  }
+
+  if (!isCompareOptionMethodObject(methodObject)) {
+    throw new Error('Error: compare option method object is invalid');
   }
 
   return methodObject;

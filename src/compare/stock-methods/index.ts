@@ -84,29 +84,29 @@ export const stockComparer = (left: Value, right: Value, compareInst: Compare, r
   
   let comparer: CompareFunction;
   if (isScalar(left)) {
-    comparer = options.compareScalar;
+    comparer = options.compareScalarMethod;
   } else {
     const leftType = actualType(left);
     const rightType = actualType(right);
     if (leftType === rightType) {
       switch (leftType) {
         case 'StdObject':
-          comparer = options.compareObject;
+          comparer = options.compareObjectMethod;
           break;
         case 'Map':
-          comparer = options.compareMap;
+          comparer = options.compareMapMethod;
           break;
         case 'Array':
-          comparer = options.compareArray;
+          comparer = options.compareArrayMethod;
           break;
         case 'Set':
-          comparer = options.compareSet;
+          comparer = options.compareSetMethod;
           break;
         default:
-          comparer = options.compareObject;
+          comparer = options.compareObjectMethod;
       }
     } else {
-      comparer = options.compareObject;
+      comparer = options.compareObjectMethod;
     }
   }
 

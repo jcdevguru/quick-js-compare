@@ -141,9 +141,9 @@ export const compareObject = (
       } else {
         throw new Error(`Unsupported condition: no stock method defined for compare option token ${compareToken}`);
       }
-    } else if (isCompareOptionMethodObject(compareOption) && isCompareFunction(compareOption.compareObject)) {
+    } else if (isCompareOptionMethodObject(compareOption)) {
       // Can happen for custom compare functions specific to standard object
-      return compareOption.compareObject(left, right, compareInstance, objectComparisonResult);
+      return compareOption.compareObjectMethod(left, right, compareInstance, objectComparisonResult);
     } else {
       throw new Error('Unsupported condition: unexpected compare option');
     }

@@ -81,12 +81,12 @@ export interface CompareOptionObject {
   compareSet: CompareSet
 }
 
-export interface CompareOptionMethodObject extends CompareOptionObject {
-  compareScalar: CompareFunction
-  compareObject: CompareFunction
-  compareMap: CompareFunction
-  compareArray: CompareFunction
-  compareSet: CompareFunction
+export interface CompareOptionMethodObject {
+  compareScalarMethod: CompareFunction
+  compareObjectMethod: CompareFunction
+  compareMapMethod: CompareFunction
+  compareArrayMethod: CompareFunction
+  compareSetMethod: CompareFunction
 }
 
 export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
@@ -118,11 +118,11 @@ export const validateMinimalCompareOptionObject = (v: unknown): v is MinimalComp
 );
 
 export const validateCompareOptionMethodObject = (v: unknown): v is CompareOptionMethodObject => validateObject(v, {
-  compareScalar: isCompareFunction,
-  compareObject: isCompareFunction,
-  compareMap: isCompareFunction,
-  compareArray: isCompareFunction,
-  compareSet: isCompareFunction,
+  compareScalarMethod: isCompareFunction,
+  compareObjectMethod: isCompareFunction,
+  compareMapMethod: isCompareFunction,
+  compareArrayMethod: isCompareFunction,
+  compareSetMethod: isCompareFunction,
 }
 );
 
