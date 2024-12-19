@@ -5,6 +5,10 @@ import {
   isKeyedObjectType,
   isIndexedObjectType,
   Value,
+  isSetObject,
+  SetObject,
+  MapObject,
+  Composite,
 } from '../../lib/types';
 
 import {
@@ -15,7 +19,10 @@ import {
   isCompareOptionToken,
   isCompareFunction,
   CompareFunction,
+  ValueResult,
 } from '../types';
+
+import { valueToValueResult } from '../util';
 
 // Because object comparison is supported for values of different types,
 // we use this method to "gracefully degrade" the comparison method if 
@@ -59,7 +66,54 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
 
 const dummyCompare: CompareFunction = () => false;
 
-export const methodMap: Record<CompareCompositeToken, CompareFunction> = {
+const values = (v: Value): Composite => {
+  const typeName = actualType(v);
+  switch (typeName) {
+    case 'ArrayObject':
+    case 'StdObject':
+      return Object.values(v as Array<Value>);
+    case 'MapObject':
+      return (v as MapObject).values();
+    case 'SetObject':
+      return v as SetObject;
+    default:
+      throw new Error('Unsupported condition: value is not a composite');
+  }
+}
+
+const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare, objectComparisonResult: CompareResult) => {
+  const leftSame: Array<ValueResult> = objectComparisonResult.leftSame || [];
+  const rightSame: Array<ValueResult> = objectComparisonResult.rightSame || [];
+
+  if (isSetObject(left) && isSetObject(right)) {
+    // Optimize for sets by weeding out values that compare equal
+    const leftSet = new Set<Value>();
+    const rightSet = new Set<Value>();
+    const sameSet = new Set<Value>();
+    for (const leftValue of left) {
+      if (right.has(leftValue)) {
+        leftSame.push(valueToValueResult(leftValue));
+        rightSame.push(valueToValueResult(leftValue));
+        sameSet.add(leftValue);
+      } else {
+        leftSet.add(leftValue);
+        rightSet.add(leftValue);
+      }
+    }
+
+    Array.from(right).filter(v => !leftSet.has(v) && !sameSet.has(v)).forEach(v => rightSet.add(v));
+
+    return valuesOnly(values(leftSet), values(rightSet), compareInstance, objectComparisonResult);
+  }
+
+  // Incomplete
+  objectComparisonResult.left = [valueToValueResult(left)];
+  objectComparisonResult.right = [valueToValueResult(right)];
+
+  return false;
+}
+
+const objectTokenToMethodMap: Record<CompareCompositeToken, CompareFunction> = {
   keyValueOrder: dummyCompare,
   keyValue: dummyCompare,
   keyOrder: dummyCompare,
@@ -72,7 +126,7 @@ export const compareObject = (
   left: Value,
   right: Value,
   compareInstance: Compare,
-  compositeComparisonResult: CompareResult,
+  objectComparisonResult: CompareResult,
 ): ComparisonStatus => {
   const rawCompareOption = compareInstance.rawOptions.compare;
   if (isMinimalCompareOptionObject(rawCompareOption)) {
@@ -80,15 +134,16 @@ export const compareObject = (
     // should not be necessary.
     if (isCompareOptionToken(rawCompareOption.compareObject)) {
       const compareToken = distillComparisonType(left, right, rawCompareOption.compareObject);
-      return methodMap[compareToken](left, right, compareInstance, compositeComparisonResult);
+      return objectTokenToMethodMap[compareToken](left, right, compareInstance, objectComparisonResult);
     } else if (isCompareFunction(rawCompareOption.compareObject)) {
       // Can happen for custom compare functions specific to standard object
-      return rawCompareOption.compareObject(left, right, compareInstance, compositeComparisonResult);
+      return rawCompareOption.compareObject(left, right, compareInstance, objectComparisonResult);
     } else {
       throw new Error('Unsupported condition: stock method called without a compare option token');
     }
   } else {
     throw new Error('Unsupported condition: rawCompareOption is not a minimal compare option object');
   }
+  // Incomplete
   return true;
 }

@@ -33,13 +33,13 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
   compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
-    strict: strict(compareObject, 'StdObject'), // TODO: implement
-    keyValueOrder: (left, right) => left === right, // TODO: implement
-    keyValue: (left, right) => left === right, // TODO: implement
-    keyOrder: (left, right) => left === right, // TODO: implement
-    valueOrder: (left, right) => left === right, // TODO: implement
-    keyOnly: (left, right) => left === right, // TODO: implement
-    valueOnly: (left, right) => left === right, // TODO: implement
+    strict: strict(compareObject, 'StdObject'),
+    keyValueOrder: compareObject,
+    keyValue: compareObject,
+    keyOrder: compareObject,
+    valueOrder: compareObject,
+    keyOnly: compareObject,
+    valueOnly: compareObject,
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,

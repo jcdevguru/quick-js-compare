@@ -103,7 +103,7 @@ export type KeyedObject = StdObject | MapObject | FunctionObject;
 // Contains multiple values, can be accessed in groups
 export type CollectionObject = ArrayObject | SetObject;
 
-export type Composite = IndexedObject | KeyedObject | CollectionObject | FunctionObject;
+export type Composite = IndexedObject | KeyedObject | CollectionObject | FunctionObject | Iterable<Value>;
 
 export type Value = Scalar | Composite;
 
