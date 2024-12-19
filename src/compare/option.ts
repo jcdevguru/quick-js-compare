@@ -78,14 +78,14 @@ const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject
     compareObject: 'keyValueOrder',
     compareMap: 'keyValueOrder',
     compareArray: 'valueOrder',
-    compareSet: 'valueOnly',
+    compareSet: 'valuesOnly',
   },
   General: {
     compareScalar: 'abstract',
     compareObject: 'keyValue',
     compareMap: 'keyValue',
-    compareArray: 'valueOnly',
-    compareSet: 'valueOnly',
+    compareArray: 'valuesOnly',
+    compareSet: 'valuesOnly',
   },
   Structure: {
     compareScalar: 'alwaysSame',

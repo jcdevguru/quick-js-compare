@@ -186,7 +186,7 @@ The following combinations of properties and values are supported when options f
     * `"keyOrder"`: match when compared objects have matching keys in the same order, regardless of their values
     * `"valueOrder"`: match when compared objects have matching values in the same order, regardless of their keys 
     * `"keyOnly"`: match when compared objects have matching keys, regardless of their order or their values 
-    * `"valueOnly"`: match when compared objects have matching values, regardless of their order or their keys
+    * `"valuesOnly"`: match when compared objects have matching values, regardless of their order or their keys
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"alwaysSame"`: compared objects always match, regardless of value, type, or structure
     * `"alwaysDifferent`": compared objects never match, even if identical
@@ -200,7 +200,7 @@ The following combinations of properties and values are supported when options f
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
     * `"strict"`*: match when objects have same type and matching values in same positions
     * `"valueOrder"`: match when compared arrays have matching values in the same order 
-    * `"valueOnly"`: match when compared arrays have matching values, regardless of their order
+    * `"valuesOnly"`: match when compared arrays have matching values, regardless of their order
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"alwaysSame"`: compared arrays always match, regardless of value, type, or size
@@ -211,7 +211,7 @@ The following combinations of properties and values are supported when options f
   * `compareSet`: for comparison of sets (JavaScript type `Set`)
     * `"reference"`: match only when identical as references, i.e., when compared sets are references to the same object in memory
     * `"strict"`*: match when objects have same type and values in same positions
-    * `"valueOnly"`: match when compared sets have matching values
+    * `"valuesOnly"`: match when compared sets have matching values
     * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"alwaysSame"`: compared sets always match, regardless of value, type, or size
@@ -236,14 +236,14 @@ String values for the `compare` option behave as shorthand helpers for a style o
   * `compareObject`: `"keyValueOrder"`
   * `compareMap`: `"keyValueOrder"`
   * `compareArray`: `"valueOrder"`
-  * `compareSet`: `"valueOnly"`
+  * `compareSet`: `"valuesOnly"`
 
 * `General`: compare for general equivalence. Scalar values will be considered matching by "truthy" or "falsy" comparisons. Keyed objects of any type will be considered matching if their key/value pairs match identically by key and value, regardless of order.  Arrays and sets will be considered matching if they contain the same values.
   * `compareScalar`: `"abstract"`
   * `compareObject`: `"keyValue"`
   * `compareMap`: `"keyValue"`
-  * `compareArray`: `"valueOnly"`
-  * `compareSet`: `"valueOnly"`
+  * `compareArray`: `"valuesOnly"`
+  * `compareSet`: `"valuesOnly"`
 
 * `Structure`: compare for identical form, not content
   * `compareScalar`: `"alwaysSame"`

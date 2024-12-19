@@ -3,7 +3,7 @@ import Compare from '..';
 import {
   actualType,
   isKeyedObjectType,
-  isIndexedObjectType,
+  isOrderedObjectType,
   Value,
   isSetObject,
   SetObject,
@@ -20,6 +20,7 @@ import {
   isCompareFunction,
   CompareFunction,
   ValueResult,
+  isCompareOptionMethodObject,
 } from '../types';
 
 import { valueToValueResult } from '../util';
@@ -41,7 +42,7 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
         distilledToken = 'valueOrder';
         break;
       case 'keyValue':
-        distilledToken = 'valueOnly';
+        distilledToken = 'valuesOnly';
         break;
       case 'keyOrder':
       case 'keyOnly':
@@ -50,13 +51,13 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
     }
   }
 
-  if (!isIndexedObjectType(leftType) || !isIndexedObjectType(rightType)) {
+  if (!isOrderedObjectType(leftType) || !isOrderedObjectType(rightType)) {
     switch (distilledToken) {
       case 'keyValueOrder':
         distilledToken = 'keyValue';
         break;
       case 'valueOrder':
-        distilledToken = 'valueOnly';
+        distilledToken = 'valuesOnly';
         break;
     }
   }
@@ -113,7 +114,7 @@ const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance:
   return false;
 }
 
-const objectTokenToMethodMap: Record<CompareCompositeToken, CompareFunction> = {
+const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunction>> = {
   keyValueOrder: dummyCompare,
   keyValue: dummyCompare,
   keyOrder: dummyCompare,
@@ -129,17 +130,22 @@ export const compareObject = (
   objectComparisonResult: CompareResult,
 ): ComparisonStatus => {
   const rawCompareOption = compareInstance.rawOptions.compare;
+  const compareOption = compareInstance.options.compare;
   if (isMinimalCompareOptionObject(rawCompareOption)) {
     // Because these stock methods are invoked via helper tokens only, this condition check
     // should not be necessary.
     if (isCompareOptionToken(rawCompareOption.compareObject)) {
       const compareToken = distillComparisonType(left, right, rawCompareOption.compareObject);
-      return objectTokenToMethodMap[compareToken](left, right, compareInstance, objectComparisonResult);
-    } else if (isCompareFunction(rawCompareOption.compareObject)) {
+      if (isCompareFunction(objectTokenToMethodMap[compareToken])) {
+        return objectTokenToMethodMap[compareToken](left, right, compareInstance, objectComparisonResult);
+      } else {
+        throw new Error(`Unsupported condition: no stock method defined for compare option token ${compareToken}`);
+      }
+    } else if (isCompareOptionMethodObject(compareOption) && isCompareFunction(compareOption.compareObject)) {
       // Can happen for custom compare functions specific to standard object
-      return rawCompareOption.compareObject(left, right, compareInstance, objectComparisonResult);
+      return compareOption.compareObject(left, right, compareInstance, objectComparisonResult);
     } else {
-      throw new Error('Unsupported condition: stock method called without a compare option token');
+      throw new Error('Unsupported condition: unexpected compare option');
     }
   } else {
     throw new Error('Unsupported condition: rawCompareOption is not a minimal compare option object');

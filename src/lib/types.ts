@@ -44,8 +44,8 @@ export type MapType = 'Map';
 const functionTypeUnion = defineUnionForType('function', 'Function');
 export type FunctionType = typeof functionTypeUnion.type[number];
 
-const indexedObjectTypeUnion = defineUnionForType('Array', 'Map', 'StdObject', ...functionTypeUnion.type);
-export type IndexedObjectType = typeof indexedObjectTypeUnion.type[number];
+const orderedObjectTypeUnion = defineUnionForType('Array', 'Map', 'StdObject', ...functionTypeUnion.type);
+export type OrderedObjectType = typeof orderedObjectTypeUnion.type[number];
 
 const compositeTypeUnion = defineUnionForType(...[...collectionTypeUnion.type, ...keyedObjectTypeUnion.type, ...functionTypeUnion.type]);
 export type CompositeType = typeof compositeTypeUnion.type[number];
@@ -76,7 +76,7 @@ export const isArrayType = (v: string): v is ArrayType => v === 'Array';
 export const isSetType = (v: string): v is SetType => v === 'Set';
 export const isMapType = (v: string): v is MapType => v === 'Map';
 export const isKeyedObjectType = (v: string): v is KeyedObjectType => keyedObjectTypeUnion.is(v);
-export const isIndexedObjectType = (v: string): v is IndexedObjectType => indexedObjectTypeUnion.is(v);
+export const isOrderedObjectType = (v: string): v is OrderedObjectType => orderedObjectTypeUnion.is(v);
 export const isCollectionType = (v: string): v is CollectionType => collectionTypeUnion.is(v);
 export const isFunctionType = (v: string): v is FunctionType => functionTypeUnion.is(v);
 export const isCompositeType = (v: string): v is CompositeType => compositeTypeUnion.is(v);
@@ -95,7 +95,7 @@ export type SetObject = Set<Value>;
 export type FunctionObject = (...args: unknown[]) => unknown;
 
 // Contains multiple values, accessed via numeric index
-export type IndexedObject = StdObject | MapObject | ArrayObject | FunctionObject;
+export type OrderedObject = StdObject | MapObject | ArrayObject | FunctionObject;
 
 // Contains multiple values, accessed via keys
 export type KeyedObject = StdObject | MapObject | FunctionObject;
@@ -103,7 +103,7 @@ export type KeyedObject = StdObject | MapObject | FunctionObject;
 // Contains multiple values, can be accessed in groups
 export type CollectionObject = ArrayObject | SetObject;
 
-export type Composite = IndexedObject | KeyedObject | CollectionObject | FunctionObject | Iterable<Value>;
+export type Composite = OrderedObject | KeyedObject | CollectionObject | FunctionObject | Iterable<Value>;
 
 export type Value = Scalar | Composite;
 
@@ -119,7 +119,7 @@ export const isMapObject = (v: unknown): v is MapObject => isMapType(actualType(
 export const isKeyedObject = (v: unknown): v is KeyedObject => isKeyedObjectType(actualType(v));
 export const isCollection = (v: unknown): v is CollectionObject => isCollectionType(actualType(v));
 export const isFunctionObject = (v: unknown): v is FunctionObject => isFunctionType(actualType(v));
-export const isIndexedObject = (v: unknown): v is IndexedObject => isIndexedObjectType(actualType(v));
+export const isOrderedObject = (v: unknown): v is OrderedObject => isOrderedObjectType(actualType(v));
 export const isComposite = (v: unknown): v is Composite => isCompositeType(actualType(v));
 export const isReference = (v: unknown): v is Reference => isComposite(v);
 export const isValue = (v: unknown): v is Value => isScalar(v) || isComposite(v);

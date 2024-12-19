@@ -39,7 +39,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     keyOrder: compareObject,
     valueOrder: compareObject,
     keyOnly: compareObject,
-    valueOnly: compareObject,
+    valuesOnly: compareObject,
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
@@ -59,7 +59,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
     reference,
     strict: exact, // TODO: implement
     valueOrder: (left, right) => left === right, // TODO: implement
-    valueOnly: (left, right) => left === right, // TODO: implement
+    valuesOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,
@@ -69,7 +69,7 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
   compareSet: {
     reference,
     strict: exact, // TODO: implement
-    valueOnly: (left, right) => left === right, // TODO: implement
+    valuesOnly: (left, right) => left === right, // TODO: implement
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,
