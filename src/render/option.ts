@@ -1,8 +1,8 @@
 
 import { OptionError } from '../lib/error';
-import { isRenderToken, isRenderFunction, validateMinimalRenderOptionObject, type RawRenderOption, RenderOption, validateRenderOptionObject } from './types';
+import { isRenderToken, isRenderFunction, validateMinimalRenderConfigOption, type RenderOption, RenderConfig, validateRenderOptionObject } from './types';
 
-export const validateRawRenderOption = (v: unknown): v is RawRenderOption => {
+export const validateRenderOption = (v: unknown): v is RenderOption => {
   try {
     switch (typeof v) {
       case 'string':
@@ -18,7 +18,7 @@ export const validateRawRenderOption = (v: unknown): v is RawRenderOption => {
         break;
 
       default:
-        if (!validateMinimalRenderOptionObject(v)) {
+        if (!validateMinimalRenderConfigOption(v)) {
           throw new OptionError('Invalid render option');
         }
     } 
@@ -31,7 +31,8 @@ export const validateRawRenderOption = (v: unknown): v is RawRenderOption => {
   return true;
 };
 
-export const validateRenderOption = (v: unknown): v is RenderOption => {
+// incomplete
+export const validateRenderConfig = (v: unknown): v is RenderConfig => {
   try {
     switch (typeof v) {
       case 'function':

@@ -1,24 +1,24 @@
 import { OptionError } from '../lib/error';
 
 import {
-  type RawCompareOption,
   type CompareOption,
-  type CompareOptionObject,
-  type CompareOptionHelperToken,
-  type CompareOptionMethodObject,
-  type MinimalCompareOptionObject,
+  type CompareConfig,
+  type CompareConfigOptions,
+  type CompareOptionAlias,
+  type CompareMethodConfig,
+  type MinimalCompareConfigOptions,
   isCompareFunction,
-  isCompareOptionHelperToken,
-  isCompareOptionToken,
-  isCompareOptionMethodObject,
+  isCompareOptionAlias,
+  isCompareConfigToken,
+  isCompareMethodConfig,
 } from './types';
 
-import { optionTokenToStockMethodMap } from './stock-methods';
+import { compareTokenToStockMethodMap } from './stock-methods';
 
-export const validateRawCompareOption = (v: unknown): v is RawCompareOption => {  
+export const validateCompareOption = (v: unknown): v is CompareOption => {  
   switch (typeof v) {
     case 'string':
-      if (!isCompareOptionHelperToken(v)) {
+      if (!isCompareOptionAlias(v)) {
         throw new OptionError('String is not a valid render option', v);
       }
       break;
@@ -31,7 +31,7 @@ export const validateRawCompareOption = (v: unknown): v is RawCompareOption => {
 
     default:
       try {
-        if (!isCompareOptionMethodObject(v)) {
+        if (!isCompareMethodConfig(v)) {
           throw new OptionError('Invalid compare option');
         }
       } catch (e) {
@@ -41,7 +41,7 @@ export const validateRawCompareOption = (v: unknown): v is RawCompareOption => {
   return true;
 };
 
-export const validateCompareOption = (v: unknown): v is CompareOption => {
+export const validateCompareConfig = (v: unknown): v is CompareConfig => {
   switch (typeof v) {
     case 'function':
       if (!isCompareFunction(v)) {
@@ -51,7 +51,7 @@ export const validateCompareOption = (v: unknown): v is CompareOption => {
 
     default:
       try {
-        if (!isCompareOptionMethodObject(v)) {
+        if (!isCompareMethodConfig(v)) {
           throw new OptionError('Invalid compare option');
         }
       } catch (e) {
@@ -61,7 +61,7 @@ export const validateCompareOption = (v: unknown): v is CompareOption => {
   return true;  
 };
 
-const ExactComparisonObject: CompareOptionObject = {
+const ExactCompareConfig: CompareConfigOptions = {
   compareScalar: 'strict',
   compareObject: 'strict',
   compareMap: 'strict',
@@ -72,9 +72,9 @@ const ExactComparisonObject: CompareOptionObject = {
 // Map string-based comparison options to their object-based equivalents
 
 
-export const helperTokenToMethodObjectMap = (token: CompareOptionHelperToken): CompareOptionObject => {
-  const helperTokenObjectMap: Record<CompareOptionHelperToken, CompareOptionObject> = {
-    Exact: ExactComparisonObject,
+export const optionAliasToMethodConfig = (token: CompareOptionAlias): CompareConfigOptions => {
+  const aliasConfigOptionMap: Record<CompareOptionAlias, CompareConfigOptions> = {
+    Exact: ExactCompareConfig,
     Equivalent: {
       compareScalar: 'strict',
       compareObject: 'keyValueOrder',
@@ -98,33 +98,33 @@ export const helperTokenToMethodObjectMap = (token: CompareOptionHelperToken): C
     },
   };
 
-  return helperTokenObjectMap[token];
+  return aliasConfigOptionMap[token];
 };
 
-const rawCompareOptionKeyToMethodObjectKey = (key: keyof MinimalCompareOptionObject) =>
-   `${key}Method` as keyof CompareOptionMethodObject;
+const compareOptionKeyToMethodObjectKey = (key: keyof MinimalCompareConfigOptions) =>
+   `${key}Method` as keyof CompareMethodConfig;
 
-export const compareOptionObjectToMethodObject = (compareOptionObject: MinimalCompareOptionObject): CompareOptionMethodObject => {
-  const methodObject: CompareOptionMethodObject = {} as CompareOptionMethodObject;
+export const compareConfigToMethodConfig = (compareConfigOptions: MinimalCompareConfigOptions): CompareMethodConfig => {
+  const methodObject: CompareMethodConfig = {} as CompareMethodConfig;
   
-  for (const k of Object.keys(optionTokenToStockMethodMap) as (keyof MinimalCompareOptionObject)[]) {
-    const spec = compareOptionObject[k] ?? ExactComparisonObject[k];
+  for (const k of Object.keys(compareTokenToStockMethodMap) as (keyof MinimalCompareConfigOptions)[]) {
+    const spec = compareConfigOptions[k] ?? ExactCompareConfig[k];
     let compareMethod;
     if (isCompareFunction(spec)) {
       compareMethod = spec;
-    } else if (isCompareOptionToken(spec)) { 
-      compareMethod = optionTokenToStockMethodMap[k][spec];
+    } else if (isCompareConfigToken(spec)) { 
+      compareMethod = compareTokenToStockMethodMap[k][spec];
     } else {
       throw new Error('Error: unexpected compare option specfication');
     }
-    methodObject[rawCompareOptionKeyToMethodObjectKey(k)] = compareMethod;
+    methodObject[compareOptionKeyToMethodObjectKey(k)] = compareMethod;
   }
 
   if (!methodObject.compareMapMethod) {
     methodObject.compareMapMethod = methodObject.compareObjectMethod;
   }
 
-  if (!isCompareOptionMethodObject(methodObject)) {
+  if (!isCompareMethodConfig(methodObject)) {
     throw new Error('Error: compare option method object is invalid');
   }
 

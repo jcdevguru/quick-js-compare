@@ -9,12 +9,12 @@ import {
 } from '../lib/types';
 
 import {
-  type RawOption,
-  type Option,
-  validateRawOption,
+  type ConfigOptions,
+  type Config,
+  validateOptions,
 } from '../lib/option';
 
-import { compareOptionObjectToMethodObject, helperTokenToMethodObjectMap } from './option';
+import { compareConfigToMethodConfig, optionAliasToMethodConfig } from './option';
 import { stockComparer } from './stock-methods';
 import { OptionError } from '../lib/error';
 
@@ -22,10 +22,10 @@ import {
   type CompareResult,
   type CompareFunction,
   isCompareFunction,
-  isMinimalCompareOptionObject,
-  isCompareOptionHelperToken,
+  isMinimalCompareConfigOption,
+  isCompareOptionAlias,
+  CompareConfig,
   CompareOption,
-  RawCompareOption,
 } from './types';
 
 import {
@@ -48,7 +48,7 @@ const nonCircular = (value: Value, refSet: RefSet): boolean => {
 }
 
 export default class Compare {
-  private static defaultOptions: RawOption = { compare: 'Exact', render: 'Standard' };
+  private static defaultOptions: ConfigOptions = { compare: 'Exact', render: 'Standard' };
 
   private refSets = {
     left: new WeakSet<Reference>(),
@@ -58,26 +58,26 @@ export default class Compare {
   private comparisonResult: CompareResult = {};
   private comparer: CompareFunction = stockComparer;
 
-  private option!: Option;
-  private rawOption!: RawOption;
+  private configOptions!: ConfigOptions;
+  private configuration!: Config;
 
-  private processOptions(options: RawOption) {
-    if (!validateRawOption(options)) {
+  private processOptions(options: ConfigOptions) {
+    if (!validateOptions(options)) {
       throw new OptionError('Invalid options');
     }
 
-    let rawCompareOption = options.compare;
-    if (isCompareFunction(rawCompareOption)) {
-      this.comparer = rawCompareOption;
-    } else if (isCompareOptionHelperToken(rawCompareOption)) {
-      rawCompareOption = helperTokenToMethodObjectMap(rawCompareOption);
+    let compareOption = options.compare;
+    if (isCompareFunction(compareOption)) {
+      this.comparer = compareOption;
+    } else if (isCompareOptionAlias(compareOption)) {
+      compareOption = optionAliasToMethodConfig(compareOption);
     }
 
 
-    if (isMinimalCompareOptionObject(rawCompareOption)) {
-      this.rawOption = { ...options, compare: rawCompareOption };
-      const methodObject = compareOptionObjectToMethodObject(rawCompareOption);
-      this.option = { ...this.option, compare: methodObject };
+    if (isMinimalCompareConfigOption(compareOption)) {
+      this.configOptions = { ...options, compare: compareOption };
+      const methodConfig = compareConfigToMethodConfig(compareOption);
+      this.configuration = { ...this.configuration, compare: methodConfig };
     } else {
       throw new Error('Internal error: unhandled compare option');
     }
@@ -85,7 +85,7 @@ export default class Compare {
     // TODO: handle render option
   }
 
-  constructor(options?: RawOption) {
+  constructor(options?: ConfigOptions) {
     this.processOptions(options ?? Compare.defaultOptions);
   }
 
@@ -137,7 +137,7 @@ export default class Compare {
     return this;
   }
 
-  public recompare(options: RawOption): Compare {
+  public recompare(options: ConfigOptions): Compare {
     if (this.isComplete) {
       return this;
     }
@@ -161,23 +161,23 @@ export default class Compare {
     return !leftSame.length;
   }
 
-  get result(): CompareResult {
+  get result(): Readonly<CompareResult> {
     return this.comparisonResult;
   }
 
-  get options(): Option {
-    return this.option;
+  get config(): Readonly<Config> {
+    return this.configuration;
   }
 
-  get compareOptions(): CompareOption {
-    return this.option.compare;
+  get compareConfig(): CompareConfig {
+    return this.configuration.compare;
   }
 
-  get rawOptions(): RawOption {
-    return this.rawOption;
+  get options(): Readonly<ConfigOptions> {
+    return this.configOptions;
   }
 
-  get rawCompareOptions(): RawCompareOption | undefined {
-    return this.rawOption.compare;
+  get compareOptions(): Readonly<CompareOption> | undefined {
+    return this.configOptions.compare;
   }
 }

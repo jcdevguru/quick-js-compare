@@ -2,13 +2,13 @@
 // compare options provided through the top-level function
 
 import Compare from '../compare';
-import type { RawOption } from '../lib/option';
+import type { ConfigOptions } from '../lib/option';
 import { OptionError } from '../lib/error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      const c = new Compare(options as RawOption);
+      const c = new Compare(options as ConfigOptions);
       expect(c).toBeInstanceOf(Compare);
     });
   };
@@ -19,7 +19,7 @@ describe('successful construction', () => {
 describe('invalid constructor calls', () => {
   const testConstructor = (testName: string, options?: unknown) => {
     test(testName, () => {
-      expect(() => new Compare(options as RawOption)).toThrow(OptionError);
+      expect(() => new Compare(options as ConfigOptions)).toThrow(OptionError);
     });
   };
 

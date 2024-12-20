@@ -3,41 +3,26 @@ import { type AtLeastOne } from './types';
 import { validateMinimalObject, validateObject } from './util';
 import { OptionError } from './error';
 
-import { validateCompareOption, validateRawCompareOption } from '../compare/option';
-import { validateRawRenderOption, validateRenderOption } from '../render/option';
-import { type RawRenderOption } from '../render/types';
-import { type CompareOption,  type RawCompareOption  } from '../compare/types';
+import { validateCompareOption, validateCompareConfig } from '../compare/option';
+import { validateRenderOption, validateRenderConfig } from '../render/option';
+import { type RenderOption } from '../render/types';
+import { type CompareConfig,  type CompareOption  } from '../compare/types';
 
-export interface RawOptionObject {
-  compare: RawCompareOption
-  render: RawRenderOption
+export interface ConfigOptionObject {
+  compare: CompareOption  
+  render: RenderOption
 }
 
-export interface Option {
-  compare: CompareOption
-  render: RawRenderOption // TODO: change to RenderOption
+export interface Config {
+  compare: CompareConfig
+  render: RenderOption // TODO: change to RenderConfig
 }
 
-export type RawOption = AtLeastOne<RawOptionObject>;
+export type ConfigOptions = AtLeastOne<ConfigOptionObject>;
 
-export const validateRawOption = (v: unknown): v is RawOption => { 
+export const validateOptions = (v: unknown): v is ConfigOptions => { 
   try {
     return validateMinimalObject(v, {
-      compare: validateRawCompareOption,
-      render: validateRawRenderOption,
-    }); 
-  } catch (e) {
-    if (e instanceof OptionError) {
-      throw e;
-    } else {
-      throw new OptionError('Invalid option');
-    }
-  }
-};
-
-export const validateOption = (v: unknown): v is Option => { 
-  try {
-    return validateObject(v, {
       compare: validateCompareOption,
       render: validateRenderOption,
     }); 
@@ -50,9 +35,24 @@ export const validateOption = (v: unknown): v is Option => {
   }
 };
 
-export const isOption = (v: unknown): v is RawOption => { 
+export const validateConfig = (v: unknown): v is Config => { 
   try {
-    return validateOption(v);
+    return validateObject(v, {
+      compare: validateCompareConfig,
+      render: validateRenderConfig,
+    }); 
+  } catch (e) {
+    if (e instanceof OptionError) {
+      throw e;
+    } else {
+      throw new OptionError('Invalid option');
+    }
+  }
+};
+
+export const isOption = (v: unknown): v is ConfigOptions => { 
+  try {
+    return validateConfig(v);
   } catch {
     return false;
   }

@@ -7,7 +7,7 @@ export interface RenderFunction {
 }
 
 // Types for render option object
-export interface RenderOptionObject {
+export interface RenderConfigOption {
   jsMapAsObject: boolean
   jsSetAsArray: boolean
   maxDepth: number
@@ -15,7 +15,7 @@ export interface RenderOptionObject {
   debug: boolean
 }
 
-export type MinimalRenderOptionObject = AtLeastOne<RenderOptionObject>;
+export type MinimalRenderConfigOption = AtLeastOne<RenderConfigOption>;
 
 // Types for render option token
 const RENDER_OPTION_TOKENS = ['StatusOnly', 'Standard'] as const;
@@ -26,8 +26,8 @@ export const isRenderToken = (v: unknown): v is RenderToken =>
 
 export const isRenderFunction = (v: unknown): v is RenderFunction => typeof v === 'function';
 
-export type RenderOption = RenderOptionObject | RenderFunction;
-export type RawRenderOption = RenderToken | MinimalRenderOptionObject | RenderFunction;
+export type RenderConfig = RenderConfigOption | RenderFunction;
+export type RenderOption = RenderToken | MinimalRenderConfigOption | RenderFunction;
 
 const isBoolean = (v: unknown) : v is boolean => typeof v === 'boolean';
 const isNumber = (v: unknown): v is number => typeof v === 'number';
@@ -39,29 +39,29 @@ const validationProperties = {
   debug: isBoolean,
 } as const;
 
-export const validateMinimalRenderOptionObject = (v: unknown): v is MinimalRenderOptionObject =>
+export const validateMinimalRenderConfigOption = (v: unknown): v is MinimalRenderConfigOption =>
   validateMinimalObject(v, validationProperties);
 
-export const validateRenderOptionObject = (v: unknown): v is RenderOptionObject =>
+export const validateRenderOptionObject = (v: unknown): v is RenderConfigOption =>
   validateMinimalObject(v, validationProperties);
 
-export const isMinimalRenderOptionObject = (v: unknown): v is MinimalRenderOptionObject => {
+export const isMinimalRenderConfigOption = (v: unknown): v is MinimalRenderConfigOption => {
   try {
-    return validateMinimalRenderOptionObject(v);
+    return validateMinimalRenderConfigOption(v);
   } catch {
     return false;
   }
 };
 
-export const isRenderOptionObject = (v: unknown): v is RenderOptionObject => {
+export const isRenderConfigOption = (v: unknown): v is RenderConfigOption => {
   try {
-    return validateMinimalRenderOptionObject(v);
+    return validateMinimalRenderConfigOption(v);
   } catch {
     return false;
   }
 };
 
-export const isRawRenderOption = (v: unknown): v is RawRenderOption => 
-  isRenderToken(v) || isMinimalRenderOptionObject(v) || isRenderFunction(v);
+export const isRenderOption = (v: unknown): v is RenderOption => 
+  isRenderToken(v) || isMinimalRenderConfigOption(v) || isRenderFunction(v);
 
-export const isRenderOption = (v: unknown): v is RenderOption => isRenderOptionObject(v) || isRenderFunction(v);
+export const isRenderConfig = (v: unknown): v is RenderConfig => isRenderConfigOption(v) || isRenderFunction(v);

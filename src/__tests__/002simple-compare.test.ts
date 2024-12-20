@@ -2,11 +2,11 @@
 // compare options provided through the top-level function
 
 import Compare from '../compare';
-import { type RawOption } from '../lib/option';
+import { type ConfigOptions } from '../lib/option';
 import { type Value } from '../lib/types';
 
 describe('successful compare', () => {
-  const testLabel = (testName: string, options?: RawOption) => {
+  const testLabel = (testName: string, options?: ConfigOptions) => {
     if (!options) {
       return `${testName} (no options)`;
     }
@@ -15,7 +15,7 @@ describe('successful compare', () => {
     return `${testName} (compare options: ${optionString})`;
   };
 
-  const testMatchingCompare = (testName: string, left: Value, right: Value, options?: RawOption) => {
+  const testMatchingCompare = (testName: string, left: Value, right: Value, options?: ConfigOptions) => {
     test(testLabel(testName, options), () => {
       const c = new Compare(options);
       const r = c.compare(left, right).result;
@@ -29,7 +29,7 @@ describe('successful compare', () => {
     });
   };
 
-  const testMismatchingCompare = (testName: string, left: Value, right: Value, options?: RawOption) => {
+  const testMismatchingCompare = (testName: string, left: Value, right: Value, options?: ConfigOptions) => {
     test(testLabel(testName, options), () => {
       const c = new Compare(options);
       const r = c.compare(left, right).result;

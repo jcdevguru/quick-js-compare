@@ -15,12 +15,12 @@ import {
   type CompareResult,
   type ComparisonStatus,
   type CompareCompositeToken,
-  isMinimalCompareOptionObject,
-  isCompareOptionToken,
+  isMinimalCompareConfigOption,
+  isCompareConfigToken,
   isCompareFunction,
   CompareFunction,
   ValueResult,
-  isCompareOptionMethodObject,
+  isCompareMethodConfig,
 } from '../types';
 
 import { valueToValueResult } from '../util';
@@ -129,26 +129,26 @@ export const compareObject = (
   compareInstance: Compare,
   objectComparisonResult: CompareResult,
 ): ComparisonStatus => {
-  const rawCompareOption = compareInstance.rawOptions.compare;
-  const compareOption = compareInstance.options.compare;
-  if (isMinimalCompareOptionObject(rawCompareOption)) {
+  const compareOptions = compareInstance.compareOptions;
+  const compareConfig = compareInstance.compareConfig;
+  if (isMinimalCompareConfigOption(compareOptions)) {
     // Because these stock methods are invoked via helper tokens only, this condition check
     // should not be necessary.
-    if (isCompareOptionToken(rawCompareOption.compareObject)) {
-      const compareToken = distillComparisonType(left, right, rawCompareOption.compareObject);
+    if (isCompareConfigToken(compareOptions.compareObject)) {
+      const compareToken = distillComparisonType(left, right, compareOptions.compareObject);
       if (isCompareFunction(objectTokenToMethodMap[compareToken])) {
         return objectTokenToMethodMap[compareToken](left, right, compareInstance, objectComparisonResult);
       } else {
         throw new Error(`Unsupported condition: no stock method defined for compare option token ${compareToken}`);
       }
-    } else if (isCompareOptionMethodObject(compareOption)) {
+    } else if (isCompareMethodConfig(compareConfig)) {
       // Can happen for custom compare functions specific to standard object
-      return compareOption.compareObjectMethod(left, right, compareInstance, objectComparisonResult);
+      return compareConfig.compareObjectMethod(left, right, compareInstance, objectComparisonResult);
     } else {
       throw new Error('Unsupported condition: unexpected compare option');
     }
   } else {
-    throw new Error('Unsupported condition: rawCompareOption is not a minimal compare option object');
+    throw new Error('Unsupported condition: compareOption is not a minimal compare option object');
   }
   // Incomplete
   return true;

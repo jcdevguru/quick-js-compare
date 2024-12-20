@@ -6,9 +6,9 @@ import {
 
 import type {
   CompareFunction,
-  CompareOptionObject,
+  CompareConfigOptions,
   ComparisonStatus,
-  CompareOptionMethodObject,
+  CompareMethodConfig,
   CompareResult,
 } from '../types';
 import Compare from '..';
@@ -29,7 +29,7 @@ const alwaysSame = () => true;
 const alwaysDifferent = () => false;
 const alwaysUndefined = () => undefined;
 
-export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Record<string, CompareFunction>> = {
+export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Record<string, CompareFunction>> = {
   compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
@@ -80,33 +80,33 @@ export const optionTokenToStockMethodMap: Record<keyof CompareOptionObject, Reco
 
 // Assume that left and right are supported types and are not a mix of composite and scalar
 export const stockComparer = (left: Value, right: Value, compareInst: Compare, result: CompareResult): ComparisonStatus => {
-  const options = compareInst.compareOptions as CompareOptionMethodObject;
+  const config = compareInst.compareConfig as CompareMethodConfig;
   
   let comparer: CompareFunction;
   if (isScalar(left)) {
-    comparer = options.compareScalarMethod;
+    comparer = config.compareScalarMethod;
   } else {
     const leftType = actualType(left);
     const rightType = actualType(right);
     if (leftType === rightType) {
       switch (leftType) {
         case 'StdObject':
-          comparer = options.compareObjectMethod;
+          comparer = config.compareObjectMethod;
           break;
         case 'Map':
-          comparer = options.compareMapMethod;
+          comparer = config.compareMapMethod;
           break;
         case 'Array':
-          comparer = options.compareArrayMethod;
+          comparer = config.compareArrayMethod;
           break;
         case 'Set':
-          comparer = options.compareSetMethod;
+          comparer = config.compareSetMethod;
           break;
         default:
-          comparer = options.compareObjectMethod;
+          comparer = config.compareObjectMethod;
       }
     } else {
-      comparer = options.compareObjectMethod;
+      comparer = config.compareObjectMethod;
     }
   }
 

@@ -34,8 +34,8 @@ export interface Comparison {
 export type CompareResult = Partial<Comparison>;
 
 // Types
-const cmpOptionHelperTokenUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
-export type CompareOptionHelperToken = typeof cmpOptionHelperTokenUnion.type[number];
+const cmpOptionAliasUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
+export type CompareOptionAlias = typeof cmpOptionAliasUnion.type[number];
 
 const CMP_GENERAL_TOKENS = ['strict', 'typeOnly', 'alwaysSame', 'alwaysDifferent', 'alwaysUndefined'] as const;
 
@@ -73,7 +73,7 @@ export type CompareArray = CompareArrayToken | CompareFunction;
 export type CompareMap = CompareMapToken | CompareFunction;
 export type CompareSet = CompareSetToken | CompareFunction;
 
-export interface CompareOptionObject {
+export interface CompareConfigOptions {
   compareScalar: CompareScalar
   compareObject: CompareObject
   compareMap: CompareMap
@@ -81,7 +81,7 @@ export interface CompareOptionObject {
   compareSet: CompareSet
 }
 
-export interface CompareOptionMethodObject {
+export interface CompareMethodConfig {
   compareScalarMethod: CompareFunction
   compareObjectMethod: CompareFunction
   compareMapMethod: CompareFunction
@@ -89,18 +89,18 @@ export interface CompareOptionMethodObject {
   compareSetMethod: CompareFunction
 }
 
-export type MinimalCompareOptionObject = AtLeastOne<CompareOptionObject>;
-export type CompareOption = CompareFunction | CompareOptionMethodObject;
-export type RawCompareOption = CompareOptionHelperToken | MinimalCompareOptionObject | CompareFunction;
+export type MinimalCompareConfigOptions = AtLeastOne<CompareConfigOptions>;
+export type CompareConfig = CompareFunction | CompareMethodConfig;
+export type CompareOption = CompareOptionAlias | MinimalCompareConfigOptions | CompareFunction;
 
 export const isCompareFunction = (v: unknown): v is CompareFunction => typeof v === 'function' && v.length >= 2 && v.length <= 4;
-export const isCompareOptionHelperToken = (v: unknown): v is CompareOptionHelperToken => cmpOptionHelperTokenUnion.is(v as string);
+export const isCompareOptionAlias = (v: unknown): v is CompareOptionAlias => cmpOptionAliasUnion.is(v as string);
 export const isCompareScalarToken = (v: unknown): v is CompareScalarToken => cmpScalarTokenUnion.is(v as string);
 export const isCompareObjectToken = (v: unknown): v is CompareObject => cmpCompositeTokenUnion.is(v as string);
 export const isCompareArrayToken = (v: unknown): v is CompareArray => cmpArrayTokenUnion.is(v as string);
 export const isCompareMapToken = (v: unknown): v is CompareMapToken => cmpMapTokenUnion.is(v as string);
 export const isCompareSetToken = (v: unknown): v is CompareSetToken => cmpSetTokenUnion.is(v as string);
-export const isCompareOptionToken = (v: unknown): v is CompareOptionToken => cmpTokenUnion.is(v as string);
+export const isCompareConfigToken = (v: unknown): v is CompareOptionToken => cmpTokenUnion.is(v as string);
 
 const isCompareScalar = (v: unknown): v is CompareScalar => isCompareScalarToken(v) || isCompareFunction(v);
 const isCompareObject = (v: unknown): v is CompareObject => isCompareObjectToken(v) || isCompareFunction(v);
@@ -108,7 +108,7 @@ const isCompareMap = (v: unknown): v is CompareMap => isCompareMapToken(v) || is
 const isCompareArray = (v: unknown): v is CompareArray => isCompareArrayToken(v) || isCompareFunction(v);
 const isCompareSet = (v: unknown): v is CompareSet => isCompareSetToken(v) || isCompareFunction(v);
 
-export const validateMinimalCompareOptionObject = (v: unknown): v is MinimalCompareOptionObject => validateMinimalObject(v, {
+export const validateMinimalCompareConfigOptions = (v: unknown): v is MinimalCompareConfigOptions => validateMinimalObject(v, {
     compareScalar: isCompareScalar,
     compareObject: isCompareObject,
     compareMap: isCompareMap,
@@ -117,7 +117,7 @@ export const validateMinimalCompareOptionObject = (v: unknown): v is MinimalComp
   }
 );
 
-export const validateCompareOptionMethodObject = (v: unknown): v is CompareOptionMethodObject => validateObject(v, {
+export const validateCompareMethodConfig = (v: unknown): v is CompareMethodConfig => validateObject(v, {
   compareScalarMethod: isCompareFunction,
   compareObjectMethod: isCompareFunction,
   compareMapMethod: isCompareFunction,
@@ -126,27 +126,27 @@ export const validateCompareOptionMethodObject = (v: unknown): v is CompareOptio
 }
 );
 
-export const isMinimalCompareOptionObject = (v: unknown): v is MinimalCompareOptionObject => {
+export const isMinimalCompareConfigOption = (v: unknown): v is MinimalCompareConfigOptions => {
   try {
-    return validateMinimalCompareOptionObject(v);
+    return validateMinimalCompareConfigOptions(v);
   } catch {
     return false;
   }
 };
 
-export const isCompareOptionMethodObject = (v: unknown): v is CompareOptionMethodObject => {
+export const isCompareMethodConfig = (v: unknown): v is CompareMethodConfig => {
   try {
-    return validateCompareOptionMethodObject(v);
+    return validateCompareMethodConfig(v);
   } catch {
     return false;
   }
 };
-
-export const isRawCompareOption = (v: unknown): v is RawCompareOption =>
-  isCompareOptionHelperToken(v) || isMinimalCompareOptionObject(v) || isCompareFunction(v);
 
 export const isCompareOption = (v: unknown): v is CompareOption =>
-  isCompareOptionMethodObject(v) || isCompareFunction(v);
+  isCompareOptionAlias(v) || isMinimalCompareConfigOption(v) || isCompareFunction(v);
+
+export const isCompareConfig = (v: unknown): v is CompareConfig =>
+  isCompareMethodConfig(v) || isCompareFunction(v);
 
 export type ValueResultProps = {
   index?: number,
