@@ -85,9 +85,9 @@ const values = (v: Value): Composite => {
   }
 }
 
-const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare, objectComparisonResult: CompareResult) => {
-  const leftSame: Array<ValueResult> = objectComparisonResult.leftSame || [];
-  const rightSame: Array<ValueResult> = objectComparisonResult.rightSame || [];
+const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare, subResult: CompareResult) => {
+  const leftSame: Array<ValueResult> = subResult.leftSame || [];
+  const rightSame: Array<ValueResult> = subResult.rightSame || [];
 
   if (isSetObject(left) && isSetObject(right)) {
     // Optimize for sets by weeding out values that compare equal
@@ -107,12 +107,12 @@ const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance:
 
     Array.from(right).filter(v => !leftSet.has(v) && !sameSet.has(v)).forEach(v => rightSet.add(v));
 
-    return valuesOnly(values(leftSet), values(rightSet), compareInstance, objectComparisonResult);
+    return valuesOnly(values(leftSet), values(rightSet), compareInstance, subResult);
   }
 
   // Incomplete
-  objectComparisonResult.left = [valueToValueResult(left)];
-  objectComparisonResult.right = [valueToValueResult(right)];
+  subResult.left = [valueToValueResult(left)];
+  subResult.right = [valueToValueResult(right)];
 
   return false;
 }
@@ -130,7 +130,7 @@ export const compareObject = (
   left: Value,
   right: Value,
   compareInstance: Compare,
-  objectComparisonResult: CompareResult,
+  subResult: CompareResult,
 ): ComparisonStatus => {
   const compareOptions = compareInstance.compareOptions;
   const compareConfig = compareInstance.compareConfig;
@@ -140,13 +140,13 @@ export const compareObject = (
     if (isCompareConfigToken(compareOptions.compareObject)) {
       const compareToken = distillComparisonType(left, right, compareOptions.compareObject);
       if (isCompareFunction(objectTokenToMethodMap[compareToken])) {
-        return objectTokenToMethodMap[compareToken](left, right, compareInstance, objectComparisonResult);
+        return objectTokenToMethodMap[compareToken](left, right, compareInstance, subResult);
       } else {
         throw new Error(`Unsupported condition: no stock method defined for compare option token ${compareToken}`);
       }
     } else if (isCompareMethodConfig(compareConfig)) {
       // Can happen for custom compare functions specific to standard object
-      return compareConfig.compareObjectMethod(left, right, compareInstance, objectComparisonResult);
+      return compareConfig.compareObjectMethod(left, right, compareInstance, subResult);
     } else {
       throw new Error('Unsupported condition: unexpected compare option');
     }

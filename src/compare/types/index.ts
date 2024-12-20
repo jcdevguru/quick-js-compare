@@ -11,7 +11,7 @@ export type CompareFunction<T extends Value = Value> = (
   left: T,
   right: T,
   compareInstance: Compare,
-  compositeComparisonResult: CompareResult
+  subResult: CompareResult
 ) => ComparisonStatus;
 
 export const isCompareFunction = (v: unknown): v is CompareFunction => typeof v === 'function' && v.length >= 2 && v.length <= 4;
