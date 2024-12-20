@@ -1,39 +1,17 @@
-import type {
-  AtLeastOne,
-  Value,
-  Scalar,
-} from '../lib/types';
+import type { AtLeastOne } from '../../lib/types';
+import { OptionError } from '../../lib/error';
 
 import {
   validateMinimalObject,
   defineUnionForType,
   validateObject,
-} from '../lib/util';
+} from '../../lib/util';  
 
-import Compare from '.';
+import { 
+  type CompareFunction,
+  isCompareFunction,
+} from '.';
 
-export type ComparisonStatus = boolean | undefined;
-
-export type CompareFunction<T extends Value = Value> = (
-  left: T,
-  right: T,
-  compareInstance: Compare,
-  compositeComparisonResult: CompareResult
-) => ComparisonStatus;
-
-export interface Comparison {
-  leftOnly: Array<ValueResult>,
-  left: Array<ValueResult>,
-  leftSame: Array<ValueResult>,
-  rightSame: Array<ValueResult>,
-  right: Array<ValueResult>,
-  rightOnly: Array<ValueResult>,
-};
-
-// Returned from .compare()
-export type CompareResult = Partial<Comparison>;
-
-// Types
 const cmpOptionAliasUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
 export type CompareOptionAlias = typeof cmpOptionAliasUnion.type[number];
 
@@ -91,9 +69,8 @@ export interface CompareMethodConfig {
 
 export type MinimalCompareConfigOptions = AtLeastOne<CompareConfigOptions>;
 export type CompareConfig = CompareFunction | CompareMethodConfig;
-export type CompareOption = CompareOptionAlias | MinimalCompareConfigOptions | CompareFunction;
+export type CompareOptions = CompareOptionAlias | MinimalCompareConfigOptions | CompareFunction;
 
-export const isCompareFunction = (v: unknown): v is CompareFunction => typeof v === 'function' && v.length >= 2 && v.length <= 4;
 export const isCompareOptionAlias = (v: unknown): v is CompareOptionAlias => cmpOptionAliasUnion.is(v as string);
 export const isCompareScalarToken = (v: unknown): v is CompareScalarToken => cmpScalarTokenUnion.is(v as string);
 export const isCompareObjectToken = (v: unknown): v is CompareObject => cmpCompositeTokenUnion.is(v as string);
@@ -142,20 +119,56 @@ export const isCompareMethodConfig = (v: unknown): v is CompareMethodConfig => {
   }
 };
 
-export const isCompareOption = (v: unknown): v is CompareOption =>
+export const isCompareOption = (v: unknown): v is CompareOptions =>
   isCompareOptionAlias(v) || isMinimalCompareConfigOption(v) || isCompareFunction(v);
 
 export const isCompareConfig = (v: unknown): v is CompareConfig =>
   isCompareMethodConfig(v) || isCompareFunction(v);
 
-export type ValueResultProps = {
-  index?: number,
-  key?: Scalar,
-  comparisonResult?: CompareResult,
+
+export const validateCompareOption = (v: unknown): v is CompareOptions => {  
+  switch (typeof v) {
+    case 'string':
+      if (!isCompareOptionAlias(v)) {
+        throw new OptionError('String is not a valid render option', v);
+      }
+      break;
+
+    case 'function':
+      if (!isCompareFunction(v)) {
+        throw new OptionError('Function is invalid compare option', v.toString());
+      }
+      break;
+
+    default:
+      try {
+        if (!isCompareMethodConfig(v)) {
+          throw new OptionError('Invalid compare option');
+        }
+      } catch (e) {
+        throw new OptionError(e as string);
+      }
+  }
+  return true;
 };
 
-export type ValueResult = {
-  typeName: string,
-  value: Value,
-} & ValueResultProps;
+export const validateCompareConfig = (v: unknown): v is CompareConfig => {
+  switch (typeof v) {
+    case 'function':
+      if (!isCompareFunction(v)) {
+        throw new OptionError('Function is invalid compare option', v.toString());
+      }
+      break;
+
+    default:
+      try {
+        if (!isCompareMethodConfig(v)) {
+          throw new OptionError('Invalid compare option');
+        }
+      } catch (e) {
+        throw new OptionError(e as string);
+      }
+  }
+  return true;  
+};
 

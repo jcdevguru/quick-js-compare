@@ -1,27 +1,30 @@
 import Compare from '..';
 
 import {
+  type Value,
+  type Composite,
+  type SetObject,
+  type MapObject,
   actualType,
   isKeyedObjectType,
   isOrderedObjectType,
-  Value,
   isSetObject,
-  SetObject,
-  MapObject,
-  Composite,
 } from '../../lib/types';
 
 import {
   type CompareResult,
   type ComparisonStatus,
+  type CompareFunction,
+  type ValueResult,
+  isCompareFunction,
+} from '../types';
+
+import {
   type CompareCompositeToken,
   isMinimalCompareConfigOption,
   isCompareConfigToken,
-  isCompareFunction,
-  CompareFunction,
-  ValueResult,
   isCompareMethodConfig,
-} from '../types';
+} from '../types/config';
 
 import { valueToValueResult } from '../util';
 

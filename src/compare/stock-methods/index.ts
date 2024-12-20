@@ -6,11 +6,15 @@ import {
 
 import type {
   CompareFunction,
-  CompareConfigOptions,
   ComparisonStatus,
-  CompareMethodConfig,
   CompareResult,
 } from '../types';
+
+import type {
+  CompareConfigOptions,
+  CompareMethodConfig
+} from '../types/config';
+
 import Compare from '..';
 
 import { compareObject } from './object';

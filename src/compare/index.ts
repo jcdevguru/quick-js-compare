@@ -9,7 +9,7 @@ import {
 } from '../lib/types';
 
 import {
-  type ConfigOptions,
+  type MinimalConfigOptions,
   type Config,
   validateOptions,
 } from '../lib/option';
@@ -22,11 +22,14 @@ import {
   type CompareResult,
   type CompareFunction,
   isCompareFunction,
+} from './types';
+
+import {
+  type CompareConfig,
+  type CompareOptions,
   isMinimalCompareConfigOption,
   isCompareOptionAlias,
-  CompareConfig,
-  CompareOption,
-} from './types';
+} from './types/config';
 
 import {
   resultIsUndefined,
@@ -48,7 +51,7 @@ const nonCircular = (value: Value, refSet: RefSet): boolean => {
 }
 
 export default class Compare {
-  private static defaultOptions: ConfigOptions = { compare: 'Exact', render: 'Standard' };
+  private static defaultOptions: MinimalConfigOptions = { compare: 'Exact', render: 'Standard' };
 
   private refSets = {
     left: new WeakSet<Reference>(),
@@ -58,10 +61,10 @@ export default class Compare {
   private comparisonResult: CompareResult = {};
   private comparer: CompareFunction = stockComparer;
 
-  private configOptions!: ConfigOptions;
+  private configOptions!: MinimalConfigOptions;
   private configuration!: Config;
 
-  private processOptions(options: ConfigOptions) {
+  private processOptions(options: MinimalConfigOptions) {
     if (!validateOptions(options)) {
       throw new OptionError('Invalid options');
     }
@@ -73,19 +76,19 @@ export default class Compare {
       compareOption = optionAliasToMethodConfig(compareOption);
     }
 
-
     if (isMinimalCompareConfigOption(compareOption)) {
       this.configOptions = { ...options, compare: compareOption };
       const methodConfig = compareConfigToMethodConfig(compareOption);
       this.configuration = { ...this.configuration, compare: methodConfig };
     } else {
+      // This should not happen since we validate, so if it does, it's an internal error
       throw new Error('Internal error: unhandled compare option');
     }
 
     // TODO: handle render option
   }
 
-  constructor(options?: ConfigOptions) {
+  constructor(options?: MinimalConfigOptions) {
     this.processOptions(options ?? Compare.defaultOptions);
   }
 
@@ -137,7 +140,7 @@ export default class Compare {
     return this;
   }
 
-  public recompare(options: ConfigOptions): Compare {
+  public recompare(options: MinimalConfigOptions): Compare {
     if (this.isComplete) {
       return this;
     }
@@ -173,11 +176,11 @@ export default class Compare {
     return this.configuration.compare;
   }
 
-  get options(): Readonly<ConfigOptions> {
+  get options(): Readonly<MinimalConfigOptions> {
     return this.configOptions;
   }
 
-  get compareOptions(): Readonly<CompareOption> | undefined {
+  get compareOptions(): Readonly<CompareOptions> | undefined {
     return this.configOptions.compare;
   }
 }

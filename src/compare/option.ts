@@ -1,65 +1,15 @@
-import { OptionError } from '../lib/error';
+import { isCompareFunction } from './types';
 
 import {
-  type CompareOption,
-  type CompareConfig,
   type CompareConfigOptions,
   type CompareOptionAlias,
   type CompareMethodConfig,
   type MinimalCompareConfigOptions,
-  isCompareFunction,
-  isCompareOptionAlias,
   isCompareConfigToken,
   isCompareMethodConfig,
-} from './types';
+} from './types/config';
 
 import { compareTokenToStockMethodMap } from './stock-methods';
-
-export const validateCompareOption = (v: unknown): v is CompareOption => {  
-  switch (typeof v) {
-    case 'string':
-      if (!isCompareOptionAlias(v)) {
-        throw new OptionError('String is not a valid render option', v);
-      }
-      break;
-
-    case 'function':
-      if (!isCompareFunction(v)) {
-        throw new OptionError('Function is invalid compare option', v.toString());
-      }
-      break;
-
-    default:
-      try {
-        if (!isCompareMethodConfig(v)) {
-          throw new OptionError('Invalid compare option');
-        }
-      } catch (e) {
-        throw new OptionError(e as string);
-      }
-  }
-  return true;
-};
-
-export const validateCompareConfig = (v: unknown): v is CompareConfig => {
-  switch (typeof v) {
-    case 'function':
-      if (!isCompareFunction(v)) {
-        throw new OptionError('Function is invalid compare option', v.toString());
-      }
-      break;
-
-    default:
-      try {
-        if (!isCompareMethodConfig(v)) {
-          throw new OptionError('Invalid compare option');
-        }
-      } catch (e) {
-        throw new OptionError(e as string);
-      }
-  }
-  return true;  
-};
 
 const ExactCompareConfig: CompareConfigOptions = {
   compareScalar: 'strict',

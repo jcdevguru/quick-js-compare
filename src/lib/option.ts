@@ -1,15 +1,19 @@
 
-import { type AtLeastOne } from './types';
-import { validateMinimalObject, validateObject } from './util';
 import { OptionError } from './error';
+import type { AtLeastOne } from './types';
+import { validateMinimalObject, validateObject } from './util';
 
-import { validateCompareOption, validateCompareConfig } from '../compare/option';
 import { validateRenderOption, validateRenderConfig } from '../render/option';
-import { type RenderOption } from '../render/types';
-import { type CompareConfig,  type CompareOption  } from '../compare/types';
+import type { RenderOption } from '../render/types';
+import {
+  type CompareConfig,
+  type CompareOptions,
+  validateCompareOption,
+  validateCompareConfig,
+} from '../compare/types/config';
 
-export interface ConfigOptionObject {
-  compare: CompareOption  
+export interface ConfigOptions {
+  compare: CompareOptions
   render: RenderOption
 }
 
@@ -18,9 +22,9 @@ export interface Config {
   render: RenderOption // TODO: change to RenderConfig
 }
 
-export type ConfigOptions = AtLeastOne<ConfigOptionObject>;
+export type MinimalConfigOptions = AtLeastOne<ConfigOptions>;
 
-export const validateOptions = (v: unknown): v is ConfigOptions => { 
+export const validateOptions = (v: unknown): v is MinimalConfigOptions => { 
   try {
     return validateMinimalObject(v, {
       compare: validateCompareOption,
@@ -50,7 +54,7 @@ export const validateConfig = (v: unknown): v is Config => {
   }
 };
 
-export const isOption = (v: unknown): v is ConfigOptions => { 
+export const isOption = (v: unknown): v is MinimalConfigOptions => { 
   try {
     return validateConfig(v);
   } catch {
