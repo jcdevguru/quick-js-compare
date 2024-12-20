@@ -1,6 +1,6 @@
 
 import { OptionError } from '../lib/error';
-import { isRenderToken, isRenderFunction, validateRenderOptionObject, type RenderOption } from './types';
+import { isRenderToken, isRenderFunction, validateMinimalRenderConfigOption, type RenderOption, RenderConfig, validateRenderOptionObject } from './types';
 
 export const validateRenderOption = (v: unknown): v is RenderOption => {
   try {
@@ -11,6 +11,30 @@ export const validateRenderOption = (v: unknown): v is RenderOption => {
         }
         break;
 
+      case 'function':
+        if (!isRenderFunction(v)) {
+          throw new OptionError('Function is invalid render option', v.toString());
+        }
+        break;
+
+      default:
+        if (!validateMinimalRenderConfigOption(v)) {
+          throw new OptionError('Invalid render option');
+        }
+    } 
+  } catch (e) {
+    if (e instanceof OptionError) {
+      throw e;
+    }
+    throw new OptionError(e as string);
+  }
+  return true;
+};
+
+// incomplete
+export const validateRenderConfig = (v: unknown): v is RenderConfig => {
+  try {
+    switch (typeof v) {
       case 'function':
         if (!isRenderFunction(v)) {
           throw new OptionError('Function is invalid render option', v.toString());

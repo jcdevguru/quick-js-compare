@@ -1,3 +1,5 @@
+import { defineUnionForType } from './util';
+
 // Utility types
 // An array-like type (tuple) that must contain exactly N elements
 // e.g.,
@@ -13,90 +15,72 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
 
-export type SetToUnion<T> = T extends Set<infer U> ? U : never;
-
 // -------------------------------------------------------------------------------------------------
 // Types we support for comparison and rendering
 
-
-// Scalar types in ES2020+, as string tokens.
-// 'null' is excluded because 'typeof'
-// returns 'object' on null value.
-// supported types only here
-const scalars = [
+// Scalar types in ES2020+
+const scalarTypeUnion = defineUnionForType(
   'string',
   'number',
   'boolean',
   'undefined',
   'bigint',
-  'Date',
-];
+  'null',
+  'Date'
+);
+export type ScalarType = typeof scalarTypeUnion.type[number];
 
-const scalarTypes = new Set(scalars);
+const collectionTypeUnion = defineUnionForType('Array', 'Set', 'Map');
+export type CollectionType = typeof collectionTypeUnion.type[number];
 
-export type Scalar = string | number | boolean | undefined | bigint | Date;
+const keyedObjectTypeUnion = defineUnionForType('Array', 'Map', 'StdObject');
+export type KeyedObjectType = typeof keyedObjectTypeUnion.type[number];
 
-// Works with [...]
-const collectionTypes = new Set([
-  'Array',
-  'Set',
-  'Map',
-]);
+export type StdObjectType = 'StdObject';
+export type ArrayType = 'Array';
+export type SetType = 'Set';
+export type MapType = 'Map';
 
-// Has multiple retrievable through key
-const keyedTypes = new Set([
-  'StdObject',
-  'Array',
-  'Map',
-]);
+const functionTypeUnion = defineUnionForType('function', 'Function');
+export type FunctionType = typeof functionTypeUnion.type[number];
 
-const referenceTypes = new Set([
-  ...collectionTypes,
-  ...keyedTypes,
-] as const);
+const orderedObjectTypeUnion = defineUnionForType('Array', 'Map', 'StdObject', ...functionTypeUnion.type);
+export type OrderedObjectType = typeof orderedObjectTypeUnion.type[number];
 
-const objectTypes = new Set([
-  ...referenceTypes,
-  'String',
-  'Number',
-  'Boolean',
-  'Symbol',
-  'Map',
-  'Set',
-]);
+const compositeTypeUnion = defineUnionForType(...[...collectionTypeUnion.type, ...keyedObjectTypeUnion.type, ...functionTypeUnion.type]);
+export type CompositeType = typeof compositeTypeUnion.type[number];
 
-const functionTypes = new Set([
-  'Function',
-  'function',
-]);
-
-const supportedTypes = new Set([
-  ...scalarTypes,
-  ...objectTypes,
-] as const);
-
-export type SupportedType = SetToUnion<typeof supportedTypes>;
+export type SupportedType = ScalarType | CompositeType;
 
 // Note 't' in argument should be return from 'actualType()', not value of 'typeof'
-export const typeIsSupported = (t: string): boolean => supportedTypes.has(t);
-export const typeIsObject = (t: string): boolean => objectTypes.has(t);
-export const typeIsGenericObject = (t: string): boolean => t === 'object';
-export const typeIsScalar = (t: string): boolean => scalarTypes.has(t);
-export const typeIsStdObject = (t: string): boolean => t === 'Object';
-export const typeIsKeyedObject = (t: string): boolean => keyedTypes.has(t);
-export const typeIsFunction = (t: string) : boolean => functionTypes.has(t);
-export const typeIsReference = (t: string) : boolean => referenceTypes.has(t);
 
 export const actualType = (v: unknown): string => {
-  const t = typeof v;
-  switch (t) {
-    case 'object':
-    case 'function':
-      // null would return 'object'
-      return v?.constructor.name || t;
+  const t = typeof v as string;
+  if (t === 'object') {
+    if (!v) {
+      return 'null';
+    }
+    let n = v?.constructor.name;
+    if (n === 'Object') {
+      n = 'StdObject';
+    } else if (isSupportedType(n)) {
+      return n;
+    }
   }
   return t;
 };
+
+export const isScalarType = (v: string): v is ScalarType => scalarTypeUnion.is(v);
+export const isStdObjectType   = (v: string): v is StdObjectType => v === 'StdObject';
+export const isArrayType = (v: string): v is ArrayType => v === 'Array';
+export const isSetType = (v: string): v is SetType => v === 'Set';
+export const isMapType = (v: string): v is MapType => v === 'Map';
+export const isKeyedObjectType = (v: string): v is KeyedObjectType => keyedObjectTypeUnion.is(v);
+export const isOrderedObjectType = (v: string): v is OrderedObjectType => orderedObjectTypeUnion.is(v);
+export const isCollectionType = (v: string): v is CollectionType => collectionTypeUnion.is(v);
+export const isFunctionType = (v: string): v is FunctionType => functionTypeUnion.is(v);
+export const isCompositeType = (v: string): v is CompositeType => compositeTypeUnion.is(v);
+export const isSupportedType = (v: string): v is SupportedType => isScalarType(v) || isCompositeType(v);
 
 export type MapKey = string | number | symbol;
 
@@ -104,35 +88,41 @@ export type StdObject = {
     [key: string]: Value;
 };
 
+export type Scalar = string | number | boolean | bigint | null | undefined | symbol | Date;
 export type MapObject = Map<MapKey, Value>;
 export type ArrayObject = Array<Value>;
 export type SetObject = Set<Value>;
+export type FunctionObject = (...args: unknown[]) => unknown;
 
 // Contains multiple values, accessed via numeric index
-export type IndexedObject = StdObject | MapObject | ArrayObject;
+export type OrderedObject = StdObject | MapObject | ArrayObject | FunctionObject;
 
 // Contains multiple values, accessed via keys
-export type KeyedObject = StdObject | MapObject;
+export type KeyedObject = StdObject | MapObject | FunctionObject;
 
 // Contains multiple values, can be accessed in groups
 export type CollectionObject = ArrayObject | SetObject;
 
-export type Reference = IndexedObject | KeyedObject | CollectionObject;
+export type Composite = OrderedObject | KeyedObject | CollectionObject | FunctionObject | Iterable<Value>;
 
-export type Value = Scalar | Reference;
+export type Value = Scalar | Composite;
+
+export type Reference = Composite;
 
 export type StdObjectEntry = [keyof StdObject, Value];
 
-export type RefSet = WeakSet<Reference>;
+export const isScalar = (v: unknown): v is Scalar => isScalarType(actualType(v));
+export const isStdObject = (v: unknown): v is StdObject => isStdObjectType(actualType(v));
+export const isArrayObject = (v: unknown): v is ArrayObject => isArrayType(actualType(v));
+export const isSetObject = (v: unknown): v is SetObject => isSetType(actualType(v));
+export const isMapObject = (v: unknown): v is MapObject => isMapType(actualType(v));
+export const isKeyedObject = (v: unknown): v is KeyedObject => isKeyedObjectType(actualType(v));
+export const isCollection = (v: unknown): v is CollectionObject => isCollectionType(actualType(v));
+export const isFunctionObject = (v: unknown): v is FunctionObject => isFunctionType(actualType(v));
+export const isOrderedObject = (v: unknown): v is OrderedObject => isOrderedObjectType(actualType(v));
+export const isComposite = (v: unknown): v is Composite => isCompositeType(actualType(v));
+export const isReference = (v: unknown): v is Reference => isComposite(v);
+export const isValue = (v: unknown): v is Value => isScalar(v) || isComposite(v);
+export const isSupported = isValue;
 
-export const deriveType = (v: unknown): string => {
-  let t = actualType(v);
-  if (typeIsStdObject(t)) {
-    t = 'StdObject';
-  }
-
-  if (!typeIsSupported(t)) {
-    return 'UnsupportedType';
-  } 
-  return t;
-};
+export type RefSet = WeakSet<Composite>;

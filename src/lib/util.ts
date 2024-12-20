@@ -11,9 +11,10 @@ export const toArray = (...v: Array<unknown>) => [...v].flat();
 // Will be false with an array, set, map, etc.
 export const isStandardObject = (v: unknown): v is Record<string, unknown> => v?.constructor.name === 'Object';
 
-export const validateMinimalObject = (
+export const validateObject = (
   obj: unknown,
   validators: Record<string, (v: unknown) => boolean>,
+  minNumberOfKeys: number = 0,
 ): boolean => {
   if (!isStandardObject(obj)) {
     return false;
@@ -27,8 +28,8 @@ export const validateMinimalObject = (
     throw new Error(`property ${unknownKeys.join(',')} unknown`);
   }
 
-  if (!objKeys.length) {
-    throw new Error(`need at least one of ${[...validKeySet].join(',')}`);
+  if (objKeys.length < minNumberOfKeys) {
+    throw new Error(`need at least ${minNumberOfKeys} of ${[...validKeySet].join(',')}`);
   }
 
   const invalidSettings = Object.entries(validators).reduce((acc: Array<string>, [setting, check]) => {
@@ -46,4 +47,18 @@ export const validateMinimalObject = (
   }
 
   return true;
+};
+
+export const validateMinimalObject = (
+  obj: unknown,
+  validators: Record<string, (v: unknown) => boolean>
+) => validateObject(obj, validators, 1);
+
+// Helper function to define the union and type guard with caching
+export const defineUnionForType = <T extends string[]>(...values: T) => {
+  const set = new Set(values);
+  return {
+    type: values,
+    is: (value: string): value is T[number] => set.has(value),
+  } as { type: T; is: (value: string) => value is T[number] };
 };
