@@ -11,10 +11,15 @@ import {
 import {
   type MinimalConfigOptions,
   type Config,
-  validateOptions,
+  validateMinimalConfigOptions,
 } from '../lib/option';
 
-import { compareConfigToMethodConfig, optionAliasToMethodConfig } from './option';
+import {
+  compareConfigToMethodConfig,
+  defaultCompareConfigOptions,
+  optionAliasToConfigOptions
+} from './option';
+
 import { stockComparer } from './stock-methods';
 import { OptionError } from '../lib/error';
 
@@ -27,8 +32,9 @@ import {
 import {
   type CompareConfig,
   type CompareOptions,
-  isMinimalCompareConfigOption,
+  isMinimalCompareConfigOptions,
   isCompareOptionAlias,
+  isCompareConfigOptions,
 } from './types/config';
 
 import {
@@ -65,20 +71,22 @@ export default class Compare {
   private configuration!: Config;
 
   private processOptions(options: MinimalConfigOptions) {
-    if (!validateOptions(options)) {
+    if (!validateMinimalConfigOptions(options)) {
       throw new OptionError('Invalid options');
     }
 
-    let compareOption = options.compare;
-    if (isCompareFunction(compareOption)) {
-      this.comparer = compareOption;
-    } else if (isCompareOptionAlias(compareOption)) {
-      compareOption = optionAliasToMethodConfig(compareOption);
+    let compareOptions = options.compare;
+    if (isCompareFunction(compareOptions)) {
+      this.comparer = compareOptions;
+    } else if (isCompareOptionAlias(compareOptions)) {
+      compareOptions = optionAliasToConfigOptions(compareOptions);
+    } else if (isMinimalCompareConfigOptions(compareOptions)) {
+      compareOptions = { ...defaultCompareConfigOptions, ...compareOptions };
     }
 
-    if (isMinimalCompareConfigOption(compareOption)) {
-      this.configOptions = { ...options, compare: compareOption };
-      const methodConfig = compareConfigToMethodConfig(compareOption);
+    if (isCompareConfigOptions(compareOptions)) {
+      this.configOptions = { ...options, compare: compareOptions };
+      const methodConfig = compareConfigToMethodConfig(compareOptions);
       this.configuration = { ...this.configuration, compare: methodConfig };
     } else {
       // This should not happen since we validate, so if it does, it's an internal error

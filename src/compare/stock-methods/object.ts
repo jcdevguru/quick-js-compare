@@ -2,7 +2,6 @@ import Compare from '..';
 
 import {
   type Value,
-  type Composite,
   type SetObject,
   type MapObject,
   actualType,
@@ -15,16 +14,17 @@ import {
   type CompareResult,
   type ComparisonStatus,
   type CompareFunction,
-  type ValueResult,
   isCompareFunction,
 } from '../types';
 
 import {
   type CompareCompositeToken,
-  isMinimalCompareConfigOption,
+  isMinimalCompareConfigOptions,
   isCompareConfigToken,
   isCompareMethodConfig,
 } from '../types/config';
+
+import * as SetMethods from './set';
 
 import { valueToValueResult } from '../util';
 
@@ -70,7 +70,7 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
 
 const dummyCompare: CompareFunction = () => false;
 
-const values = (v: Value): Composite => {
+const values = (v: Value): Iterable<Value> => {
   const typeName = actualType(v);
   switch (typeName) {
     case 'ArrayObject':
@@ -86,33 +86,12 @@ const values = (v: Value): Composite => {
 }
 
 const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare, subResult: CompareResult) => {
-  const leftSame: Array<ValueResult> = subResult.leftSame || [];
-  const rightSame: Array<ValueResult> = subResult.rightSame || [];
-
   if (isSetObject(left) && isSetObject(right)) {
-    // Optimize for sets by weeding out values that compare equal
-    const leftSet = new Set<Value>();
-    const rightSet = new Set<Value>();
-    const sameSet = new Set<Value>();
-    for (const leftValue of left) {
-      if (right.has(leftValue)) {
-        leftSame.push(valueToValueResult(leftValue));
-        rightSame.push(valueToValueResult(leftValue));
-        sameSet.add(leftValue);
-      } else {
-        leftSet.add(leftValue);
-        rightSet.add(leftValue);
-      }
-    }
-
-    Array.from(right).filter(v => !leftSet.has(v) && !sameSet.has(v)).forEach(v => rightSet.add(v));
-
-    return valuesOnly(values(leftSet), values(rightSet), compareInstance, subResult);
+    return SetMethods.valuesOnly(left, right, compareInstance, subResult);
   }
-
   // Incomplete
-  subResult.left = [valueToValueResult(left)];
-  subResult.right = [valueToValueResult(right)];
+  subResult.left = [...values(left)].map(v => valueToValueResult(v));
+  subResult.right = [...values(right)].map(v => valueToValueResult(v));
 
   return false;
 }
@@ -134,7 +113,7 @@ export const compareObject = (
 ): ComparisonStatus => {
   const compareOptions = compareInstance.compareOptions;
   const compareConfig = compareInstance.compareConfig;
-  if (isMinimalCompareConfigOption(compareOptions)) {
+  if (isMinimalCompareConfigOptions(compareOptions)) {
     // Because these stock methods are invoked via helper tokens only, this condition check
     // should not be necessary.
     if (isCompareConfigToken(compareOptions.compareObject)) {

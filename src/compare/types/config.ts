@@ -85,25 +85,30 @@ const isCompareMap = (v: unknown): v is CompareMap => isCompareMapToken(v) || is
 const isCompareArray = (v: unknown): v is CompareArray => isCompareArrayToken(v) || isCompareFunction(v);
 const isCompareSet = (v: unknown): v is CompareSet => isCompareSetToken(v) || isCompareFunction(v);
 
-export const validateMinimalCompareConfigOptions = (v: unknown): v is MinimalCompareConfigOptions => validateMinimalObject(v, {
-    compareScalar: isCompareScalar,
-    compareObject: isCompareObject,
-    compareMap: isCompareMap,
-    compareArray: isCompareArray,
-    compareSet: isCompareSet,
+const configOptionSchema = {
+  compareScalar: isCompareScalar,
+  compareObject: isCompareObject,
+  compareMap: isCompareMap,
+  compareArray: isCompareArray,
+  compareSet: isCompareSet,
+}
+
+export const validateMinimalCompareConfigOptions = (v: unknown): v is MinimalCompareConfigOptions =>
+  validateMinimalObject(v, configOptionSchema);
+
+export const validateCompareConfigOptions = (v: unknown): v is CompareConfigOptions =>
+  validateObject(v, configOptionSchema);
+
+export const validateCompareMethodConfig = (v: unknown): v is CompareMethodConfig => validateObject(v, {
+    compareScalarMethod: isCompareFunction,
+    compareObjectMethod: isCompareFunction,
+    compareMapMethod: isCompareFunction,
+    compareArrayMethod: isCompareFunction,
+    compareSetMethod: isCompareFunction,
   }
 );
 
-export const validateCompareMethodConfig = (v: unknown): v is CompareMethodConfig => validateObject(v, {
-  compareScalarMethod: isCompareFunction,
-  compareObjectMethod: isCompareFunction,
-  compareMapMethod: isCompareFunction,
-  compareArrayMethod: isCompareFunction,
-  compareSetMethod: isCompareFunction,
-}
-);
-
-export const isMinimalCompareConfigOption = (v: unknown): v is MinimalCompareConfigOptions => {
+export const isMinimalCompareConfigOptions = (v: unknown): v is MinimalCompareConfigOptions => {
   try {
     return validateMinimalCompareConfigOptions(v);
   } catch {
@@ -119,14 +124,22 @@ export const isCompareMethodConfig = (v: unknown): v is CompareMethodConfig => {
   }
 };
 
+
+export const isCompareConfigOptions = (v: unknown): v is CompareConfigOptions => {
+  try {
+    return validateCompareConfigOptions(v);
+  } catch {
+    return false;
+  }
+};
+
 export const isCompareOption = (v: unknown): v is CompareOptions =>
-  isCompareOptionAlias(v) || isMinimalCompareConfigOption(v) || isCompareFunction(v);
+  isCompareOptionAlias(v) || isMinimalCompareConfigOptions(v) || isCompareFunction(v);
 
 export const isCompareConfig = (v: unknown): v is CompareConfig =>
   isCompareMethodConfig(v) || isCompareFunction(v);
 
-
-export const validateCompareOption = (v: unknown): v is CompareOptions => {  
+export const validateCompareOptions = (v: unknown): v is CompareOptions => {  
   switch (typeof v) {
     case 'string':
       if (!isCompareOptionAlias(v)) {
@@ -141,12 +154,8 @@ export const validateCompareOption = (v: unknown): v is CompareOptions => {
       break;
 
     default:
-      try {
-        if (!isCompareMethodConfig(v)) {
-          throw new OptionError('Invalid compare option');
-        }
-      } catch (e) {
-        throw new OptionError(e as string);
+      if (!isMinimalCompareConfigOptions(v)) {
+        throw new OptionError('Invalid compare option');
       }
   }
   return true;
@@ -161,14 +170,9 @@ export const validateCompareConfig = (v: unknown): v is CompareConfig => {
       break;
 
     default:
-      try {
-        if (!isCompareMethodConfig(v)) {
-          throw new OptionError('Invalid compare option');
-        }
-      } catch (e) {
-        throw new OptionError(e as string);
+      if (!isCompareMethodConfig(v)) {
+        throw new OptionError('Invalid compare option');
       }
   }
   return true;  
 };
-

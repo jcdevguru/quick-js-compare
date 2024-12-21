@@ -19,6 +19,8 @@ import Compare from '..';
 
 import { compareObject } from './object';
 
+import * as SetMethods from './set';
+
 const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
 const strict = (compareFunction: CompareFunction, typeName: string): CompareFunction =>
   (left, right, compareInst, result) =>
@@ -73,7 +75,7 @@ export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Re
   compareSet: {
     reference,
     strict: exact, // TODO: implement
-    valuesOnly: (left, right) => left === right, // TODO: implement
+    valuesOnly: SetMethods.valuesOnly,
     sizeOnly: (left, right) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,

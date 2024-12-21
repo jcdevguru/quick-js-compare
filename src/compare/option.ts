@@ -19,10 +19,12 @@ const ExactCompareConfig: CompareConfigOptions = {
   compareSet: 'strict',
 };
 
+export const defaultCompareConfigOptions = ExactCompareConfig;
+
 // Map string-based comparison options to their object-based equivalents
 
 
-export const optionAliasToMethodConfig = (token: CompareOptionAlias): CompareConfigOptions => {
+export const optionAliasToConfigOptions = (token: CompareOptionAlias): CompareConfigOptions => {
   const aliasConfigOptionMap: Record<CompareOptionAlias, CompareConfigOptions> = {
     Exact: ExactCompareConfig,
     Equivalent: {
