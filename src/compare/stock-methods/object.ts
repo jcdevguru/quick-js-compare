@@ -11,7 +11,6 @@ import {
 } from '../../lib/types';
 
 import {
-  type CompareResult,
   type ComparisonStatus,
   type CompareFunction,
   isCompareFunction,
@@ -25,8 +24,6 @@ import {
 } from '../types/config';
 
 import * as SetMethods from './set';
-
-import { valueToValueResult } from '../util';
 
 // Because object comparison is supported for values of different types,
 // we use this method to "gracefully degrade" the comparison method if 
@@ -70,6 +67,7 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
 
 const dummyCompare: CompareFunction = () => false;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const values = (v: Value): Iterable<Value> => {
   const typeName = actualType(v);
   switch (typeName) {
@@ -85,16 +83,21 @@ const values = (v: Value): Iterable<Value> => {
   }
 }
 
-const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare, subResult: CompareResult) => {
+const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare) => {
   if (isSetObject(left) && isSetObject(right)) {
-    return SetMethods.valuesOnly(left, right, compareInstance, subResult);
+    return SetMethods.valuesOnly(left, right, compareInstance);
   }
   // Incomplete
-  subResult.left = [...values(left)].map(v => valueToValueResult(v));
-  subResult.right = [...values(right)].map(v => valueToValueResult(v));
-
   return false;
 }
+
+// const keyOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare) => {
+//   if (isKeyedObject(left) && isKeyedObject(right)) {
+//     return SetMethods.valuesOnly(left, right, compareInstance);
+//   }
+//   // Incomplete
+//   return false;
+// }
 
 const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunction>> = {
   keyValueOrder: dummyCompare,
@@ -108,8 +111,7 @@ const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunct
 export const compareObject = (
   left: Value,
   right: Value,
-  compareInstance: Compare,
-  subResult: CompareResult,
+  compareInstance: Compare
 ): ComparisonStatus => {
   const compareOptions = compareInstance.compareOptions;
   const compareConfig = compareInstance.compareConfig;
@@ -119,13 +121,13 @@ export const compareObject = (
     if (isCompareConfigToken(compareOptions.compareObject)) {
       const compareToken = distillComparisonType(left, right, compareOptions.compareObject);
       if (isCompareFunction(objectTokenToMethodMap[compareToken])) {
-        return objectTokenToMethodMap[compareToken](left, right, compareInstance, subResult);
+        return objectTokenToMethodMap[compareToken](left, right, compareInstance);
       } else {
-        throw new Error(`Unsupported condition: no stock method defined for compare option token ${compareToken}`);
+        throw new Error(`Unsupported condition: stock method defined incorrectly for compare option token ${compareToken}`);
       }
     } else if (isCompareMethodConfig(compareConfig)) {
       // Can happen for custom compare functions specific to standard object
-      return compareConfig.compareObjectMethod(left, right, compareInstance, subResult);
+      return compareConfig.compareObjectMethod(left, right, compareInstance);
     } else {
       throw new Error('Unsupported condition: unexpected compare option');
     }

@@ -27,6 +27,7 @@ import {
   type CompareResult,
   type CompareFunction,
   isCompareFunction,
+  ComparisonStatus,
 } from './types';
 
 import {
@@ -38,7 +39,6 @@ import {
 } from './types/config';
 
 import {
-  resultIsUndefined,
   valueToValueResult,
   mergeComparisonResults
 } from './util';
@@ -64,8 +64,11 @@ export default class Compare {
     right: new WeakSet<Reference>(),
   };
 
-  private comparisonResult: CompareResult = {};
-  private comparer: CompareFunction = stockComparer;
+  private comparisonResult: CompareResult;
+  private currentResult: CompareResult | undefined;
+  private workingResult: CompareResult;
+
+  private compareFunction: CompareFunction = stockComparer;
 
   private configOptions!: MinimalConfigOptions;
   private configuration!: Config;
@@ -77,7 +80,7 @@ export default class Compare {
 
     let compareOptions = options.compare;
     if (isCompareFunction(compareOptions)) {
-      this.comparer = compareOptions;
+      this.compareFunction = compareOptions;
     } else if (isCompareOptionAlias(compareOptions)) {
       compareOptions = optionAliasToConfigOptions(compareOptions);
     } else if (isMinimalCompareConfigOptions(compareOptions)) {
@@ -89,7 +92,8 @@ export default class Compare {
       const methodConfig = compareConfigToMethodConfig(compareOptions);
       this.configuration = { ...this.configuration, compare: methodConfig };
     } else {
-      // This should not happen since we validate, so if it does, it's an internal error
+      // This should not happen because options are supposed to be validated already
+      // If it does, it's an internal error
       throw new Error('Internal error: unhandled compare option');
     }
 
@@ -98,12 +102,14 @@ export default class Compare {
 
   constructor(options?: MinimalConfigOptions) {
     this.processOptions(options ?? Compare.defaultOptions);
+    this.workingResult = {};
+    this.comparisonResult = this.workingResult;
   }
 
-  private coreCompare = (left: Value, right: Value): CompareResult => {
+  protected comparer = (left: Value, right: Value): ComparisonStatus => {
     const leftType = actualType(left);
     const rightType = actualType(right);
-    const result: CompareResult = {};
+    let status: ComparisonStatus = undefined;
 
     // types of operands must be supported
     // and circular references must be detected and ignored
@@ -113,82 +119,83 @@ export default class Compare {
       isSupportedType(leftType) &&
       isSupportedType(rightType)
     ) {
-        const leftResult = valueToValueResult(left);
-        const rightResult = valueToValueResult(right);
-        
-        // a scalar is always considered different from a composite
+        // a composite is always considered different from a non-composite
         if (isCompositeType(leftType) !== isCompositeType(rightType)) {
-           result.left = [leftResult];
-           result.right = [rightResult];
+          status = false;
         } else {
-          const subResult: CompareResult = {};
-          const comparisonStatus = this.comparer(left, right, this, subResult);
-          if (comparisonStatus) {
-            if (!resultIsUndefined(subResult)) {
-              leftResult.comparisonResult = subResult;
-              rightResult.comparisonResult = subResult;
-            }
-            result.leftSame = [leftResult];
-            result.rightSame = [rightResult];
-          } else if (comparisonStatus === false) {
-              leftResult.comparisonResult = mergeComparisonResults({}, subResult, ['leftOnly', 'left']);
-              rightResult.comparisonResult = mergeComparisonResults({}, subResult, ['right', 'rightOnly']);
-              result.left = [leftResult];
-              result.right = [rightResult];
-          }
+          status = this.compareFunction(left, right, this);
         }
     }
 
-    return result;
+    const leftResult = valueToValueResult(left);
+    const rightResult = valueToValueResult(right);
+
+    if (status) {
+      this.workingResult.leftSame = [leftResult];
+      this.workingResult.rightSame = [rightResult];
+    } else if (status === false) {
+      this.workingResult.left = [leftResult];
+      this.workingResult.right = [rightResult];
+    }
+
+    if (this.currentResult) {
+      if (status) {
+        mergeComparisonResults(this.currentResult, this.workingResult, ['leftSame']);
+        mergeComparisonResults(this.currentResult, this.workingResult, ['rightSame']);
+      } else if (status === false) {
+        mergeComparisonResults(this.currentResult, this.workingResult, ['leftOnly', 'left']);
+        mergeComparisonResults(this.currentResult, this.workingResult, ['right', 'rightOnly']);
+      }
+    } else {
+      this.currentResult = this.workingResult
+    }
+
+    return status;
   }
 
   public compare(left: Value, right: Value): Compare {
-    this.comparisonResult = this.coreCompare(left, right);
-    
+    this.comparer(left, right);
     return this;
   }
 
   public recompare(options: MinimalConfigOptions): Compare {
-    if (this.isComplete) {
-      return this;
-    }
-
     this.processOptions(options);
 
-    const { leftSame = [], rightSame = [] } = this.comparisonResult;
+    const { leftSame: leftArray, rightSame: rightArray } = this.comparisonResult;
+
+    if (!leftArray || !rightArray) {
+      return this;
+    }
+    this.currentResult = undefined;
+    this.comparisonResult = mergeComparisonResults({}, this.comparisonResult, ['leftOnly', 'left', 'rightOnly', 'right']);
 
     // Since arrays are same length, we just use leftSame for the length
-    const comparisonResult: CompareResult = {};
-    for (let i = 0; i < leftSame.length; i++) {
-      const result = this.coreCompare(leftSame[i].value, rightSame[i].value);
-      mergeComparisonResults(comparisonResult, result);
+    for (let i = 0; i < leftArray.length; i++) {
+      this.workingResult = {};
+      this.comparer(leftArray[i].value, rightArray[i].value);
     }
-    this.comparisonResult = comparisonResult;
+    this.comparisonResult = this.currentResult ?? {};
+
     return this;
   }
 
-  get isComplete(): boolean {
-    const { leftSame = [] } = this.comparisonResult;
-    return !leftSame.length;
-  }
-
-  get result(): Readonly<CompareResult> {
+  public get result(): Readonly<CompareResult> {
     return this.comparisonResult;
   }
 
-  get config(): Readonly<Config> {
+  public get config(): Readonly<Config> {
     return this.configuration;
   }
 
-  get compareConfig(): CompareConfig {
+  public get compareConfig(): CompareConfig {
     return this.configuration.compare;
   }
 
-  get options(): Readonly<MinimalConfigOptions> {
+  public get options(): Readonly<MinimalConfigOptions> {
     return this.configOptions;
   }
 
-  get compareOptions(): Readonly<CompareOptions> | undefined {
+  public get compareOptions(): Readonly<CompareOptions> | undefined {
     return this.configOptions.compare;
   }
 }

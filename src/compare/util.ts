@@ -1,5 +1,6 @@
 import {
   actualType,
+  isNonEmptyArray,
   type Value,
 } from '../lib/types';
 
@@ -29,12 +30,12 @@ export const mergeComparisonResults = (
   from: CompareResult, 
   keys?: Array<keyof CompareResult>
 ): CompareResult => {
-  if (!keys) {
-    keys = Object.keys(from) as Array<keyof CompareResult>;
-  }
-  keys.forEach((key) => {
-    mergeTo[key] = [...(mergeTo[key] ?? []), ...(from[key] ?? [])];
-  });
-  
-  return mergeTo;
+  const nKeys = (keys || Object.keys(from)) as Array<keyof CompareResult>;
+  return nKeys.reduce((acc, key) => {
+    const fromValue = from[key];
+    if (isNonEmptyArray(fromValue)) {
+      acc[key] = [...(acc[key] ?? []), ...fromValue];
+    }
+    return acc;
+  }, mergeTo);
 };

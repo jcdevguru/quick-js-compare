@@ -11,12 +11,11 @@ export type ComparisonStatus = boolean | undefined;
 export type CompareFunction<T extends Value = Value> = (
   left: T,
   right: T,
-  compareInstance: Compare,
-  subResult: CompareResult
+  compareInstance: Compare
 ) => ComparisonStatus;
 
 export const isCompareFunction = (v: unknown): v is CompareFunction =>
-  typeof v === 'function' && v.length >= 2 && v.length <= 4;
+  typeof v === 'function' && v.length >= 2;
 
 export interface Comparison {
   leftOnly: NonEmptyArray<ValueResult>,

@@ -5,10 +5,7 @@ import {
   isSetObject,
 } from '../../lib/types';
 
-import {
-  type CompareResult,
-  type ComparisonStatus,
-} from '../types';
+import type { ComparisonStatus } from '../types';
 
 import {
   isCompareScalarToken,
@@ -17,7 +14,7 @@ import {
 
 import { valueToValueResult } from '../util';
 
-export const valuesOnly = (left: Value, right: Value, compareInstance: Compare, subResult: CompareResult): ComparisonStatus => {
+export const valuesOnly = (left: Value, right: Value, compareInstance: Compare): ComparisonStatus => {
   if (!isSetObject(left) || !isSetObject(right)) {
     throw new Error('Values must be Sets');
   }
@@ -38,24 +35,17 @@ export const valuesOnly = (left: Value, right: Value, compareInstance: Compare, 
     const same = Array.from(left).filter(value => sameSet.has(value)).map(v => valueToValueResult(v));
     let comparisonStatus = undefined;
     if (leftDiff.length > 0) {
-      subResult.left = leftDiff;
       comparisonStatus = false;
     }
     if (rightDiff.length > 0) {
-      subResult.right = rightDiff;
       comparisonStatus = false;
     }
     if (same.length > 0) {
-      subResult.leftSame = same;
-      subResult.rightSame = same;
       comparisonStatus = comparisonStatus ?? true;
     }
     return comparisonStatus;
   }
 
   // Incomplete
-  subResult.left = [valueToValueResult(left)];
-  subResult.right = [valueToValueResult(right)];
-
   return false;
 }  

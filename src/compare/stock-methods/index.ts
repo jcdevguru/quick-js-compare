@@ -6,8 +6,7 @@ import {
 
 import type {
   CompareFunction,
-  ComparisonStatus,
-  CompareResult,
+  ComparisonStatus
 } from '../types';
 
 import type {
@@ -23,10 +22,10 @@ import * as SetMethods from './set';
 
 const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
 const strict = (compareFunction: CompareFunction, typeName: string): CompareFunction =>
-  (left, right, compareInst, result) =>
+  (left, right, compareInst) =>
     actualType(left) === typeName &&
     matchTypes(left, right) &&
-    compareFunction(left, right, compareInst, result);
+    compareFunction(left, right, compareInst);
 
 const exact = (left: Value, right: Value) => left === right;
 const reference = exact;
@@ -85,7 +84,7 @@ export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Re
 };
 
 // Assume that left and right are supported types and are not a mix of composite and scalar
-export const stockComparer = (left: Value, right: Value, compareInst: Compare, result: CompareResult): ComparisonStatus => {
+export const stockComparer = (left: Value, right: Value, compareInst: Compare): ComparisonStatus => {
   const config = compareInst.compareConfig as CompareMethodConfig;
   
   let comparer: CompareFunction;
@@ -116,5 +115,5 @@ export const stockComparer = (left: Value, right: Value, compareInst: Compare, r
     }
   }
 
-  return comparer(left, right, compareInst, result);
+  return comparer(left, right, compareInst);
 };
