@@ -1,6 +1,7 @@
 import type {
   Value,
   Scalar,
+  NonEmptyArray,
 } from '../../lib/types';
 
 import Compare from '../../compare';
@@ -18,12 +19,12 @@ export const isCompareFunction = (v: unknown): v is CompareFunction =>
   typeof v === 'function' && v.length >= 2 && v.length <= 4;
 
 export interface Comparison {
-  leftOnly: Array<ValueResult>,
-  left: Array<ValueResult>,
-  leftSame: Array<ValueResult>,
-  rightSame: Array<ValueResult>,
-  right: Array<ValueResult>,
-  rightOnly: Array<ValueResult>,
+  leftOnly: NonEmptyArray<ValueResult>,
+  left: NonEmptyArray<ValueResult>,
+  leftSame: NonEmptyArray<ValueResult>,
+  rightSame: NonEmptyArray<ValueResult>,
+  right: NonEmptyArray<ValueResult>,
+  rightOnly: NonEmptyArray<ValueResult>,
 };
 
 // Returned from .compare()

@@ -15,6 +15,9 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
 
+export const isNonEmptyArray = <T>(v: unknown): v is NonEmptyArray<T> => 
+  Array.isArray(v) && v.length > 0;
+
 // -------------------------------------------------------------------------------------------------
 // Types we support for comparison and rendering
 
@@ -85,7 +88,7 @@ export const isSupportedType = (v: string): v is SupportedType => isScalarType(v
 export type MapKey = string | number | symbol;
 
 export type StdObject = {
-    [key: string]: Value;
+  [key: string]: Value;
 };
 
 export type Scalar = string | number | boolean | bigint | null | undefined | symbol | Date;
