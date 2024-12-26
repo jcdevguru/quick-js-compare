@@ -2,7 +2,7 @@ import Compare from '..';
 
 import {
   type Value,
-  isSetObject,
+  SetObject,
 } from '../../lib/types';
 
 import type { ComparisonStatus } from '../types';
@@ -14,10 +14,7 @@ import {
 
 import { valueToValueResult } from '../util';
 
-export const valuesOnly = (left: Value, right: Value, compareInstance: Compare): ComparisonStatus => {
-  if (!isSetObject(left) || !isSetObject(right)) {
-    throw new Error('Values must be Sets');
-  }
+export const valuesOnly = (left: SetObject, right: SetObject, compareInstance: Compare): ComparisonStatus => {
   const compareOptions = compareInstance.compareOptions;
   const scalarIsStrict = isCompareConfigOptions(compareOptions) &&
     isCompareScalarToken(compareOptions.compareScalar) &&

@@ -1,4 +1,7 @@
 import {
+  ArrayObject,
+  MapObject,
+  SetObject,
   type Value,
   actualType,
   isScalar,
@@ -10,8 +13,8 @@ import type {
 } from '../types';
 
 import type {
-  CompareConfigOptions,
-  CompareMethodConfig
+  CompareMethodConfig,
+  StockCompareConfig
 } from '../types/config';
 
 import Compare from '..';
@@ -34,7 +37,7 @@ const alwaysSame = () => true;
 const alwaysDifferent = () => false;
 const alwaysUndefined = () => undefined;
 
-export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Record<string, CompareFunction>> = {
+export const compareTokenToStockMethodMap: StockCompareConfig = {
   compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
@@ -45,6 +48,7 @@ export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Re
     valueOrder: compareObject,
     keyOnly: compareObject,
     valuesOnly: compareObject,
+    sizeOnly: compareObject,
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
@@ -53,8 +57,13 @@ export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Re
   compareMap: {
     reference,
     strict: exact, // TODO: implement
-    keyValueOrder: (left, right) => left === right, // TODO: implement
-    keyValue: (left, right) => left === right, // TODO: implement
+    keyValueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    keyValue: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    keyOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    keyOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    valueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    valuesOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    sizeOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
@@ -63,9 +72,9 @@ export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Re
   compareArray: {
     reference,
     strict: exact, // TODO: implement
-    valueOrder: (left, right) => left === right, // TODO: implement
-    valuesOnly: (left, right) => left === right, // TODO: implement
-    sizeOnly: (left, right) => left === right, // TODO: implement
+    valueOrder: (left: ArrayObject, right: ArrayObject) => left === right, // TODO: implement
+    valuesOnly: (left: ArrayObject, right: ArrayObject) => left === right, // TODO: implement
+    sizeOnly: (left: ArrayObject, right: ArrayObject) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
@@ -75,7 +84,7 @@ export const compareTokenToStockMethodMap: Record<keyof CompareConfigOptions, Re
     reference,
     strict: exact, // TODO: implement
     valuesOnly: SetMethods.valuesOnly,
-    sizeOnly: (left, right) => left === right, // TODO: implement
+    sizeOnly: (left: SetObject, right: SetObject) => left === right, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,

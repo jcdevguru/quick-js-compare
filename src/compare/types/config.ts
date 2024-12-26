@@ -1,4 +1,4 @@
-import type { AtLeastOne } from '../../lib/types';
+import type { ArrayObject, AtLeastOne, Composite, MapObject, Scalar, SetObject } from '../../lib/types';
 import { OptionError } from '../../lib/error';
 
 import {
@@ -20,7 +20,7 @@ const CMP_GENERAL_TOKENS = ['strict', 'typeOnly', 'alwaysSame', 'alwaysDifferent
 const CMP_SCALAR_TOKENS = [ ...CMP_GENERAL_TOKENS, 'abstract'] as const;
 const CMP_GENERAL_COMPOSITE_TOKENS = [...CMP_GENERAL_TOKENS, 'reference'] as const;
 
-const CMP_KEYED_OBJECT_TOKENS = [...CMP_GENERAL_COMPOSITE_TOKENS, 'keyValueOrder', 'keyValue', 'keyOrder', 'keyOnly'] as const;
+const CMP_KEYED_OBJECT_TOKENS = [...CMP_GENERAL_COMPOSITE_TOKENS, 'keyValueOrder', 'keyValue', 'keyOrder', 'keyOnly', 'valuesOnly', 'sizeOnly'] as const;
 const CMP_COLLECTION_TOKENS = [...CMP_GENERAL_COMPOSITE_TOKENS, 'valuesOnly', 'sizeOnly'] as const;
 const CMP_ORDERED_OBJECT_TOKENS = [...CMP_GENERAL_COMPOSITE_TOKENS, 'valueOrder'] as const;
 
@@ -45,11 +45,11 @@ const cmpTokenUnion = defineUnionForType(...CMP_SCALAR_TOKENS, ...CMP_COMPOSITE_
 export type CompareOptionToken = typeof cmpTokenUnion.type[number];
 
 // Create a type that can be a token or a function
-export type CompareScalar = CompareScalarToken | CompareFunction;
-export type CompareObject = CompareCompositeToken | CompareFunction;
-export type CompareArray = CompareArrayToken | CompareFunction;
-export type CompareMap = CompareMapToken | CompareFunction;
-export type CompareSet = CompareSetToken | CompareFunction;
+export type CompareScalar = CompareScalarToken | CompareFunction<Scalar>;
+export type CompareObject = CompareCompositeToken | CompareFunction<Composite>;
+export type CompareArray = CompareArrayToken | CompareFunction<ArrayObject>;
+export type CompareMap = CompareMapToken | CompareFunction<MapObject>;
+export type CompareSet = CompareSetToken | CompareFunction<SetObject>;
 
 export interface CompareConfigOptions {
   compareScalar: CompareScalar
@@ -175,4 +175,12 @@ export const validateCompareConfig = (v: unknown): v is CompareConfig => {
       }
   }
   return true;  
+};
+
+export type StockCompareConfig = {
+  compareScalar: Record<CompareScalarToken, CompareFunction<Scalar>>,
+  compareObject: Record<CompareCompositeToken, CompareFunction<Composite>>,
+  compareMap: Record<CompareMapToken, CompareFunction<MapObject>>,
+  compareArray: Record<CompareArrayToken, CompareFunction<ArrayObject>>,
+  compareSet: Record<CompareSetToken, CompareFunction<SetObject>>,
 };
