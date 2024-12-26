@@ -4,26 +4,32 @@ Comparing two values in JavaScript is a common task and simple in description, b
 
 Quick JS Compare is a utility library for performing quick comparisons between any two values in JavaScript or TypeScript. It directly supports comparison of scalar types, objects, Maps, and Sets, but can be tailored to compare any sort of data in any way. Flexibility is provided through an options object that accepts both parameters and callback functions, permitting you to specify comparison in any way that is needed.
 
-Most of all, it's quick and lightweight.  Care is taken in the implementation to avoid redundant operations or unnecessary storage.  It also does not use JSON serialization or parsing in any operation.
+Most of all, it's quick and lightweight. Care is taken in the implementation to avoid redundant operations or unnecessary storage.  It also does not use JSON serialization or parsing in any operation.
 
-For now, this is a WIP.  Feel free to give feedback on any topic from this README.
+## Installation
+
+- Use Yarn or NPM to install Quick JS Compare.
 
 ## Usage
 
-- Use Yarn or NPM to install Quick JS Compare.
-- In TypeScript or JavaScript, access the base method from the module:
+### Loading
+
+- In TypeScript or JavaScript, access the utility function or class from the module:
 
 ```ts
-import { compare } from 'quick-js-compare'; // TypeScript, NodeJS
+import { compare } from 'quick-js-compare'; // function for TypeScript, ES6+
+import { Compare } from 'quick-js-compare'; // class for TypeScript, ES6+
 ```
 
 or
 
 ```js
-const { compare } = require('quick-js-compare'); // Other JS
+const { compare } = require('quick-js-compare'); // function for JavaScript
+const { Compare } = require('quick-js-compare'); // class for ES6+
 ```
+### Calling the function
 
-The method can be invoked as follows:
+The function can be invoked as follows:
 
 ```js
 const value1 = ....<any value>...;
@@ -31,6 +37,8 @@ const value2 = ...<any other value>...;
 
 const comparison = compare(value1, value2);
 ```
+
+The result will be rendered as an object with properties `left`, `same`, `right`, and `status` which are populated with the results of the comparison.  Properties `left` and `right` contain the differences found in the first and second value, respective, and `same` will hold what matches.
 
 ### Directly supported types
 
@@ -115,35 +123,26 @@ will result in:
 
 ```js
 {
-  "result": [
-    {
-      "a": 1,
-      "x": 5,
-      "details": {
-        "cost": 2.14
-      }
-    },
-    {
-      "b": "abc",
-      "c": "def",
-      "details": {
-        "title": "Shopping list"
-      }
-    },
-    {
-      "b": "abc",
-      "c": "def",
-      "details": {
-        "title": "Shopping list"
-      }
-    },
-    {
-      "a": 2,
-      "details": {
-        "cost": 2.9
-      }
+  "left": {
+    "a": 1,
+    "x": 5,
+    "details": {
+      "cost": 2.14
     }
-  ],
+  },
+  "same": {
+    "b": "abc",
+    "c": "def",
+    "details": {
+      "title": "Shopping list"
+    }
+  },
+  "right": {
+    "a": 2,
+    "details": {
+      "cost": 2.9
+    }
+  },
   "status": false
 }
 ```
@@ -231,21 +230,21 @@ String values for the `compare` option behave as shorthand helpers for a style o
   * `compareArray`: `"strict"`
   * `compareSet`: `"strict"`
 
-* `Equivalent`: compare for functional equivalence. Scalar values are considered matching only if identical by type and value. Keyed objects of any type will be considered matching if their key/value pairs match identically and if keys are in same order.  
+* `Equivalent`: compare for functional equivalence.  Objects will match with objects or with maps if their keys and values match and are in the same orders.  Arrays will match other arrays if values match and are in same order.  Sets will match each other if they contain the same values.  Arrays will match with sets if they contain the same values.
   * `compareScalar`: `"strict"`
   * `compareObject`: `"keyValueOrder"`
   * `compareMap`: `"keyValueOrder"`
   * `compareArray`: `"valueOrder"`
   * `compareSet`: `"valuesOnly"`
 
-* `General`: compare for general equivalence. Scalar values will be considered matching by "truthy" or "falsy" comparisons. Keyed objects of any type will be considered matching if their key/value pairs match identically by key and value, regardless of order.  Arrays and sets will be considered matching if they contain the same values.
+* `General`: compare for general equivalence. Scalars will match if they are abstractly equivalent, i.e., if the abstract equality operator `==` evaluates to `true`. Objects will match if their key/value pairs match identically by key and value, regardless of order. Arrays will match other arrays and sets if they contain the same values, regardless order.
   * `compareScalar`: `"abstract"`
   * `compareObject`: `"keyValue"`
   * `compareMap`: `"keyValue"`
   * `compareArray`: `"valuesOnly"`
   * `compareSet`: `"valuesOnly"`
 
-* `Structure`: compare for identical form, not content
+* `Structure`: compare for identical form, not content. Scalars will always be considered matching one another. Objects will match objects or maps if they have the same keys, regardless of their order. Arrays and sets will match if they have the same size.
   * `compareScalar`: `"alwaysSame"`
   * `compareObject`: `"keyOnly"`
   * `compareMap`: `"keyOnly"`
