@@ -28,8 +28,22 @@ describe('successful compare', () => {
       expect(r?.rightOnly).toBeUndefined();
     });
   };
-
+  
   const testMismatchingCompare = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
+    test(testLabel(testName, options), () => {
+      const c = new Compare(options);
+      const r = c.compare(left, right).result;
+      expect(r).toBeInstanceOf(Object);
+      expect(r?.leftSame).toBeUndefined();
+      expect(r?.rightSame).toBeUndefined();
+      expect(r?.left?.[0].value).toEqual(left);
+      expect(r?.right?.[0].value).toEqual(right);
+      expect(r?.leftOnly).toBeUndefined();
+      expect(r?.rightOnly).toBeUndefined();
+    });
+  };
+
+  const testMismatchingSet = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
     test(testLabel(testName, options), () => {
       const c = new Compare(options);
       const r = c.compare(left, right).result;
@@ -55,4 +69,5 @@ describe('successful compare', () => {
   testMismatchingCompare('mismatching booleans', true, false);
 
   testMismatchingCompare('mismatching types', 1, '1');
+  testMismatchingSet('mismatching sets', new Set([1, 2, 3]), new Set([1, 2, 4]), { compare: { compareSet: 'valuesOnly' } });
 });

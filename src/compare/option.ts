@@ -1,4 +1,4 @@
-import { isCompareFunction } from './types';
+import { CompareFunction, isCompareFunction } from './types';
 
 import {
   type CompareConfigOptions,
@@ -65,7 +65,7 @@ export const compareConfigToMethodConfig = (compareConfigOptions: MinimalCompare
     if (isCompareFunction(spec)) {
       compareMethod = spec;
     } else if (isCompareConfigToken(spec)) { 
-      compareMethod = compareTokenToStockMethodMap[k][spec];
+      compareMethod = (compareTokenToStockMethodMap[k] as Record<string, CompareFunction>)[spec];
     } else {
       throw new Error('Error: unexpected compare option specfication');
     }

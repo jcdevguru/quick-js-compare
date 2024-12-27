@@ -2,10 +2,10 @@ import {
   type Value,
   type Reference,
   type RefSet,
-  isComposite,
   actualType,
   isSupportedType,
   isCompositeType,
+  isReference,
 } from '../lib/types';
 
 import {
@@ -45,7 +45,7 @@ import {
 
 const nonCircular = (value: Value, refSet: RefSet): boolean => {
   let rc = true;
-  if (isComposite(value)) {
+  if (isReference(value)) {
     if (refSet.has(value)) {
       rc = false;
     } else {
@@ -107,24 +107,29 @@ export default class Compare {
   }
 
   protected comparer = (left: Value, right: Value): ComparisonStatus => {
+    let status: ComparisonStatus = undefined;
+
     const leftType = actualType(left);
     const rightType = actualType(right);
-    let status: ComparisonStatus = undefined;
 
     // types of operands must be supported
     // and circular references must be detected and ignored
-    if (
-      nonCircular(left, this.refSets.left) &&
-      nonCircular(right, this.refSets.right) &&
-      isSupportedType(leftType) &&
-      isSupportedType(rightType)
-    ) {
-        // a composite is always considered different from a non-composite
-        if (isCompositeType(leftType) !== isCompositeType(rightType)) {
+    if (isSupportedType(leftType) && isSupportedType(rightType)) {
+      status = left === right || undefined;
+      if (!status) {
+        const leftIsComposite = isCompositeType(leftType);
+        const rightIsComposite = isCompositeType(rightType);
+        if (leftIsComposite !== rightIsComposite) {
           status = false;
-        } else {
+        } else if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
           status = this.compareFunction(left, right, this);
         }
+      }
+    }
+
+    if (status === undefined) {
+      // If we don't have a status, we don't have a result
+      return status;
     }
 
     const leftResult = valueToValueResult(left);
@@ -133,7 +138,7 @@ export default class Compare {
     if (status) {
       this.workingResult.leftSame = [leftResult];
       this.workingResult.rightSame = [rightResult];
-    } else if (status === false) {
+    } else {
       this.workingResult.left = [leftResult];
       this.workingResult.right = [rightResult];
     }
@@ -142,7 +147,7 @@ export default class Compare {
       if (status) {
         mergeComparisonResults(this.currentResult, this.workingResult, ['leftSame']);
         mergeComparisonResults(this.currentResult, this.workingResult, ['rightSame']);
-      } else if (status === false) {
+      } else {
         mergeComparisonResults(this.currentResult, this.workingResult, ['leftOnly', 'left']);
         mergeComparisonResults(this.currentResult, this.workingResult, ['right', 'rightOnly']);
       }
@@ -174,7 +179,9 @@ export default class Compare {
       this.workingResult = {};
       this.comparer(leftArray[i].value, rightArray[i].value);
     }
-    this.comparisonResult = this.currentResult ?? {};
+    if (this.currentResult) {
+      this.comparisonResult = this.currentResult;
+    }
 
     return this;
   }

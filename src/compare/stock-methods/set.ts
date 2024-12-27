@@ -16,10 +16,11 @@ import { valueToValueResult } from '../util';
 
 export const valuesOnly = (left: SetObject, right: SetObject, compareInstance: Compare): ComparisonStatus => {
   const compareOptions = compareInstance.compareOptions;
-  const scalarIsStrict = isCompareConfigOptions(compareOptions) &&
+  if (
+    isCompareConfigOptions(compareOptions) &&
     isCompareScalarToken(compareOptions.compareScalar) &&
-    compareOptions.compareScalar === 'strict';
-  if (scalarIsStrict) {
+    compareOptions.compareScalar === 'strict'
+  ) {
     const sameSet = new Set<Value>();
     const [largerSet, smallerSet] = left.size > right.size ? [left, right] : [right, left];
     for (const v of smallerSet) {
@@ -45,4 +46,13 @@ export const valuesOnly = (left: SetObject, right: SetObject, compareInstance: C
 
   // Incomplete
   return false;
-}  
+}
+
+export const sizeOnly = (left: SetObject, right: SetObject): ComparisonStatus => {
+  return left.size === right.size;
+}
+
+export const strict = (left: SetObject, right: SetObject): ComparisonStatus => {
+  // Incomplete
+  return left === right;
+}
