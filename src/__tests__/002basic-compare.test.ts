@@ -31,13 +31,17 @@ describe('compare - basic operations', () => {
   testMatch('exact matching numbers', 1, 1);
   testMatch('exact matching booleans', true, true);
 
-  testMatch('abstract matching scalars', 0, false, { compare: 'General' });
-  testMatch('abstract matching scalars', '', 0, { compare: 'General' });
-
   testMismatch('mismatching strings', 'test-string1', 'test-string2');
   testMismatch('mismatching numbers', 1, 2);
   testMismatch('mismatching booleans', true, false);
-  testMismatch('scalars and composites - always mismatch', 'mismatch-me', ['mismatch-me']);
 
-  testMismatch('mismatching types', 1, '1');
+  testMatch('abstract matching scalars 1', 0, false, { compare: 'General' });
+  testMatch('abstract matching scalars 2', '', 0, { compare: 'General' });
+
+  testMatch('scalar type only', 1, 91, { compare: { compareScalar: 'typeOnly' } });
+  testMatch('array type only', [1, 2, 3], ['abc'], { compare: { compareArray: 'typeOnly' } });
+
+
+  testMismatch('scalars and composites - always mismatch', 'mismatch-me', ['mismatch-me']);
+  testMismatch('mismatching scalar types', 1, '1');
 });
