@@ -4,70 +4,40 @@
 import Compare from '../compare';
 import { type MinimalConfigOptions } from '../lib/option';
 import { type Value } from '../lib/types';
+import { compareTestLabel } from './util';
 
-describe('successful compare', () => {
-  const testLabel = (testName: string, options?: MinimalConfigOptions) => {
-    if (!options) {
-      return `${testName} (no options)`;
-    }
-    const optionString = typeof options.compare == 'string' ? options.compare : JSON.stringify(options.compare);
-
-    return `${testName} (compare options: ${optionString})`;
-  };
-
-  const testMatchingCompare = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
-    test(testLabel(testName, options), () => {
+describe('compare - basic operations', () => {
+  const testMatch = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
+    test(compareTestLabel(testName, options), () => {
       const c = new Compare(options);
-      const r = c.compare(left, right).result;
-      expect(r).toBeInstanceOf(Object);
-      expect(r?.leftSame?.[0]?.value).toEqual(left);
-      expect(r?.rightSame?.[0]?.value).toEqual(right);
-      expect(r?.left).toBeUndefined();
-      expect(r?.right).toBeUndefined();
-      expect(r?.leftOnly).toBeUndefined();
-      expect(r?.rightOnly).toBeUndefined();
+      expect(c.compare(left, right).result).toStrictEqual({
+        leftSame: [expect.objectContaining({value: left})],
+        rightSame: [expect.objectContaining({value: right})]
+      });
     });
   };
   
-  const testMismatchingCompare = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
-    test(testLabel(testName, options), () => {
+  const testMismatch = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
+    test(compareTestLabel(testName, options), () => {
       const c = new Compare(options);
-      const r = c.compare(left, right).result;
-      expect(r).toBeInstanceOf(Object);
-      expect(r?.leftSame).toBeUndefined();
-      expect(r?.rightSame).toBeUndefined();
-      expect(r?.left?.[0].value).toEqual(left);
-      expect(r?.right?.[0].value).toEqual(right);
-      expect(r?.leftOnly).toBeUndefined();
-      expect(r?.rightOnly).toBeUndefined();
+      expect(c.compare(left, right).result).toStrictEqual({
+        left: [expect.objectContaining({value: left})],
+        right: [expect.objectContaining({value: right})]
+      });
     });
   };
 
-  const testMismatchingSet = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
-    test(testLabel(testName, options), () => {
-      const c = new Compare(options);
-      const r = c.compare(left, right).result;
-      expect(r).toBeInstanceOf(Object);
-      expect(r?.leftSame).toBeUndefined();
-      expect(r?.rightSame).toBeUndefined();
-      expect(r?.left?.[0].value).toEqual(left);
-      expect(r?.right?.[0].value).toEqual(right);
-      expect(r?.leftOnly).toBeUndefined();
-      expect(r?.rightOnly).toBeUndefined();
-    });
-  };
+  testMatch('exact matching strings', 'test-string1', 'test-string1');
+  testMatch('exact matching numbers', 1, 1);
+  testMatch('exact matching booleans', true, true);
 
-  testMatchingCompare('exact matching strings', 'test-string1', 'test-string1');
-  testMatchingCompare('exact matching numbers', 1, 1);
-  testMatchingCompare('exact matching booleans', true, true);
+  testMatch('abstract matching scalars', 0, false, { compare: 'General' });
+  testMatch('abstract matching scalars', '', 0, { compare: 'General' });
 
-  testMatchingCompare('abstract matching scalars', 0, false, { compare: 'General' });
-  testMatchingCompare('abstract matching scalars', 0, false, { compare: 'General' });
+  testMismatch('mismatching strings', 'test-string1', 'test-string2');
+  testMismatch('mismatching numbers', 1, 2);
+  testMismatch('mismatching booleans', true, false);
+  testMismatch('scalars and composites - always mismatch', 'mismatch-me', ['mismatch-me']);
 
-  testMismatchingCompare('mismatching strings', 'test-string1', 'test-string2');
-  testMismatchingCompare('mismatching numbers', 1, 2);
-  testMismatchingCompare('mismatching booleans', true, false);
-
-  testMismatchingCompare('mismatching types', 1, '1');
-  testMismatchingSet('mismatching sets', new Set([1, 2, 3]), new Set([1, 2, 4]), { compare: { compareSet: 'valuesOnly' } });
+  testMismatch('mismatching types', 1, '1');
 });

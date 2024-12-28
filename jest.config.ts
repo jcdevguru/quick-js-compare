@@ -1,7 +1,9 @@
 const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testPathIgnorePatterns: ['.history', 'node_modules', 'dist', 'coverage'],
+  testMatch: [
+    "**/*.test.ts"
+  ],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
