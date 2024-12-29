@@ -85,14 +85,14 @@ export const isFunctionType = (v: string): v is FunctionType => functionTypeUnio
 export const isCompositeType = (v: string): v is CompositeType => compositeTypeUnion.is(v);
 export const isSupportedType = (v: string): v is SupportedType => isScalarType(v) || isCompositeType(v);
 
-export type MapKey = string | number | symbol;
+export type ObjectKey = string | number | symbol;
 
 export type StdObject = {
-  [key: string]: Value;
+  [key: ObjectKey]: Value;
 };
 
 export type Scalar = string | number | boolean | bigint | null | undefined | symbol | Date;
-export type MapObject = Map<MapKey, Value>;
+export type MapObject = Map<ObjectKey, Value>;
 export type ArrayObject = Array<Value>;
 export type SetObject = Set<Value>;
 export type FunctionObject = (...args: unknown[]) => unknown;
