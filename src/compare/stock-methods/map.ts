@@ -1,5 +1,5 @@
-import { MapObject } from "../../lib/types";
-import { ComparisonStatus } from "../types";
+import type { MapObject } from "../../lib/types";
+import type { ComparisonStatus } from "../types";
 
 export const sizeOnly = (left: MapObject, right: MapObject): ComparisonStatus => {
   return left.size === right.size;

@@ -1,8 +1,8 @@
-import Compare from '..';
+import type Compare from '..';
 
-import {
-  type Value,
+import type {
   SetObject,
+  Value
 } from '../../lib/types';
 
 import type { ComparisonStatus } from '../types';

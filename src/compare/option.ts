@@ -1,4 +1,7 @@
-import { CompareFunction, isCompareFunction } from './types';
+import {
+  type CompareFunction,
+  isCompareFunction
+} from './types';
 
 import {
   type CompareConfigOptions,

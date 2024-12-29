@@ -26,8 +26,8 @@ import { OptionError } from '../lib/error';
 import {
   type CompareResult,
   type CompareFunction,
-  isCompareFunction,
-  ComparisonStatus,
+  type ComparisonStatus,
+  isCompareFunction
 } from './types';
 
 import {

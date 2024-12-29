@@ -1,4 +1,4 @@
-import Compare from '..';
+import type Compare from '..';
 
 import {
   type Value,

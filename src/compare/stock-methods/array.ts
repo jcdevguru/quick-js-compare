@@ -1,5 +1,5 @@
-import { ArrayObject } from "../../lib/types";
-import { ComparisonStatus } from "../types";
+import type { ArrayObject } from "../../lib/types";
+import type { ComparisonStatus } from "../types";
 
 export const sizeOnly = (left: ArrayObject, right: ArrayObject): ComparisonStatus => {
   return left.length === right.length;

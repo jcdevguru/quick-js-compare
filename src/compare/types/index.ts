@@ -4,7 +4,7 @@ import type {
   NonEmptyArray,
 } from '../../lib/types';
 
-import Compare from '../../compare';
+import type Compare from '../../compare';
 
 export type ComparisonStatus = boolean | undefined;
 

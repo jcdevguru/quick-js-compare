@@ -1,8 +1,7 @@
 import {
-  ArrayObject,
-  MapObject,
-  SetObject,
   type Value,
+  type ArrayObject,
+  type MapObject,
   actualType,
   isScalar,
 } from '../../lib/types';
@@ -17,7 +16,7 @@ import type {
   StockCompareConfig
 } from '../types/config';
 
-import Compare from '..';
+import type Compare from '..';
 
 import { compareObject } from './object';
 
@@ -46,14 +45,14 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
-    strict: compositeStrict(compareObject, 'StdObject'),
-    keyValueOrder: compareObject,
-    keyValue: compareObject,
-    keyOrder: compareObject,
-    valueOrder: compareObject,
-    keyOnly: compareObject,
-    valuesOnly: compareObject,
-    sizeOnly: compareObject,
+    strict: compositeStrict(compareObject, 'StdObject'), // TODO: implement
+    keyValueOrder: compareObject, // TODO: implement
+    keyValue: compareObject, // TODO: implement
+    keyOrder: compareObject, // TODO: implement
+    valueOrder: compareObject, // TODO: implement
+    keysOnly: compareObject, // TODO: implement
+    valuesOnly: compareObject, // TODO: implement
+    sizeOnly: compareObject, // TODO: implement
     typeOnly: matchTypes,
     alwaysSame,
     alwaysDifferent,
@@ -65,7 +64,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
     keyValueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     keyValue: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     keyOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
-    keyOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    keysOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     valueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     valuesOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     sizeOnly: MapMethods.sizeOnly,
@@ -87,7 +86,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   },
   compareSet: {
     reference,
-    strict: compositeStrict<SetObject>(SetMethods.strict, 'SetObject'),
+    strict: compositeStrict(SetMethods.strict, 'SetObject'),
     valuesOnly: SetMethods.valuesOnly,
     sizeOnly: SetMethods.sizeOnly,
     typeOnly: matchTypes,
