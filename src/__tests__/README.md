@@ -15,7 +15,7 @@ Per `jest.config.ts` and `tsconfig.json` at the root of this project:
 In this directory, tests are expected to being with a three-digit sequence and a name that describes its purpose.  Here are the conventions to use so far:
 
 * `000`: Validate Jest configuration
-* `001` - `099`: Validate construction and option management
+* `001` - `099`: Validate foundational operations (construction, type checking, etc.)
 * `101` - `199`: Comparisons with stock configurations
 * `201` - `299`: Comparisons with user-configurations
 * `301` - `399`: Rendering use cases
