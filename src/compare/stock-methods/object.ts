@@ -45,7 +45,7 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
         distilledToken = 'valuesOnly';
         break;
       case 'keyOrder':
-      case 'keyOnly':
+      case 'keysOnly':
         distilledToken = 'alwaysDifferent';
         break;
     }
@@ -103,7 +103,7 @@ const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunct
   keyValueOrder: dummyCompare,
   keyValue: dummyCompare,
   keyOrder: dummyCompare,
-  keyOnly: dummyCompare,
+  keysOnly: dummyCompare,
   valueOrder: dummyCompare,
   valuesOnly
 };

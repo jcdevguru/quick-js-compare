@@ -184,7 +184,7 @@ The following combinations of properties and values are supported when options f
     * `"keyValue"`: match when compared objects have matching key/value pairs, regardless of order
     * `"keyOrder"`: match when compared objects have matching keys in the same order, regardless of their values
     * `"valueOrder"`: match when compared objects have matching values in the same order, regardless of their keys 
-    * `"keyOnly"`: match when compared objects have matching keys, regardless of their order or their values 
+    * `"keysOnly"`: match when compared objects have matching keys, regardless of their order or their values 
     * `"valuesOnly"`: match when compared objects have matching values, regardless of their order or their keys
     * `"typeOnly"`: match when identical in type only, without comparing values
     * `"alwaysSame"`: compared objects always match, regardless of value, type, or structure
@@ -246,8 +246,8 @@ String values for the `compare` option behave as shorthand helpers for a style o
 
 * `Structure`: compare for identical form, not content. Scalars will always be considered matching one another. Objects will match objects or maps if they have the same keys, regardless of their order. Arrays and sets will match if they have the same size.
   * `compareScalar`: `"alwaysSame"`
-  * `compareObject`: `"keyOnly"`
-  * `compareMap`: `"keyOnly"`
+  * `compareObject`: `"keysOnly"`
+  * `compareMap`: `"keysOnly"`
   * `compareArray`: `"sizeOnly"`
   * `compareSet`: `"sizeOnly"`
 
