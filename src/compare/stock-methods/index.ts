@@ -64,7 +64,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
     keyValueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     keyValue: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     keyOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
-    keysOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
+    keysOnly: MapMethods.keysOnly,
     valueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     valuesOnly: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     sizeOnly: MapMethods.sizeOnly,

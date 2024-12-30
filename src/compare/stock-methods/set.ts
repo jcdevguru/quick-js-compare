@@ -1,8 +1,9 @@
 import type Compare from '..';
 
+import { commonSetElements } from '../../lib/util';
+
 import type {
-  SetObject,
-  Value
+  SetObject
 } from '../../lib/types';
 
 import type { ComparisonStatus } from '../types';
@@ -21,13 +22,7 @@ export const valuesOnly = (left: SetObject, right: SetObject, compareInstance: C
     isCompareScalarToken(compareOptions.compareScalar) &&
     compareOptions.compareScalar === 'strict'
   ) {
-    const sameSet = new Set<Value>();
-    const [largerSet, smallerSet] = left.size > right.size ? [left, right] : [right, left];
-    for (const v of smallerSet) {
-      if (largerSet.has(v)) {
-        sameSet.add(v);
-      }
-    }
+    const sameSet = commonSetElements(left, right);
     const leftDiff = Array.from(left).filter(value => !sameSet.has(value)).map(v => valueToValueResult(v));
     const rightDiff = Array.from(right).filter(value => !sameSet.has(value)).map(v => valueToValueResult(v));
     const same = Array.from(left).filter(value => sameSet.has(value)).map(v => valueToValueResult(v));

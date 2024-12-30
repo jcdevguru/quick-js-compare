@@ -2,12 +2,9 @@ import type Compare from '..';
 
 import {
   type Value,
-  type SetObject,
-  type MapObject,
   actualType,
   isKeyedObjectType,
   isOrderedObjectType,
-  isSetObject,
 } from '../../lib/types';
 
 import {
@@ -23,7 +20,6 @@ import {
   isCompareMethodConfig,
 } from '../types/config';
 
-import * as SetMethods from './set';
 
 // Because object comparison is supported for values of different types,
 // we use this method to "gracefully degrade" the comparison method if 
@@ -67,37 +63,6 @@ const distillComparisonType = (left: Value, right: Value, token: CompareComposit
 
 const dummyCompare: CompareFunction = () => false;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const values = (v: Value): Iterable<Value> => {
-  const typeName = actualType(v);
-  switch (typeName) {
-    case 'ArrayObject':
-    case 'StdObject':
-      return Object.values(v as Array<Value>);
-    case 'MapObject':
-      return (v as MapObject).values();
-    case 'SetObject':
-      return v as SetObject;
-    default:
-      throw new Error('Unsupported condition: value is not a composite');
-  }
-}
-
-const valuesOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare) => {
-  if (isSetObject(left) && isSetObject(right)) {
-    return SetMethods.valuesOnly(left, right, compareInstance);
-  }
-  // Incomplete
-  return false;
-}
-
-// const keyOnly: CompareFunction = (left: Value, right: Value, compareInstance: Compare) => {
-//   if (isKeyedObject(left) && isKeyedObject(right)) {
-//     return SetMethods.valuesOnly(left, right, compareInstance);
-//   }
-//   // Incomplete
-//   return false;
-// }
 
 const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunction>> = {
   keyValueOrder: dummyCompare,
@@ -105,7 +70,7 @@ const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunct
   keyOrder: dummyCompare,
   keysOnly: dummyCompare,
   valueOrder: dummyCompare,
-  valuesOnly
+  valuesOnly: dummyCompare,
 };
 
 export const compareObject = (
