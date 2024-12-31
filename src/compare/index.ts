@@ -65,8 +65,7 @@ export default class Compare {
   };
 
   private comparisonResult: CompareResult;
-  private currentResult: CompareResult | undefined;
-  private workingResult: CompareResult;
+  private workingResult: CompareResult | undefined;
 
   private compareFunction: CompareFunction = stockComparer;
 
@@ -102,8 +101,7 @@ export default class Compare {
 
   constructor(options?: MinimalConfigOptions) {
     this.processOptions(options ?? Compare.defaultOptions);
-    this.workingResult = {};
-    this.comparisonResult = this.workingResult;
+    this.comparisonResult = {};
   }
 
   protected comparer = (left: Value, right: Value): ComparisonStatus => {
@@ -115,13 +113,11 @@ export default class Compare {
     // types of operands must be supported
     // and circular references must be detected and ignored
     if (isSupportedType(leftType) && isSupportedType(rightType)) {
-      status = left === right || undefined;
-      if (!status) {
-        const leftIsComposite = isCompositeType(leftType);
-        const rightIsComposite = isCompositeType(rightType);
-        if (leftIsComposite !== rightIsComposite) {
-          status = false;
-        } else if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
+      if (isCompositeType(leftType) !== isCompositeType(rightType)) {
+        status = false;
+      } else if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
+        status = left === right || undefined;
+        if (!status) {
           status = this.compareFunction(left, right, this);
         }
       }
@@ -136,23 +132,11 @@ export default class Compare {
     const rightResult = valueToValueResult(right);
 
     if (status) {
-      this.workingResult.leftSame = [leftResult];
-      this.workingResult.rightSame = [rightResult];
+      this.comparisonResult.leftSame = [leftResult];
+      this.comparisonResult.rightSame = [rightResult];
     } else {
-      this.workingResult.left = [leftResult];
-      this.workingResult.right = [rightResult];
-    }
-
-    if (this.currentResult) {
-      if (status) {
-        mergeComparisonResults(this.currentResult, this.workingResult, ['leftSame']);
-        mergeComparisonResults(this.currentResult, this.workingResult, ['rightSame']);
-      } else {
-        mergeComparisonResults(this.currentResult, this.workingResult, ['leftOnly', 'left']);
-        mergeComparisonResults(this.currentResult, this.workingResult, ['right', 'rightOnly']);
-      }
-    } else {
-      this.currentResult = this.workingResult
+      this.comparisonResult.left = [leftResult];
+      this.comparisonResult.right = [rightResult];
     }
 
     return status;
@@ -171,18 +155,19 @@ export default class Compare {
     if (!leftArray || !rightArray) {
       return this;
     }
-    this.currentResult = undefined;
+
+    // This just clears out leftSame and rightSame
     this.comparisonResult = mergeComparisonResults({}, this.comparisonResult, ['leftOnly', 'left', 'rightOnly', 'right']);
+
+    this.refSets.left = new WeakSet<Reference>();
+    this.refSets.right = new WeakSet<Reference>();
 
     // Since arrays are same length, we just use leftSame for the length
     for (let i = 0; i < leftArray.length; i++) {
       this.workingResult = {};
       this.comparer(leftArray[i].value, rightArray[i].value);
     }
-    if (this.currentResult) {
-      this.comparisonResult = this.currentResult;
-    }
-
+  
     return this;
   }
 

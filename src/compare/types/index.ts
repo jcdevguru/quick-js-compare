@@ -1,7 +1,7 @@
 import type {
   Value,
-  Scalar,
   NonEmptyArray,
+  ObjectKey,
 } from '../../lib/types';
 
 import type Compare from '../../compare';
@@ -31,12 +31,11 @@ export type CompareResult = Partial<Comparison>;
 
 export type ValueResultProps = {
   index?: number,
-  key?: Scalar,
-  comparisonResult?: CompareResult,
+  key?: ObjectKey,
+  subResult?: Array<ValueResult>,
 };
 
 export type ValueResult = {
   typeName: string,
   value: Value,
 } & ValueResultProps;
-
