@@ -33,6 +33,9 @@ export type CompareResult = Partial<Comparison> & {
   subResult?: CompareResult,
 };
 
+export type ComparisonKey = keyof Comparison;
+export type CompareResultKey = keyof CompareResult;
+
 export type ValueResultProps = {
   index?: number,
   key?: ObjectKey,
