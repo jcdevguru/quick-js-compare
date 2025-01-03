@@ -45,7 +45,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
-    strict: compositeStrict(compareObject, 'StdObject'), // TODO: implement
+    strict: compositeStrict(compareObject, 'RecordObject'), // TODO: implement
     keyValueOrder: compareObject, // TODO: implement
     keyValue: compareObject, // TODO: implement
     keyOrder: compareObject, // TODO: implement
@@ -108,7 +108,7 @@ export const stockComparer = (left: Value, right: Value, compareInst: Compare): 
     const rightType = actualType(right);
     if (leftType === rightType) {
       switch (leftType) {
-        case 'StdObject':
+        case 'RecordObject':
           comparer = config.compareObjectMethod;
           break;
         case 'Map':

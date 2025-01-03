@@ -3,7 +3,7 @@ import {
   type Composite, 
   type MapObject, 
   type SetObject,
-  type StdObject,
+  type RecordObject,
   type Value,
   actualType
 } from "../../lib/types";
@@ -17,8 +17,8 @@ const typeHandlers: Record<string, TypeHandler> = {
   ArrayObject: {
     values: (v) => v as ArrayObject,
   },
-  StdObject: {
-    values: (v) => Object.values(v as StdObject),
+  RecordObject: {
+    values: (v) => Object.values(v as RecordObject),
   },
   MapObject: {
     values: (v) => (v as MapObject).values(),

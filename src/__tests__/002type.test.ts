@@ -3,7 +3,7 @@ import {
   type Value,
   type ArrayObject,
   type MapObject,
-  type StdObject,
+  type RecordObject,
   type SetObject,
   type FunctionObject,
   isValue,
@@ -27,12 +27,12 @@ describe('verify compile-time type relationships', () => {
     });
   };
 
-  testTypeStructure<StdObject>('StdObject matches a sample value', { a: 1, b: 'hello' });
+  testTypeStructure<RecordObject>('RecordObject matches a sample value', { a: 1, b: 'hello' });
   testTypeStructure<MapObject>('MapObject matches a sample value', new Map([['a', 1]]));
   testTypeStructure<SetObject>('SetObject matches a sample value', new Set([1, 2, 3]));
   testTypeStructure<ArrayObject>('ArrayObject matches a sample value', [1, 2, 3]);
-  testTypeStructure<StdObject>('StdObject matches nested sample value', { a: { b: 1 } });
-  testTypeStructure<StdObject>('mixed object matches a sample value', { 
+  testTypeStructure<RecordObject>('RecordObject matches nested sample value', { a: { b: 1 } });
+  testTypeStructure<RecordObject>('mixed object matches a sample value', { 
     map: new Map([['a', 1]]),
     arr: [1, 2, 3],
     set: new Set([4, 5, 6])
