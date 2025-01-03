@@ -17,22 +17,25 @@ export type CompareFunction<T extends Value = Value> = (
 export const isCompareFunction = (v: unknown): v is CompareFunction =>
   typeof v === 'function' && v.length >= 2;
 
+export type ValueResults = NonEmptyArray<ValueResult>;
+
 export interface Comparison {
-  leftOnly: NonEmptyArray<ValueResult>,
-  left: NonEmptyArray<ValueResult>,
-  leftSame: NonEmptyArray<ValueResult>,
-  rightSame: NonEmptyArray<ValueResult>,
-  right: NonEmptyArray<ValueResult>,
-  rightOnly: NonEmptyArray<ValueResult>,
+  leftOnly: ValueResults,
+  left: ValueResults,
+  leftSame: ValueResults,
+  rightSame: ValueResults,
+  right: ValueResults,
+  rightOnly: ValueResults,
 };
 
 // Returned from .compare()
-export type CompareResult = Partial<Comparison>;
+export type CompareResult = Partial<Comparison> & {
+  subResult?: CompareResult,
+};
 
 export type ValueResultProps = {
   index?: number,
   key?: ObjectKey,
-  subResult?: Array<ValueResult>,
 };
 
 export type ValueResult = {

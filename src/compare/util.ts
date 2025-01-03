@@ -1,7 +1,6 @@
 import {
-  actualType,
-  isNonEmptyArray,
   type Value,
+  actualType,
 } from '../lib/types';
 
 import type {
@@ -24,18 +23,3 @@ export const resultIsValid = (result: CompareResult): boolean =>
 
 export const valueToValueResult = (value: Value, props: ValueResultProps = {}): ValueResult =>
   ({ typeName: actualType(value), value, ...props });
-
-export const mergeComparisonResults = (
-  mergeTo: CompareResult, 
-  from: CompareResult, 
-  keys?: Array<keyof CompareResult>
-): CompareResult => {
-  const nKeys = (keys || Object.keys(from)) as Array<keyof CompareResult>;
-  return nKeys.reduce((acc, key) => {
-    const fromValue = from[key];
-    if (isNonEmptyArray(fromValue)) {
-      acc[key] = [...(acc[key] ?? []), ...fromValue];
-    }
-    return acc;
-  }, mergeTo);
-};

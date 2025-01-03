@@ -27,7 +27,8 @@ import {
   type CompareResult,
   type CompareFunction,
   type ComparisonStatus,
-  isCompareFunction
+  type ValueResults,
+  isCompareFunction,
 } from './types';
 
 import {
@@ -39,8 +40,7 @@ import {
 } from './types/config';
 
 import {
-  valueToValueResult,
-  mergeComparisonResults
+  valueToValueResult
 } from './util';
 
 const nonCircular = (value: Value, refSet: RefSet): boolean => {
@@ -104,7 +104,7 @@ export default class Compare {
     this.comparisonResult = {};
   }
 
-  protected comparer = (left: Value, right: Value): ComparisonStatus => {
+  protected comparer = (left: Value, right: Value, result: CompareResult): ComparisonStatus => {
     let status: ComparisonStatus = undefined;
 
     const leftType = actualType(left);
@@ -128,22 +128,32 @@ export default class Compare {
       return status;
     }
 
-    const leftResult = valueToValueResult(left);
-    const rightResult = valueToValueResult(right);
+    const leftResults: ValueResults = [valueToValueResult(left)];
+    const rightResults: ValueResults = [valueToValueResult(right)];
 
     if (status) {
-      this.comparisonResult.leftSame = [leftResult];
-      this.comparisonResult.rightSame = [rightResult];
+      result.leftSame = leftResults;
+      result.rightSame = rightResults;
     } else {
-      this.comparisonResult.left = [leftResult];
-      this.comparisonResult.right = [rightResult];
+      result.left = leftResults;
+      result.right = rightResults;
     }
 
     return status;
   }
 
   public compare(left: Value, right: Value): Compare {
-    this.comparer(left, right);
+    const result: CompareResult = {};
+    const status = this.comparer(left, right, result);
+    if (!this.workingResult) {
+      this.comparisonResult = result;
+    } else {
+      if (status !== undefined) {
+        result.subResult = this.workingResult;
+      }
+      this.workingResult = result;
+    }
+
     return this;
   }
 
@@ -156,20 +166,25 @@ export default class Compare {
       return this;
     }
 
-    // This just clears out leftSame and rightSame
-    this.comparisonResult = mergeComparisonResults({}, this.comparisonResult, ['leftOnly', 'left', 'rightOnly', 'right']);
-
     this.refSets.left = new WeakSet<Reference>();
     this.refSets.right = new WeakSet<Reference>();
 
-    // Since arrays are same length, we just use leftSame for the length
+    // Incomplete
+    this.workingResult = {};
     for (let i = 0; i < leftArray.length; i++) {
-      this.workingResult = {};
-      this.comparer(leftArray[i].value, rightArray[i].value);
+      const result: CompareResult = {};
+      this.comparer(leftArray[i].value, rightArray[i].value, result);
+      if (result.leftSame && result.rightSame) {
+        this.workingResult.leftSame = [...(this.workingResult.leftSame ?? []), ...result.leftSame];
+        this.workingResult.rightSame = [...(this.workingResult.rightSame ?? []), ...result.rightSame];
+      } else if (result.left && result.right) {
+        this.workingResult.left = [...(this.workingResult.left ?? []), ...result.left];
+        this.workingResult.right = [...(this.workingResult.right ?? []), ...result.right];
+      }
     }
   
     return this;
-  }
+  } 
 
   public get result(): Readonly<CompareResult> {
     return this.comparisonResult;
