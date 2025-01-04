@@ -14,16 +14,18 @@ type TypeHandler = Partial<{
 }>
 
 const typeHandlers: Record<string, TypeHandler> = {
-  ArrayObject: {
+  Array: {
     values: (v) => v as ArrayObject,
   },
   RecordObject: {
+    keys: (v) => Object.keys(v as RecordObject),
     values: (v) => Object.values(v as RecordObject),
   },
-  MapObject: {
+  Map: {
+    keys: (v) => (v as MapObject).keys(),
     values: (v) => (v as MapObject).values(),
   },
-  SetObject: {
+  Set: {
     values: (v) => v as SetObject,
   }
 } as const;

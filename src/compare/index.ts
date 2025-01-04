@@ -148,7 +148,7 @@ export default class Compare {
     const result: CompareResult = {};
     const status = this.comparer(left, right, result);
     if (!this.workingResult) {
-      this.comparisonResult = result;
+      this.comparisonResult = { ...this.comparisonResult, ...result };
     } else {
       if (status !== undefined) {
         result.subResult = this.workingResult;
@@ -207,5 +207,9 @@ export default class Compare {
 
   public get compareOptions(): Readonly<CompareOptions> | undefined {
     return this.configOptions.compare;
+  }
+
+  public set setSubResult(result: CompareResult) {
+    this.comparisonResult.subResult = result;
   }
 }
