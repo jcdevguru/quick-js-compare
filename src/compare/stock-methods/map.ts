@@ -1,7 +1,6 @@
 import type { MapObject, ObjectKey } from "../../lib/types";
 import type { CompareResult, ComparisonStatus, ValueResults } from "../types";
 import { commonSetElements } from '../../lib/util';
-import { keys } from './util';
 import { valueToValueResult } from "../util";
 
 import { type Compare } from "../..";
@@ -17,17 +16,17 @@ export const strict = (left: MapObject, right: MapObject): ComparisonStatus => {
 
 export const keysOnly = (left: MapObject, right: MapObject, cmp: Compare): ComparisonStatus => {
   let status: ComparisonStatus = undefined;
-  const leftKeys = new Set(keys(left));
-  const rightKeys = new Set(keys(right));
+  const leftKeys = new Set(left.keys());
+  const rightKeys = new Set(right.keys());
 
   const sameKeySet = commonSetElements(leftKeys, rightKeys, true) as Set<ObjectKey>;
-  const sameKeys = Array.from(sameKeySet).map(key => valueToValueResult(key));
+  const sameKeys = Array.from(sameKeySet).map(key => valueToValueResult(key)) as ValueResults;
 
   const subResult: CompareResult = {};
 
   if (sameKeys.length > 0) {
-    subResult.leftSame = sameKeys as ValueResults;
-    subResult.rightSame = sameKeys as ValueResults;
+    subResult.leftSame = sameKeys;
+    subResult.rightSame = sameKeys;
   }
 
   if (leftKeys.size === rightKeys.size && !leftKeys.size) {
