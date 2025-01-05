@@ -3,7 +3,7 @@ import {
   type ArrayObject,
   type MapObject,
   actualType,
-  isScalar,
+  isScalarType,
 } from '../../lib/types';
 
 import type {
@@ -13,6 +13,7 @@ import type {
 
 import type {
   CompareMethodConfig,
+  CompareMethodConfigKey,
   StockCompareConfig
 } from '../types/config';
 
@@ -89,37 +90,31 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   },
 };
 
-// Assume that left and right are supported types and are not a mix of composite and scalar
+// - We allow any scalar to be compared with any other scalar
+// - If the left type is a scalar, we assume the right also is because
+//   scalar/composite comparisons are disallowed earlier in processing
+// - If not comparing scalar (i.e., comparing composites), we use the specific
+//   compare method for that type if types match
+// - If types don't match, or no specific compare method for the type exists,
+//   we use the default compare method for objects
+
+const selectComparisonMethod = (left: Value, right: Value, config: CompareMethodConfig): CompareFunction => {
+  const leftType = actualType(left);
+  let selectedMethod: CompareFunction | undefined;
+
+  if (isScalarType(leftType)) {
+    selectedMethod = config.compareScalarMethod;
+  } else if (leftType === actualType(right)) {
+    selectedMethod = config[`compare${leftType}Method` as CompareMethodConfigKey];
+  } 
+  
+  return selectedMethod ?? config.compareObjectMethod;
+};
+
 export const stockComparer = (left: Value, right: Value, compareInst: Compare): ComparisonStatus => {
   const config = compareInst.compareConfig as CompareMethodConfig;
   
-  let comparer: CompareFunction;
-  if (isScalar(left)) {
-    comparer = config.compareScalarMethod;
-  } else {
-    const leftType = actualType(left);
-    const rightType = actualType(right);
-    if (leftType === rightType) {
-      switch (leftType) {
-        case 'RecordObject':
-          comparer = config.compareObjectMethod;
-          break;
-        case 'Map':
-          comparer = config.compareMapMethod;
-          break;
-        case 'Array':
-          comparer = config.compareArrayMethod;
-          break;
-        case 'Set':
-          comparer = config.compareSetMethod;
-          break;
-        default:
-          comparer = config.compareObjectMethod;
-      }
-    } else {
-      comparer = config.compareObjectMethod;
-    }
-  }
+  const method = selectComparisonMethod(left, right, config);
 
-  return comparer(left, right, compareInst);
+  return method(left, right, compareInst);
 };
