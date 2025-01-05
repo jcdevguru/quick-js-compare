@@ -1,10 +1,15 @@
-import { isCompareFunction } from './types';
+import {
+  type CompareFunction,
+  isCompareFunction
+} from './types';
 
 import {
   type CompareConfigOptions,
   type CompareOptionAlias,
   type CompareMethodConfig,
   type MinimalCompareConfigOptions,
+  type CompareConfigOptionKey,
+  type CompareMethodConfigKey,
   isCompareConfigToken,
   isCompareMethodConfig,
 } from './types/config';
@@ -19,10 +24,12 @@ const ExactCompareConfig: CompareConfigOptions = {
   compareSet: 'strict',
 };
 
+export const defaultCompareConfigOptions = ExactCompareConfig;
+
 // Map string-based comparison options to their object-based equivalents
 
 
-export const optionAliasToMethodConfig = (token: CompareOptionAlias): CompareConfigOptions => {
+export const optionAliasToConfigOptions = (token: CompareOptionAlias): CompareConfigOptions => {
   const aliasConfigOptionMap: Record<CompareOptionAlias, CompareConfigOptions> = {
     Exact: ExactCompareConfig,
     Equivalent: {
@@ -51,19 +58,18 @@ export const optionAliasToMethodConfig = (token: CompareOptionAlias): CompareCon
   return aliasConfigOptionMap[token];
 };
 
-const compareOptionKeyToMethodObjectKey = (key: keyof MinimalCompareConfigOptions) =>
-   `${key}Method` as keyof CompareMethodConfig;
+const compareOptionKeyToMethodObjectKey = (key: CompareConfigOptionKey): CompareMethodConfigKey => `${key}Method`;
 
 export const compareConfigToMethodConfig = (compareConfigOptions: MinimalCompareConfigOptions): CompareMethodConfig => {
   const methodObject: CompareMethodConfig = {} as CompareMethodConfig;
   
-  for (const k of Object.keys(compareTokenToStockMethodMap) as (keyof MinimalCompareConfigOptions)[]) {
-    const spec = compareConfigOptions[k] ?? ExactCompareConfig[k];
+  for (const k of Object.keys(compareTokenToStockMethodMap) as CompareConfigOptionKey[]) {
+    const cfg = compareConfigOptions[k] ?? ExactCompareConfig[k];
     let compareMethod;
-    if (isCompareFunction(spec)) {
-      compareMethod = spec;
-    } else if (isCompareConfigToken(spec)) { 
-      compareMethod = compareTokenToStockMethodMap[k][spec];
+    if (isCompareFunction(cfg)) {
+      compareMethod = cfg;
+    } else if (isCompareConfigToken(cfg)) { 
+      compareMethod = (compareTokenToStockMethodMap[k] as Record<string, CompareFunction>)[cfg];
     } else {
       throw new Error('Error: unexpected compare option specfication');
     }

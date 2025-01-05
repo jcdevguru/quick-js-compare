@@ -1,6 +1,13 @@
 
 import { OptionError } from '../lib/error';
-import { isRenderToken, isRenderFunction, validateMinimalRenderConfigOption, type RenderOption, RenderConfig, validateRenderOptionObject } from './types';
+import {
+  type RenderOption,
+  type RenderConfig,
+  isRenderToken,
+  isRenderFunction,
+  validateMinimalRenderConfigOption,
+  validateRenderOptionObject
+} from './types';
 
 export const validateRenderOption = (v: unknown): v is RenderOption => {
   try {

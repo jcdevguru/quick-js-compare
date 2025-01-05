@@ -1,7 +1,7 @@
-import { CompareResult } from '../compare/types';
-import { AtLeastOne } from '../lib/types';
+import type { CompareResult } from '../compare/types';
+import type { AtLeastOne } from '../lib/types';
 import { validateMinimalObject } from '../lib/util';
-import Compare from '../compare';
+import type Compare from '../compare';
 export interface RenderFunction {
   (result: CompareResult, compareInstance: Compare): unknown;
 }

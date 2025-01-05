@@ -1,41 +1,47 @@
 import type {
   Value,
-  Scalar,
+  NonEmptyArray,
+  ObjectKey,
 } from '../../lib/types';
 
-import Compare from '../../compare';
+import type Compare from '../../compare';
 
 export type ComparisonStatus = boolean | undefined;
 
 export type CompareFunction<T extends Value = Value> = (
   left: T,
   right: T,
-  compareInstance: Compare,
-  compositeComparisonResult: CompareResult
+  compareInstance: Compare
 ) => ComparisonStatus;
 
-export const isCompareFunction = (v: unknown): v is CompareFunction => typeof v === 'function' && v.length >= 2 && v.length <= 4;
+export const isCompareFunction = (v: unknown): v is CompareFunction =>
+  typeof v === 'function' && v.length >= 2;
+
+export type ValueResults = NonEmptyArray<ValueResult>;
 
 export interface Comparison {
-  leftOnly: Array<ValueResult>,
-  left: Array<ValueResult>,
-  leftSame: Array<ValueResult>,
-  rightSame: Array<ValueResult>,
-  right: Array<ValueResult>,
-  rightOnly: Array<ValueResult>,
+  leftOnly: ValueResults,
+  left: ValueResults,
+  leftSame: ValueResults,
+  rightSame: ValueResults,
+  right: ValueResults,
+  rightOnly: ValueResults,
 };
 
 // Returned from .compare()
-export type CompareResult = Partial<Comparison>;
+export type CompareResult = Partial<Comparison> & {
+  subResult?: CompareResult,
+};
+
+export type ComparisonKey = keyof Comparison;
+export type CompareResultKey = keyof CompareResult;
 
 export type ValueResultProps = {
   index?: number,
-  key?: Scalar,
-  comparisonResult?: CompareResult,
+  key?: ObjectKey,
 };
 
 export type ValueResult = {
   typeName: string,
   value: Value,
 } & ValueResultProps;
-

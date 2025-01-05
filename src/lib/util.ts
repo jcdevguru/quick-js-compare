@@ -27,9 +27,9 @@ export const validateObject = (
   if (unknownKeys.length) {
     throw new Error(`property ${unknownKeys.join(',')} unknown`);
   }
-
-  if (objKeys.length < minNumberOfKeys) {
-    throw new Error(`need at least ${minNumberOfKeys} of ${[...validKeySet].join(',')}`);
+  const minKeys = minNumberOfKeys || Object.keys(validators).length;
+  if (objKeys.length < minKeys) {
+    throw new Error(`need at least ${minKeys} of ${[...validKeySet].join(',')}`);
   }
 
   const invalidSettings = Object.entries(validators).reduce((acc: Array<string>, [setting, check]) => {
@@ -61,4 +61,21 @@ export const defineUnionForType = <T extends string[]>(...values: T) => {
     type: values,
     is: (value: string): value is T[number] => set.has(value),
   } as { type: T; is: (value: string) => value is T[number] };
+};
+
+// Get same elements of two sets
+// If modify is true, the sets are modified to remove the common elements
+export const commonSetElements = <T = unknown>(left: Set<T>, right: Set<T>, modify: boolean = false): Set<T> => {
+  const same = new Set<T>();
+  const [larger, smaller] = left.size > right.size ? [left, right] : [right, left];
+
+  for (const el of [...smaller].filter((v) => larger.has(v))) {
+    same.add(el);
+    if (modify) {
+      larger.delete(el);
+      smaller.delete(el);
+    }
+  }
+
+  return same;
 };

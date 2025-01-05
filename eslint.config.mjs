@@ -46,5 +46,9 @@ export default [{
             ignoreStrings: true,
             ignoreTemplateLiterals: true,
         }],
+        "@typescript-eslint/consistent-type-imports": ["error", {
+            prefer: "type-imports",
+            disallowTypeAnnotations: true,
+        }],
     },
 }];

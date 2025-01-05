@@ -15,6 +15,9 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
 
+export const isNonEmptyArray = <T>(v: unknown): v is NonEmptyArray<T> => 
+  Array.isArray(v) && v.length > 0;
+
 // -------------------------------------------------------------------------------------------------
 // Types we support for comparison and rendering
 
@@ -33,10 +36,10 @@ export type ScalarType = typeof scalarTypeUnion.type[number];
 const collectionTypeUnion = defineUnionForType('Array', 'Set', 'Map');
 export type CollectionType = typeof collectionTypeUnion.type[number];
 
-const keyedObjectTypeUnion = defineUnionForType('Array', 'Map', 'StdObject');
+const keyedObjectTypeUnion = defineUnionForType('Array', 'Map', 'RecordObject');
 export type KeyedObjectType = typeof keyedObjectTypeUnion.type[number];
 
-export type StdObjectType = 'StdObject';
+export type RecordObjectType = 'RecordObject';
 export type ArrayType = 'Array';
 export type SetType = 'Set';
 export type MapType = 'Map';
@@ -44,7 +47,7 @@ export type MapType = 'Map';
 const functionTypeUnion = defineUnionForType('function', 'Function');
 export type FunctionType = typeof functionTypeUnion.type[number];
 
-const orderedObjectTypeUnion = defineUnionForType('Array', 'Map', 'StdObject', ...functionTypeUnion.type);
+const orderedObjectTypeUnion = defineUnionForType('Array', 'Map', 'RecordObject', ...functionTypeUnion.type);
 export type OrderedObjectType = typeof orderedObjectTypeUnion.type[number];
 
 const compositeTypeUnion = defineUnionForType(...[...collectionTypeUnion.type, ...keyedObjectTypeUnion.type, ...functionTypeUnion.type]);
@@ -55,14 +58,14 @@ export type SupportedType = ScalarType | CompositeType;
 // Note 't' in argument should be return from 'actualType()', not value of 'typeof'
 
 export const actualType = (v: unknown): string => {
-  const t = typeof v as string;
+  let t = typeof v as string;
   if (t === 'object') {
     if (!v) {
       return 'null';
     }
-    let n = v?.constructor.name;
+    const n = v?.constructor.name;
     if (n === 'Object') {
-      n = 'StdObject';
+      t = 'RecordObject';
     } else if (isSupportedType(n)) {
       return n;
     }
@@ -71,7 +74,7 @@ export const actualType = (v: unknown): string => {
 };
 
 export const isScalarType = (v: string): v is ScalarType => scalarTypeUnion.is(v);
-export const isStdObjectType   = (v: string): v is StdObjectType => v === 'StdObject';
+export const isRecordObjectType   = (v: string): v is RecordObjectType => v === 'RecordObject';
 export const isArrayType = (v: string): v is ArrayType => v === 'Array';
 export const isSetType = (v: string): v is SetType => v === 'Set';
 export const isMapType = (v: string): v is MapType => v === 'Map';
@@ -82,23 +85,23 @@ export const isFunctionType = (v: string): v is FunctionType => functionTypeUnio
 export const isCompositeType = (v: string): v is CompositeType => compositeTypeUnion.is(v);
 export const isSupportedType = (v: string): v is SupportedType => isScalarType(v) || isCompositeType(v);
 
-export type MapKey = string | number | symbol;
+export type ObjectKey = string | number | symbol;
 
-export type StdObject = {
-    [key: string]: Value;
+export type RecordObject = {
+  [key: ObjectKey]: Value;
 };
 
 export type Scalar = string | number | boolean | bigint | null | undefined | symbol | Date;
-export type MapObject = Map<MapKey, Value>;
+export type MapObject = Map<ObjectKey, Value>;
 export type ArrayObject = Array<Value>;
 export type SetObject = Set<Value>;
 export type FunctionObject = (...args: unknown[]) => unknown;
 
 // Contains multiple values, accessed via numeric index
-export type OrderedObject = StdObject | MapObject | ArrayObject | FunctionObject;
+export type OrderedObject = RecordObject | MapObject | ArrayObject | FunctionObject;
 
 // Contains multiple values, accessed via keys
-export type KeyedObject = StdObject | MapObject | FunctionObject;
+export type KeyedObject = RecordObject | MapObject | FunctionObject;
 
 // Contains multiple values, can be accessed in groups
 export type CollectionObject = ArrayObject | SetObject;
@@ -109,10 +112,10 @@ export type Value = Scalar | Composite;
 
 export type Reference = Composite;
 
-export type StdObjectEntry = [keyof StdObject, Value];
+export type RecordObjectEntry = [keyof RecordObject, Value];
 
 export const isScalar = (v: unknown): v is Scalar => isScalarType(actualType(v));
-export const isStdObject = (v: unknown): v is StdObject => isStdObjectType(actualType(v));
+export const isRecordObject = (v: unknown): v is RecordObject => isRecordObjectType(actualType(v));
 export const isArrayObject = (v: unknown): v is ArrayObject => isArrayType(actualType(v));
 export const isSetObject = (v: unknown): v is SetObject => isSetType(actualType(v));
 export const isMapObject = (v: unknown): v is MapObject => isMapType(actualType(v));
@@ -124,5 +127,3 @@ export const isComposite = (v: unknown): v is Composite => isCompositeType(actua
 export const isReference = (v: unknown): v is Reference => isComposite(v);
 export const isValue = (v: unknown): v is Value => isScalar(v) || isComposite(v);
 export const isSupported = isValue;
-
-export type RefSet = WeakSet<Composite>;

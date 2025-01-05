@@ -1,12 +1,13 @@
 import {
-  actualType,
   type Value,
+  actualType,
 } from '../lib/types';
 
 import type {
   ValueResult,
   CompareResult,
   ValueResultProps,
+  ComparisonKey,
 } from './types';
 
 export const resultHasDifferences = (result: CompareResult): boolean =>
@@ -24,17 +25,17 @@ export const resultIsValid = (result: CompareResult): boolean =>
 export const valueToValueResult = (value: Value, props: ValueResultProps = {}): ValueResult =>
   ({ typeName: actualType(value), value, ...props });
 
-export const mergeComparisonResults = (
-  mergeTo: CompareResult, 
-  from: CompareResult, 
-  keys?: Array<keyof CompareResult>
-): CompareResult => {
-  if (!keys) {
-    keys = Object.keys(from) as Array<keyof CompareResult>;
-  }
-  keys.forEach((key) => {
-    mergeTo[key] = [...(mergeTo[key] ?? []), ...(from[key] ?? [])];
+export const mergeCompareResults = (target: CompareResult, source: CompareResult): void => {
+  const keys: ComparisonKey[] = Object.keys(target) as ComparisonKey[];
+
+  keys.forEach(key => {
+    if (source[key]) {
+      target[key] = [...(target[key] ?? []), ...source[key]!];
+    }
   });
-  
-  return mergeTo;
+
+  if (source.subResult) {
+    mergeCompareResults(target.subResult ?? {}, source.subResult);
+  }
 };
+

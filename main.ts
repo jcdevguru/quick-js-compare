@@ -1,5 +1,5 @@
 import Compare from './src/compare';
-// import type { Value, StdObjectEntry } from './src/lib/types';
+// import type { Value, RecordObjectEntry } from './src/lib/types';
 
 const cmp = new Compare();
 
@@ -32,7 +32,7 @@ const cmp = new Compare();
 // const right = { a: { c: 2, d: { a: 3 }, e: { a: 4  }}, f: 'matcher', x: 'sole'};
 
 // const r2 = cmp.compare(left, right);
-// let result = r2.result.map((a) => sparseEntriesToStdObject(a as Array<StdObjectEntry|undefined>));
+// let result = r2.result.map((a) => sparseEntriesToRecordObject(a as Array<RecordObjectEntry|undefined>));
 // showIt(left, right, result);
 
 const value1 = {
@@ -52,7 +52,7 @@ const value2 = {
 
 const r3 = cmp.compare(value1, value2);
 console.log(JSON.stringify(r3, null, 2));
-// const result3 = r3.result.map((a) => sparseEntriesToStdObject(a as Array<StdObjectEntry|undefined>));
+// const result3 = r3.result.map((a) => sparseEntriesToRecordObject(a as Array<RecordObjectEntry|undefined>));
 // showIt(value1, value2, result3, null, 2);
 // // now mess with them.
 // // no results should exist from left.a.e

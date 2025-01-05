@@ -8,7 +8,7 @@ import type { RenderOption } from '../render/types';
 import {
   type CompareConfig,
   type CompareOptions,
-  validateCompareOption,
+  validateCompareOptions,
   validateCompareConfig,
 } from '../compare/types/config';
 
@@ -24,12 +24,12 @@ export interface Config {
 
 export type MinimalConfigOptions = AtLeastOne<ConfigOptions>;
 
-export const validateOptions = (v: unknown): v is MinimalConfigOptions => { 
+export const validateMinimalConfigOptions = (v: unknown): v is MinimalConfigOptions => { 
   try {
     return validateMinimalObject(v, {
-      compare: validateCompareOption,
+      compare: validateCompareOptions,
       render: validateRenderOption,
-    }); 
+    });
   } catch (e) {
     if (e instanceof OptionError) {
       throw e;
