@@ -25,13 +25,6 @@ import * as ArrayMethods from './array';
 import * as MapMethods from './map';
 
 const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
-const compositeStrict = <T extends Value>(compareFunction: CompareFunction<T>, typeName: string ): CompareFunction =>
-  (left: Value, right: Value, compareInst) =>   
-      actualType(left) === typeName &&
-      matchTypes(left, right) &&
-      compareFunction(left as T, right as T, compareInst)
-    ;
-
 // Method 'exact' might never be called due to strict equality check in Compare.comparer
 const exact = (left: Value, right: Value) => left === right;
 const reference = exact;
@@ -45,7 +38,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   compareScalar: { strict: exact, abstract, typeOnly: matchTypes, alwaysSame, alwaysDifferent, alwaysUndefined },
   compareObject: {
     reference,
-    strict: compositeStrict(compareObject, 'RecordObject'), // TODO: implement
+    strict: compareObject, // TODO: implement
     keyValueOrder: compareObject, // TODO: implement
     keyValue: compareObject, // TODO: implement
     keyOrder: compareObject, // TODO: implement
@@ -60,7 +53,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   },
   compareMap: {
     reference,
-    strict: compositeStrict(MapMethods.strict, 'MapObject'),
+    strict: MapMethods.strict,
     keyValueOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     keyValue: (left: MapObject, right: MapObject) => left === right, // TODO: implement
     keyOrder: (left: MapObject, right: MapObject) => left === right, // TODO: implement
@@ -75,7 +68,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   },
   compareArray: {
     reference,
-    strict: compositeStrict(ArrayMethods.strict, 'ArrayObject'),
+    strict: ArrayMethods.strict,
     valueOrder: (left: ArrayObject, right: ArrayObject) => left === right, // TODO: implement
     valuesOnly: (left: ArrayObject, right: ArrayObject) => left === right, // TODO: implement
     sizeOnly: ArrayMethods.sizeOnly,
@@ -86,7 +79,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
   },
   compareSet: {
     reference,
-    strict: compositeStrict(SetMethods.strict, 'SetObject'),
+    strict: SetMethods.strict,
     valuesOnly: SetMethods.valuesOnly,
     sizeOnly: SetMethods.sizeOnly,
     typeOnly: matchTypes,
