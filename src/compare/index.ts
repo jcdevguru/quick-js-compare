@@ -1,7 +1,6 @@
 import {
   type Value,
   type Reference,
-  type RefSet,
   actualType,
   isSupportedType,
   isCompositeType,
@@ -44,7 +43,7 @@ import {
   mergeCompareResults,
 } from './util';
 
-const nonCircular = (value: Value, refSet: RefSet): boolean => {
+const nonCircular = (value: Value, refSet: WeakSet<Reference>): boolean => {
   let rc = true;
   if (isReference(value)) {
     if (refSet.has(value)) {

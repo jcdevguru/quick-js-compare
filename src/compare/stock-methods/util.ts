@@ -32,7 +32,7 @@ const typeHandlers: Record<string, TypeHandler> = {
 
 export const values = (v: Composite): Iterable<Value> => {
   const typeName = actualType(v);
-  const handler = typeHandlers[typeName as keyof typeof typeHandlers]?.values;
+  const handler = typeHandlers[typeName]?.values;
   
   if (!handler) {
     throw new Error('Unsupported condition: value is not a composite');
@@ -43,7 +43,7 @@ export const values = (v: Composite): Iterable<Value> => {
 
 export const keys = (v: Composite): Iterable<Value> => {
   const typeName = actualType(v);
-  const handler = typeHandlers[typeName as keyof typeof typeHandlers]?.keys;
+  const handler = typeHandlers[typeName]?.keys;
   
   if (!handler) {
     throw new Error('Unsupported condition: value is not a composite');

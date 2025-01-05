@@ -65,8 +65,8 @@ export const defineUnionForType = <T extends string[]>(...values: T) => {
 
 // Get same elements of two sets
 // If modify is true, the sets are modified to remove the common elements
-export const commonSetElements = (left: Set<unknown>, right: Set<unknown>, modify: boolean = false): Set<unknown> => {
-  const same = new Set<unknown>();
+export const commonSetElements = <T = unknown>(left: Set<T>, right: Set<T>, modify: boolean = false): Set<T> => {
+  const same = new Set<T>();
   const [larger, smaller] = left.size > right.size ? [left, right] : [right, left];
 
   for (const el of [...smaller].filter((v) => larger.has(v))) {

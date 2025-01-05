@@ -63,13 +63,13 @@ const compareOptionKeyToMethodObjectKey = (key: CompareConfigOptionKey): Compare
 export const compareConfigToMethodConfig = (compareConfigOptions: MinimalCompareConfigOptions): CompareMethodConfig => {
   const methodObject: CompareMethodConfig = {} as CompareMethodConfig;
   
-  for (const k of Object.keys(compareTokenToStockMethodMap) as (keyof MinimalCompareConfigOptions)[]) {
-    const spec = compareConfigOptions[k] ?? ExactCompareConfig[k];
+  for (const k of Object.keys(compareTokenToStockMethodMap) as CompareConfigOptionKey[]) {
+    const cfg = compareConfigOptions[k] ?? ExactCompareConfig[k];
     let compareMethod;
-    if (isCompareFunction(spec)) {
-      compareMethod = spec;
-    } else if (isCompareConfigToken(spec)) { 
-      compareMethod = (compareTokenToStockMethodMap[k] as Record<string, CompareFunction>)[spec];
+    if (isCompareFunction(cfg)) {
+      compareMethod = cfg;
+    } else if (isCompareConfigToken(cfg)) { 
+      compareMethod = (compareTokenToStockMethodMap[k] as Record<string, CompareFunction>)[cfg];
     } else {
       throw new Error('Error: unexpected compare option specfication');
     }

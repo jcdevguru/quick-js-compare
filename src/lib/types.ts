@@ -127,5 +127,3 @@ export const isComposite = (v: unknown): v is Composite => isCompositeType(actua
 export const isReference = (v: unknown): v is Reference => isComposite(v);
 export const isValue = (v: unknown): v is Value => isScalar(v) || isComposite(v);
 export const isSupported = isValue;
-
-export type RefSet = WeakSet<Composite>;
