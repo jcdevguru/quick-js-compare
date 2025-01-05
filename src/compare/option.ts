@@ -8,6 +8,8 @@ import {
   type CompareOptionAlias,
   type CompareMethodConfig,
   type MinimalCompareConfigOptions,
+  type CompareConfigOptionKey,
+  type CompareMethodConfigKey,
   isCompareConfigToken,
   isCompareMethodConfig,
 } from './types/config';
@@ -56,8 +58,7 @@ export const optionAliasToConfigOptions = (token: CompareOptionAlias): CompareCo
   return aliasConfigOptionMap[token];
 };
 
-const compareOptionKeyToMethodObjectKey = (key: keyof MinimalCompareConfigOptions) =>
-   `${key}Method` as keyof CompareMethodConfig;
+const compareOptionKeyToMethodObjectKey = (key: CompareConfigOptionKey): CompareMethodConfigKey => `${key}Method`;
 
 export const compareConfigToMethodConfig = (compareConfigOptions: MinimalCompareConfigOptions): CompareMethodConfig => {
   const methodObject: CompareMethodConfig = {} as CompareMethodConfig;

@@ -67,6 +67,9 @@ export interface CompareMethodConfig {
   compareSetMethod: CompareFunction
 }
 
+export type CompareMethodConfigKey = keyof CompareMethodConfig;
+export type CompareConfigOptionKey = keyof CompareConfigOptions;
+
 export type MinimalCompareConfigOptions = AtLeastOne<CompareConfigOptions>;
 export type CompareConfig = CompareFunction | CompareMethodConfig;
 export type CompareOptions = CompareOptionAlias | MinimalCompareConfigOptions | CompareFunction;
