@@ -209,7 +209,9 @@ export default class Compare {
     return this.configOptions.compare;
   }
 
-  public set setSubResult(result: CompareResult) {
+  // TODO: figure out how to make this accessible to stock methods
+  // but not public
+  public setSubResult(result: CompareResult) {
     this.comparisonResult.subResult = result;
   }
 }

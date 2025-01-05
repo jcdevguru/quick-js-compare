@@ -14,7 +14,7 @@ export const strict = (left: MapObject, right: MapObject): ComparisonStatus => {
   return left === right;
 }
 
-export const keysOnly = (left: MapObject, right: MapObject, cmp: Compare): ComparisonStatus => {
+export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare): ComparisonStatus => {
   let status: ComparisonStatus = undefined;
   const leftKeys = new Set(left.keys());
   const rightKeys = new Set(right.keys());
@@ -37,7 +37,8 @@ export const keysOnly = (left: MapObject, right: MapObject, cmp: Compare): Compa
     status = false;
   }
 
-  cmp.setSubResult = subResult;
+  compareInst.setSubResult(subResult);
 
   return status;
 }
+
