@@ -1,11 +1,11 @@
 import type { MinimalConfigOptions } from '../../lib/option';
-import type { Value, ObjectKey } from '../../lib/types';
+import type { Value, Scalar } from '../../lib/types';
 import Compare from '../../compare';
 
-export type TestKeys = Partial<{
-  sameKeys: ObjectKey[];
-  leftKeys: ObjectKey[];
-  rightKeys: ObjectKey[];
+export type TestValues = Partial<{
+  sameValues: Scalar[];
+  leftValues: Scalar[];
+  rightValues: Scalar[];
 }>;
 
 export const compareTestLabel = (testName: string, options?: MinimalConfigOptions) => {
@@ -22,41 +22,38 @@ export const compareTestLabel = (testName: string, options?: MinimalConfigOption
 export const expectValue = (value: Value) => 
   expect.objectContaining({ value });
 
-export const expectValueArray = (keys: ObjectKey[]) => 
-  expect.arrayContaining(keys.map(expectValue));
+export const expectValueArray = (values: Scalar[]) => 
+  expect.arrayContaining(values.map(expectValue));
 
-export const testMatchingKeys = (
-  testName: string, 
+export const scalarCollection = (
   left: Value, 
   right: Value, 
-  keys: TestKeys,
+  values: TestValues,
   options?: MinimalConfigOptions
 ) => {
-  test(compareTestLabel(testName, options), () => {
-    const c = new Compare(options);
-    const result = c.compare(left, right).result;
-    
-    const isMatching = !keys.leftKeys && !keys.rightKeys;
-    
-    expect(result).toEqual({
-      ...(isMatching 
-        ? {
-            leftSame: [expectValue(left)],
-            rightSame: [expectValue(right)]
-          }
-        : {
-            left: [expectValue(left)],
-            right: [expectValue(right)]
-          }
-      ),
-      subResult: expect.objectContaining({
-        ...(keys.leftKeys && { left: expectValueArray(keys.leftKeys) }),
-        ...(keys.rightKeys && { right: expectValueArray(keys.rightKeys) }),
-        ...(keys.sameKeys && {
-          leftSame: expectValueArray(keys.sameKeys),
-          rightSame: expectValueArray(keys.sameKeys)
-        })
+  const c = new Compare(options);
+  const result = c.compare(left, right).result;
+  
+  const isMatching = !values.leftValues && !values.rightValues;
+  
+  return expect(result).toEqual({
+    ...(isMatching 
+      ? {
+          leftSame: [expectValue(left)],
+          rightSame: [expectValue(right)]
+        }
+      : {
+          left: [expectValue(left)],
+          right: [expectValue(right)]
+        }
+    ),
+    subResult: {
+      ...(values.leftValues && { left: expectValueArray(values.leftValues) }),
+      ...(values.rightValues && { right: expectValueArray(values.rightValues) }),
+      ...(values.sameValues && {
+        leftSame: expectValueArray(values.sameValues),
+        rightSame: expectValueArray(values.sameValues)
       })
-    });
+    }
   });
 };
