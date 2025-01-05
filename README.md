@@ -177,7 +177,8 @@ The following combinations of properties and values are supported when options f
     * `"alwaysUndefined`": never match nor differ (values not included in results)
     * *function*: use function to compare (see below)    * *function*: use function to compare (see below)
 
-  * `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`), or any two composite values allowed for comparison (see below)
+  * `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`), or any two composite values allowed for comparison
+
     * `"reference"`: match only when identical as references, i.e., when compared objects are references to the same object in memory
     * `"strict"`*: match when objects have same type and matching key/value pairs in identical order
     * `"keyValueOrder"`: match when compared objects have matching key/value pairs in identical order 
@@ -193,9 +194,11 @@ The following combinations of properties and values are supported when options f
     * *function*: use function to compare (see below)
 
   * `compareMap`: for comparison of objects of type `Map` (JavaScript type `Map`)
-    Same settings and default as `compareObject`. If omitted, `compareObject` settings will be used.
+
+    * Same settings and default as `compareObject`. If omitted, `compareObject` settings will be used.
 
   * `compareArray`: for comparison of arrays
+
     * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
     * `"strict"`*: match when objects have same type and matching values in same positions
     * `"valueOrder"`: match when compared arrays have matching values in the same order 
@@ -208,6 +211,7 @@ The following combinations of properties and values are supported when options f
     * *function*: use function to compare (see below)
 
   * `compareSet`: for comparison of sets (JavaScript type `Set`)
+  
     * `"reference"`: match only when identical as references, i.e., when compared sets are references to the same object in memory
     * `"strict"`*: match when objects have same type and values in same positions
     * `"valuesOnly"`: match when compared sets have matching values
@@ -224,27 +228,31 @@ In all cases, a comparison operation may be supplied as a function whose job is 
 String values for the `compare` option behave as shorthand helpers for a style of comparison.  Their function is described by their equivalent representations in the previously described option object.
 
 * `Exact`: (default) compare for identical type, value, and structure. Values considered matching if they can be used interchangeably.
+
   * `compareScalar`: `"strict"`
   * `compareObject`: `"strict"`
   * `compareMap`: `"strict"`
   * `compareArray`: `"strict"`
   * `compareSet`: `"strict"`
 
-* `Equivalent`: compare for functional equivalence.  Objects will match with objects or with maps if their keys and values match and are in the same orders.  Arrays will match other arrays if values match and are in same order.  Sets will match each other if they contain the same values.  Arrays will match with sets if they contain the same values.
+* `Equivalent`: compare for matching content and order.  Objects will match with objects or with maps if their keys and values match and are in the same orders.  Arrays will match other arrays if their values match and are in same order.  Sets will match other sets or arrays if they contain the same values.
+
   * `compareScalar`: `"strict"`
   * `compareObject`: `"keyValueOrder"`
   * `compareMap`: `"keyValueOrder"`
   * `compareArray`: `"valueOrder"`
   * `compareSet`: `"valuesOnly"`
 
-* `General`: compare for general equivalence. Scalars will match if they are abstractly equivalent, i.e., if the abstract equality operator `==` evaluates to `true`. Objects will match if their key/value pairs match identically by key and value, regardless of order. Arrays will match other arrays and sets if they contain the same values, regardless order.
+* `General`: compare for matching content. Scalars will match if they are abstractly equivalent, i.e., if the abstract equality operator `==` evaluates to `true`. Objects will match objects or maps if their key/value pairs match identically by key and value, regardless of order. Arrays will match other arrays and sets if they contain the same values.
+
   * `compareScalar`: `"abstract"`
   * `compareObject`: `"keyValue"`
   * `compareMap`: `"keyValue"`
   * `compareArray`: `"valuesOnly"`
   * `compareSet`: `"valuesOnly"`
 
-* `Structure`: compare for identical form, not content. Scalars will always be considered matching one another. Objects will match objects or maps if they have the same keys, regardless of their order. Arrays and sets will match if they have the same size.
+* `Structure`: compare for identical form, not content. Scalars will always be considered matching one another. Objects will match objects or maps if they have the same keys, regardless of their order. Arrays and sets will match if they have the same size, regardless of content or types of elements.
+
   * `compareScalar`: `"alwaysSame"`
   * `compareObject`: `"keysOnly"`
   * `compareMap`: `"keysOnly"`
