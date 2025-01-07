@@ -2,33 +2,83 @@
 
 Let's start with a joke.
 
-> A JavaScript developer asked his girlfriend why she was mad at him. She told him it was because she thought he had lied. "I asked you if you had a lot of girlfriends before me, and you answered "one." You've had at least five!"  The JavaScript developer was confused. "That wasn't a lie," he said. "I said it was true!"
+> A JavaScript developer asked his girlfriend why she was mad at him. She said it was because he lied about his past. "You said "one" when I asked you if you had a lot of girlfriends before me, but you've had at least five!" The JavaScript developer looked confused. "That wasn't a lie," he said. "I said it was true!"
 
-If you don't get this joke, you have obviously never had to compare two values in JavaScript. If you do get this joke, continue reading.
+If you understand this joke, it means you have seen how the JavaScript language can process values in unexpected ways. Unfortunately, it might also mean you have suffered through unexpected problems in comparing two values in JavaScript can be - a common action that should be simple but hardly ever is. That is why this package exists.  Read on.
 
-## Problem statement: how comparing two JavaScript values can be ... awful
+## Problem: how comparing two JavaScript values can be ... awful
 
-The need to compare two values in JavaScript is a frequent requirement in software engineering and testing, and often seems easy to the point of being trivial. Unfortunately, this is not the case, and for many reasons. Because JavaScript is not a strongly typed language, values can often compare and function equivalently when they actually are different, and a comparison between two values can mislead in either direction. Even when issues around typing are accommodated, more issues can arise that are not easily predicted until code is in production. Sometimes, problems will arise due to undefined ordering of keys or values, or inconsequential values appearing within objects that will flag inequality when they really should be ignored. There are also the questions of circular references, deep vs. shallow comparisons, and performance that can dog how effective or practical a comparison operation can be. Often, the results of comparing two JavaScript values can lead to the problem of "too much or not enough" - significant differences are overlooked when lost in the noise of many other inconsequential differences. For example, automated tests will often fail when comparison between expected and actual results differ in the slightest, even though the software is working perfectly. When tests routinely fail due to such issues, test results stop delivering value and become ignored. If an actual bug comes along, the test will catch it, but no one will pay attention until it is too late.
+Merely comparing two values should be easy in any programming language, but in JavaScript, which is not a strongly typed language, multiple issues abound. Whether or not values are computed as matching or not matching has everything to do with how the operation is done, and that is often easy to misunderstand or predict correctly.
 
-## Bad comparisons lead to bad software
+Consider how the following code:
 
-It is easy to blame developers and test engineers with the claim that comparisons are written lazily and should be corrected, but this is not necessarily practical or true. For example, order of value or keys can matter in some contexts, even if strict JavaScript language specifications say it does not. However, no ones should make a failing test more forgiving without a full understanding of the requirements, and to expect an uninformed developer to make this call is not realistic. An intuitive call that "key order does not matter" might open the door to a bug when a software process downstream requires a certain order.
+```js
+[true, 1, 'false', 'anything'].forEach(v => {
+  console.log(v ? `${v} is true` : `${v} is not true`);
+});
+```
 
-It is also possible that tests can run perfectly from one software version and report full coverage of the both old and new code, yet still miss on validating essential new requirements. For example, an existing test that confirms that the contents of two objects match exactly would not also verify a new requirement that the two objects match in reference, i.e., point to the same place in memory. The test should fail but will not, and without that feedback, the new requirement will remain unverified indefinitely.
+produces these results:
 
-## How to compare two values does not have one answer
+```txt
+true is true
+1 is true
+false is true
+anything is true
+```
 
-There is also the question of how to compare or manage any JavaScript value. Should it be made into JSON, which means we must assume that no circular references exist?  If there are circular references, how do we avoid infinite loops when doing deep comparisons?  Should the whole of two objects be considered when comparing them, or just the "interesting" parts?  And what constitutes a match, anyway? Should we use "truthy" or "falsy" comparison vs. strict comparisons, such as what happens with `==` vs `===`?  Can we specialize these styles of comparison to certain properties only?  How can we do any of this without writing a ton of special-cased code? 
+The above shows a clear example of how type coercion can lead to highly unexpected behaviors.  In this case, non-zero and non-null values used as conditions are considered "truthy", which means they will evaluate equivalently to "true".  But now look at what happens if we change the code, just a little?
 
-Finally, how do we control the whole operation so that our performance is kept manageable?  Should we stop comparing as soon as we find a difference, or keep going?  How do we keep our result lean enough to be practical instead of emitting a JSON string that takes up 10 lines?  Have we really thought of everything?
+```js
+// Below, we compare for truth, not truthiness
+[true, 1, 'false', 'anything'].forEach(v => {
+  console.log(v === true ? `${v} is true` : `${v} is not true`);
+});
+```
 
-## Quick JS Compare will get you through it all
+And now we get:
 
-Quick JS Compare is a software utility that will compare two JavaScript-based values in a highly customizable, repeatable fashion with all the various nuances and behaviors spelled out in visible and maintainable configurations that generally will not require any special-case code. It directly supports comparison of scalar types, e.g., numbers, strings, and booleans, as well as objects, maps, arrays, and sets, and can be specialized to exactly the requirements your project might have. It is also maximally extensible. You can perform comparisons in phases and link the operations with a small amount of code. It also will accept your own versions of a comparison method, in case your requirements are exotic. The same flexibility is offered in how results are rendered as well.
+```txt
+true is true
+1 is not true
+false is not true
+anything is not true
+```
 
-Most of all, it's quick, lightweight, and keeps the operations minimal. It automatically protects against breakage and infinite loops that are caused by circular references. It produces results that are only as verbose or sparse as you need, and will only show values as the same or different if such results can be precisely determined.
+ Now, we see that when operands are explicitly used in a comparison to arrive a boolean value, the actual type and values are considered, without considerations of "truthy" or "falsy" behavior.  However, the mere use of an expression does not stop type coercion from happening in other ways.
 
-In short, Quick JS Compare should fit your need for just about any value comparison in JavaScript you will ever need to do, and do so in a straightforward, maintainable, and configurable way. It will spare you the repeated drudgery of dealing with the unpredicted difficulties of discovering changes in your data and boost your confidence that all is well as you release new features and fixes to your customer base.
+Consider:
+
+```js
+const aString = '100';
+const num = Number(aString);
+console.log(`a string is ${aString == num ? 'just' : 'not'} a number.`);
+```
+
+Output:
+
+```txt
+a string is just a number.
+```
+
+Here, we see type coercion to support JavaScript's legacy support of numbers as strings. Although we might want that to happen, we just as easily might not, and it is not easy to discern if our code is right.
+
+The confusing nature of value comparison in JavaScript is not limited to questions of typing.  We might habitually use `===` vs `==` to keep our simplest comparisons predictable, but composite values, such as objects, arrays, maps, and sets hold any and all sorts of data, and applications take full advantage of this flexibility.  This makes "typeless" objects a frequent means of data exchange in JavaScript applications, and unfortunately, that same flexibility invites trouble. Consider these real-world issues:
+
+* A deep comparison of objects can lead to expoential loss of performance as quantities are scaled up.
+* If a circular reference exists, a deep comparison could throw the code into an infinite loop.
+* A null or undefined value that surfaces in an unexpected place could cause an irrecoverable crash.
+* A simple change in rounding or padding suddenly causes unit tests everywhere to break, and no one has time to fix them.
+
+All this and more is why we have Quick JS Compare.
+
+## Quick JS Compare helps you get through it
+
+Quick JS Compare can be used to make your comparisons clearer, accurate, maintainable, and most of all, meeting your specific needs.  It directly supports comparison of scalar types, e.g., numbers, strings, and booleans, as well as objects, maps, arrays, and sets, and can be specialized to exactly the requirements your project might have. It is also extensible. You can perform comparisons in phases and so that the inconsequential data is shaken out first and only the significant data is left. It also will accept your own versions of methods to compare values and render results.
+
+Most of all, it's quick, lightweight, and keeps the operations minimal, generally ridding you of the need to write most any custom code. It is also provides protections against the most easily unanticipated problems, such as the possibility of circular references. It produces results that are only as verbose or sparse as you need, and will only show values as the same or different if such results can be precisely determined.
+
+In short, Quick JS Compare should fit your need for just about any value comparison in JavaScript you will ever need to do, and it does its job in a straightforward and maintainable way. You can avoid the headache of unpredicted or unmeaningful value comparison and keep focus on the stuff that matters.
 
 # Getting started
 
