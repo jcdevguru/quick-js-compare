@@ -4,7 +4,7 @@ Let's start with a joke.
 
 > A JavaScript developer asked his girlfriend why she was mad at him. She said it was because he lied about his past. "You said "one" when I asked you if you had a lot of girlfriends before me, but you've had at least five!" The JavaScript developer looked confused. "That wasn't a lie," he said. "I said it was true!"
 
-If you understand this joke, it means you have seen how the JavaScript language can process values in unexpected ways. Unfortunately, it might also mean you have suffered through unexpected problems in comparing two values in JavaScript can be - a common action that should be simple but hardly ever is. That is why this package exists.  Read on.
+If you understand this joke, it means you have seen how the JavaScript language can process values in unexpected ways. Unfortunately, it might also mean you have suffered through unexpected problems in comparing two values in JavaScript, an action that sounds simple but often goes wrong. This package is here to help you avoid the most common issues and make it far easier to compare objects reliably, safely, and meaningfully. Read on.
 
 ## Problem: how comparing two JavaScript values can be ... awful
 
@@ -80,17 +80,15 @@ Most of all, it's quick, lightweight, and keeps the operations minimal, generall
 
 In short, Quick JS Compare should fit your need for just about any value comparison in JavaScript you will ever need to do, and it does its job in a straightforward and maintainable way. You can avoid the headache of unpredicted or unmeaningful value comparison and keep focus on the stuff that matters.
 
-# Getting started
+## Getting started
 
-## Installation
+### Installation
 
-- Use Yarn or NPM to install Quick JS Compare.
-
-## Usage
+Use Yarn or NPM to install Quick JS Compare.
 
 ### Loading
 
-- In TypeScript or JavaScript, access the utility function or class from the module:
+In TypeScript or JavaScript, access the utility function or class from the module:
 
 ```ts
 import { compare } from 'quick-js-compare'; // function for TypeScript, ES6+
@@ -103,7 +101,8 @@ or
 const { compare } = require('quick-js-compare'); // function for JavaScript
 const { Compare } = require('quick-js-compare'); // class for ES6+
 ```
-### Calling the function
+
+### Invocation
 
 The function can be invoked as follows:
 
@@ -116,26 +115,28 @@ const comparison = compare(value1, value2);
 
 The result will be rendered as an object with properties `left`, `same`, `right`, and `status` which are populated with the results of the comparison. Properties `left` and `right` contain the differences found in the first and second value, respectively, and `same` will hold what matches.
 
+## Features
+
 ### Directly supported types
 
 The broad categories of data supported in this package are ones whose primary use is to hold data. These types include the native data types defined in the [ES2020+ spec](https://tc39.es/ecma262/2020/) and are categorized as follows:
 
 * **Scalar**: Instances of data that have a single value. Scalar values supported in this package are:
 
- * `string` - character values, e.g., `"abc"`
- * `number` - [numeric values](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) expressed in 64-bit binary format, e.g, `0`, `-2`, `3.1416`
- * `boolean` - `true` or `false`
- * `undefined` - value `undefined`, i.e., no meaningful value
- * `bigint` - [numeric values too large](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) to be represented as 64 bits
- * `Date` - The native `Date` object - i.e., created with the `Date` constructor
+  * `string` - character values, e.g., `"abc"`
+  * `number` - [numeric values](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) expressed in 64-bit binary format, e.g, `0`, `-2`, `3.1416`
+  * `boolean` - `true` or `false`
+  * `undefined` - value `undefined`, i.e., no meaningful value
+  * `bigint` - [numeric values too large](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) to be represented as 64 bits
+  * `Date` - The native `Date` object - i.e., created with the `Date` constructor
 
 * **Composite**: Instances of data that have multiple values. Composite values supported in this package:
 
- * "Standard" or record objects, i.e., those expressed in object literal notation as `{ <string-property1>: <value1>, <string-property2>: <value2> }`
- * Array objects, i.e., a collection of values indexed by whole numbers, those expressed in object literal notation as `[<value1>, <value2>]`
- * Map objects, i.e., objects created by ECMA's `Map` constructor
- * Set object, i.e., objects created by ECMA's `Set` constructor
- * Function objects, which hold values through specific properties
+  * "Standard" or record objects, i.e., those expressed in object literal notation as `{ <string-property1>: <value1>, <string-property2>: <value2> }`
+  * Array objects, i.e., a collection of values indexed by whole numbers, those expressed in object literal notation as `[<value1>, <value2>]`
+  * Map objects, i.e., objects created by ECMA's `Map` constructor
+  * Set object, i.e., objects created by ECMA's `Set` constructor
+  * Function objects, which hold values through specific properties
 
 Because this package provides comparison only and is meant for practical use, types of data are categorized around their behavior in representing data and not around their formal definitions. For example, data of type `string` or `Date` can be said to hold multiple values, but are compared as scalars, since most JavaScript programming works with these types as single values. Or, although a function is primarily used for programming, its capacity to hold values as properties makes it supportable as a composite data type.
 
@@ -161,7 +162,7 @@ const value1 = 'hello';
 const value2 = 'world';
 
 const result = compare(value1, value2);
-console.log(JSON.stringfy(result, null, 2));
+console.log(JSON.stringify(result, null, 2));
 ```
 
 will result in:
@@ -194,7 +195,7 @@ const value1 = { a: 1, b: 'abc', x: 5, c: 'def', details: { title: 'Shopping lis
 const value2 = { b: 'abc', a: 2, c: 'def', details: { title: 'Shopping list', cost: 2.9 }}; }
 
 const result = compare(value1, value2);
-console.log(JSON.stringfy(result, null, 2));
+console.log(JSON.stringify(result, null, 2));
 ```
 
 will result in:
@@ -246,95 +247,96 @@ The following settings are supported as values for the `compare` property. When 
 
 The following combinations of properties and values are supported when options for comparison are specified in an object:
 
- * `"compareScalar"`: for comparison of scalar values (e.g., `"number"`, `"boolean"`, or `"string"`)
-   * `"strict"`*: match only when identical in both value and type, i.e., as with `"==="`
-   * `"abstract"`: match when identical or when semantically equivalent, i.e., as with `"=="` (a "truthy" or "falsy" match condition)
-   * `"typeOnly"`: match when identical in type only, without comparing values
-   * `"alwaysSame"`: compared scalars always match, regardless of value or type
-   * `"alwaysDifferent`": compared scalars never match, even if identical
-   * `"alwaysUndefined`": never match nor differ (values not included in results)
-   * *function*: use function to compare (see below)    * *function*: use function to compare (see below)
+* `"compareScalar"`: for comparison of scalar values (e.g., `"number"`, `"boolean"`, or `"string"`)
+  * `"strict"`*: match only when identical in both value and type, i.e., as with `"==="`
+  * `"abstract"`: match when identical or when semantically equivalent, i.e., as with `"=="` (a "truthy" or "falsy" match condition)
+  * `"typeOnly"`: match when identical in type only, without comparing values
+  * `"alwaysSame"`: compared scalars always match, regardless of value or type
+  * `"alwaysDifferent`": compared scalars never match, even if identical
+  * `"alwaysUndefined`": never match nor differ (values not included in results)
+  * *function*: use function to compare (see below)    * *function*: use function to compare (see below)
 
- * `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`), or any two composite values allowed for comparison
+* `compareObject`: for comparison for any object with named keys (JavaScript type `object`, `function`), or any two composite values allowed for comparison
 
-   * `"reference"`: match only when identical as references, i.e., when compared objects are references to the same object in memory
-   * `"strict"`*: match when objects have same type and matching key/value pairs in identical order
-   * `"keyValueOrder"`: match when compared objects have matching key/value pairs in identical order
-   * `"keyValue"`: match when compared objects have matching key/value pairs, regardless of order
-   * `"keyOrder"`: match when compared objects have matching keys in the same order, regardless of their values
-   * `"valueOrder"`: match when compared objects have matching values in the same order, regardless of their keys
-   * `"keysOnly"`: match when compared objects have matching keys, regardless of their order or their values
-   * `"valuesOnly"`: match when compared objects have matching values, regardless of their order or their keys
-   * `"typeOnly"`: match when identical in type only, without comparing values
-   * `"alwaysSame"`: compared objects always match, regardless of value, type, or structure
-   * `"alwaysDifferent`": compared objects never match, even if identical
-   * `"alwaysUndefined`": never match nor differ (values not included in results)
-   * *function*: use function to compare (see below)
+  * `"reference"`: match only when identical as references, i.e., when compared objects are references to the same object in memory
+  * `"strict"`*: match when objects have same type and matching key/value pairs in identical order
+  * `"keyValueOrder"`: match when compared objects have matching key/value pairs in identical order
+  * `"keyValue"`: match when compared objects have matching key/value pairs, regardless of order
+  * `"keyOrder"`: match when compared objects have matching keys in the same order, regardless of their values
+  * `"valueOrder"`: match when compared objects have matching values in the same order, regardless of their keys
+  * `"keysOnly"`: match when compared objects have matching keys, regardless of their order or their values
+  * `"valuesOnly"`: match when compared objects have matching values, regardless of their order or their keys
+  * `"typeOnly"`: match when identical in type only, without comparing values
+  * `"alwaysSame"`: compared objects always match, regardless of value, type, or structure
+  * `"alwaysDifferent`": compared objects never match, even if identical
+  * `"alwaysUndefined`": never match nor differ (values not included in results)
+  * *function*: use function to compare (see below)
 
- * `compareMap`: for comparison of objects of type `Map` (JavaScript type `Map`)
+* `compareMap`: for comparison of objects of type `Map` (JavaScript type `Map`)
 
-   * Same settings and default as `compareObject`. If omitted, `compareObject` settings will be used.
+  * Same settings and default as `compareObject`. If omitted, `compareObject` settings will be used.
 
- * `compareArray`: for comparison of arrays
+* `compareArray`: for comparison of arrays
 
-   * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
-   * `"strict"`*: match when objects have same type and matching values in same positions
-   * `"valueOrder"`: match when compared arrays have matching values in the same order
-   * `"valuesOnly"`: match when compared arrays have matching values, regardless of their order
-   * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
-   * `"typeOnly"`: match when identical in type only, without comparing values
-   * `"alwaysSame"`: compared arrays always match, regardless of value, type, or size
-   * `"alwaysDifferent`": compared arrays never match, even if identical
-   * `"alwaysUndefined`": never match nor differ (values not included in results)
-   * *function*: use function to compare (see below)
+  * `"reference"`: match only when identical as references, i.e., when compared arrays are references to the same object in memory
+  * `"strict"`*: match when objects have same type and matching values in same positions
+  * `"valueOrder"`: match when compared arrays have matching values in the same order
+  * `"valuesOnly"`: match when compared arrays have matching values, regardless of their order
+  * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
+  * `"typeOnly"`: match when identical in type only, without comparing values
+  * `"alwaysSame"`: compared arrays always match, regardless of value, type, or size
+  * `"alwaysDifferent`": compared arrays never match, even if identical
+  * `"alwaysUndefined`": never match nor differ (values not included in results)
+  * *function*: use function to compare (see below)
 
- * `compareSet`: for comparison of sets (JavaScript type `Set`)
-    * `"reference"`: match only when identical as references, i.e., when compared sets are references to the same object in memory
-   * `"strict"`*: match when objects have same type and values in same positions
-   * `"valuesOnly"`: match when compared sets have matching values
-   * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
-   * `"typeOnly"`: match when identical in type only, without comparing values
-   * `"alwaysSame"`: compared sets always match, regardless of value, type, or size
-   * `"alwaysDifferent`": compared sets never match, even if identical
-   * `"alwaysUndefined`": never match nor differ (values not included in results)    * *function*: use function to compare (see below)
+* `compareSet`: for comparison of sets (JavaScript type `Set`)
+  * `"reference"`: match only when identical as references, i.e., when compared sets are references to the same object in memory
+  * `"strict"`*: match when objects have same type and values in same positions
+  * `"valuesOnly"`: match when compared sets have matching values
+  * `"sizeOnly"`: match when compared arrays have matching number of elements, regardless of their contents
+  * `"typeOnly"`: match when identical in type only, without comparing values
+  * `"alwaysSame"`: compared sets always match, regardless of value, type, or size
+  * `"alwaysDifferent`": compared sets never match, even if identical
+  * `"alwaysUndefined`": never match nor differ (values not included in results)
+  * *function*: use function to compare (see below)
 
 In all cases, a comparison operation may be supplied as a function whose job is to compare the two arguments, and return `true` if considered the same, `false` if considered different, or `undefined` if it cannot be determined. The two arguments may be assumed to be of compatible types when called. // TODO - pass options to function?  Object??
 
-#### Options as strings
+#### Compare options as shorthand strings
 
 String values for the `compare` option behave as shorthand helpers for a style of comparison. Their function is described by their equivalent representations in the previously described option object.
 
 * `Exact`: (default) compare for identical type, value, and structure. Values considered matching if they can be used interchangeably.
 
- * `compareScalar`: `"strict"`
- * `compareObject`: `"strict"`
- * `compareMap`: `"strict"`
- * `compareArray`: `"strict"`
- * `compareSet`: `"strict"`
+  * `compareScalar`: `"strict"`
+  * `compareObject`: `"strict"`
+  * `compareMap`: `"strict"`
+  * `compareArray`: `"strict"`
+  * `compareSet`: `"strict"`
 
 * `Equivalent`: compare for matching content and structure, but not as strictly. Objects will match with objects or with maps if their keys and values match and are in the same orders. Arrays will match other arrays if their values match and are in the same order. Sets will match other sets or arrays if they contain the same values.
 
- * `compareScalar`: `"strict"`
- * `compareObject`: `"keyValueOrder"`
- * `compareMap`: `"keyValueOrder"`
- * `compareArray`: `"valueOrder"`
- * `compareSet`: `"valuesOnly"`
+  * `compareScalar`: `"strict"`
+  * `compareObject`: `"keyValueOrder"`
+  * `compareMap`: `"keyValueOrder"`
+  * `compareArray`: `"valueOrder"`
+  * `compareSet`: `"valuesOnly"`
 
 * `General`: compare for functional equivalence. Scalars will match if they are abstractly equivalent, i.e., if the abstract equality operator `==` evaluates to `true`. Objects will match objects or maps if their key/value pairs match identically by key and value, regardless of order. Arrays will match other arrays and sets if they contain the same values.
 
- * `compareScalar`: `"abstract"`
- * `compareObject`: `"keyValue"`
- * `compareMap`: `"keyValue"`
- * `compareArray`: `"valuesOnly"`
- * `compareSet`: `"valuesOnly"`
+  * `compareScalar`: `"abstract"`
+  * `compareObject`: `"keyValue"`
+  * `compareMap`: `"keyValue"`
+  * `compareArray`: `"valuesOnly"`
+  * `compareSet`: `"valuesOnly"`
 
 * `Structure`: compare for identical form, not content. Scalars will always be considered matching one another. Objects will match objects or maps if they have the same keys, regardless of their order. Arrays and sets will match if they have the same size, regardless of content or types of elements.
 
- * `compareScalar`: `"alwaysSame"`
- * `compareObject`: `"keysOnly"`
- * `compareMap`: `"keysOnly"`
- * `compareArray`: `"sizeOnly"`
- * `compareSet`: `"sizeOnly"`
+  * `compareScalar`: `"alwaysSame"`
+  * `compareObject`: `"keysOnly"`
+  * `compareMap`: `"keysOnly"`
+  * `compareArray`: `"sizeOnly"`
+  * `compareSet`: `"sizeOnly"`
 
 ### Render options
 
@@ -348,24 +350,23 @@ The following properties are supported in an option object passed through the `r
 * `diffOnly`: (`true`/`false`*) Render differences only
 * `verbose`: (`true`/`false`*) Include performance, statistics
 
-#### Options as strings
+#### Render options as shorthand strings
 
 String values for the `render` option behave as shorthand helpers for a style of rendering. Their function is described by their equivalent representations in the previously described option object.
 
 * `General`:
- * `mapAsObject`: true
- * `setAsArray`: true
- * `maxDepth`: 0
- * `diffOnly`: true
- * `verbose`: false
+  * `mapAsObject`: true
+  * `setAsArray`: true
+  * `maxDepth`: 0
+  * `diffOnly`: true
+  * `verbose`: false
 
 * `Verbose`:
- * `mapAsObject`: true
- * `setAsArray`: true
- * `maxDepth`: 0
- * `same`: true
- * `report`: true
-
+  * `mapAsObject`: true
+  * `setAsArray`: true
+  * `maxDepth`: 0
+  * `same`: true
+  * `report`: true
 
 ## Examples (TBD)
 
@@ -382,4 +383,3 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
