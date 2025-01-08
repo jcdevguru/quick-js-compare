@@ -52,4 +52,4 @@ A coverage directory will be created at the root of the project with various rep
 
 Developers are welcome to submit pull requests for bug fixes or suggested changes, but they must include unit tests to cover any and all new functionality.  Pull requests, however straightforward, will not be accepted without them.  
 
-If you just find a bug but do not want to fix the code yourself, it's perfectly fine to submit a PR with only a new unit test that exposes the bug. You will be given credit for contributing to the fix!!
+If you just find a bug but do not want to fix the code yourself, it's perfectly fine to submit a PR with only a new unit test that exposes the bug. You will be given credit!
