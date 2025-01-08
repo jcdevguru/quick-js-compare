@@ -9,8 +9,9 @@ import type {
 import type { CompareResult, ComparisonStatus, ValueResults } from '../types';
 
 import { valueToValueResult } from '../util';
+import { type StockSubResultSetter } from '.';
 
-export const strict = (left: SetObject, right: SetObject, compareInst: Compare): ComparisonStatus => {
+export const strict = (left: SetObject, right: SetObject, compareInst: Compare, setSubResult: StockSubResultSetter): ComparisonStatus => {
   const subResult: CompareResult = {};
 
   const sameSet = commonSetElements(left, right);
@@ -29,7 +30,7 @@ export const strict = (left: SetObject, right: SetObject, compareInst: Compare):
     subResult.rightSame = same;
   }
 
-  compareInst.setSubResult(subResult);
+  setSubResult(subResult);
 
   return comparisonStatus;
 }
@@ -38,7 +39,10 @@ export const sizeOnly = (left: SetObject, right: SetObject): ComparisonStatus =>
   return left.size === right.size;
 }
 
-export const valuesOnly = (left: SetObject, right: SetObject, compareInst: Compare): ComparisonStatus => {
+export const valuesOnly = (
+  left: SetObject, right: SetObject, compareInst: Compare, setSubResult: StockSubResultSetter
+): ComparisonStatus => {
   // Incomplete
-  return strict(left, right, compareInst);
+  return strict(left, right, compareInst, setSubResult);
 }
+

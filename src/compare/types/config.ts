@@ -12,6 +12,8 @@ import {
   isCompareFunction,
 } from '.';
 
+import { type StockCompareFunction } from '../stock-methods';
+
 const cmpOptionAliasUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
 export type CompareOptionAlias = typeof cmpOptionAliasUnion.type[number];
 
@@ -181,9 +183,9 @@ export const validateCompareConfig = (v: unknown): v is CompareConfig => {
 };
 
 export type StockCompareConfig = {
-  compareScalar: Record<CompareScalarToken, CompareFunction<Scalar>>,
-  compareObject: Record<CompareCompositeToken, CompareFunction<Composite>>,
-  compareMap: Record<CompareMapToken, CompareFunction<MapObject>>,
-  compareArray: Record<CompareArrayToken, CompareFunction<ArrayObject>>,
-  compareSet: Record<CompareSetToken, CompareFunction<SetObject>>,
+  compareScalar: Record<CompareScalarToken, StockCompareFunction<Scalar>>,
+  compareObject: Record<CompareCompositeToken, StockCompareFunction<Composite>>,
+  compareMap: Record<CompareMapToken, StockCompareFunction<MapObject>>,
+  compareArray: Record<CompareArrayToken, StockCompareFunction<ArrayObject>>,
+  compareSet: Record<CompareSetToken, StockCompareFunction<SetObject>>,
 };

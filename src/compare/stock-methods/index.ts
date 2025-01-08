@@ -8,6 +8,7 @@ import {
 
 import type {
   CompareFunction,
+  CompareResult,
   ComparisonStatus
 } from '../types';
 
@@ -17,6 +18,10 @@ import type {
   StockCompareConfig
 } from '../types/config';
 
+export type StockSubResultSetter = (result: CompareResult) => void;
+export interface StockCompareFunction<T extends Value = Value> {
+  (left: T, right: T, compareInstance: Compare, setSubResult: StockSubResultSetter): ComparisonStatus;
+}
 import type Compare from '..';
 
 import { compareObject } from './object';
@@ -98,7 +103,7 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
 // - If types don't match, or no specific compare method for the type exists,
 //   we use the default compare method for objects
 
-const selectComparisonMethod = (left: Value, right: Value, config: CompareMethodConfig): CompareFunction => {
+const selectComparisonMethod = (left: Value, right: Value, config: CompareMethodConfig): StockCompareFunction => {
   const leftType = actualType(left);
   let selectedMethod: CompareFunction | undefined;
 
@@ -106,15 +111,15 @@ const selectComparisonMethod = (left: Value, right: Value, config: CompareMethod
     selectedMethod = config.compareScalarMethod;
   } else if (leftType === actualType(right)) {
     selectedMethod = config[`compare${leftType}Method` as CompareMethodConfigKey];
-  } 
+  } else {
+    selectedMethod = config.compareObjectMethod;
+  }
   
-  return selectedMethod ?? config.compareObjectMethod;
+  return selectedMethod;
 };
 
-export const stockComparer = (left: Value, right: Value, compareInst: Compare): ComparisonStatus => {
-  const config = compareInst.compareConfig as CompareMethodConfig;
-  
-  const method = selectComparisonMethod(left, right, config);
-
-  return method(left, right, compareInst);
-};
+export const createStockCompareFunction = (setSubResult: StockSubResultSetter): CompareFunction => 
+  (left: Value, right: Value, compareInst: Compare): ComparisonStatus => {
+    const method = selectComparisonMethod(left, right, compareInst.compareConfig as CompareMethodConfig);
+    return method(left, right, compareInst, setSubResult);
+  };

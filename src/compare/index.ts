@@ -19,7 +19,8 @@ import {
   optionAliasToConfigOptions
 } from './option';
 
-import { stockComparer } from './stock-methods';
+import { createStockCompareFunction } from './stock-methods';
+
 import { OptionError } from '../lib/error';
 
 import {
@@ -67,19 +68,19 @@ export default class Compare {
   private comparisonResult: CompareResult;
   private workingResult: CompareResult | undefined;
 
-  private compareFunction: CompareFunction = stockComparer;
+  private compareFunction: CompareFunction;
 
   private configOptions!: MinimalConfigOptions;
   private configuration!: Config;
 
-  private processOptions(options: MinimalConfigOptions) {
+  private processOptions(options: MinimalConfigOptions): CompareFunction {
     if (!validateMinimalConfigOptions(options)) {
       throw new OptionError('Invalid options');
     }
 
     let compareOptions = options.compare;
     if (isCompareFunction(compareOptions)) {
-      this.compareFunction = compareOptions;
+      return compareOptions;
     } else if (isCompareOptionAlias(compareOptions)) {
       compareOptions = optionAliasToConfigOptions(compareOptions);
     } else if (isMinimalCompareConfigOptions(compareOptions)) {
@@ -96,7 +97,7 @@ export default class Compare {
       throw new Error('Internal error: unhandled compare option');
     }
 
-    // TODO: handle render option
+    return createStockCompareFunction(result => this.setSubResult(result));
   }
 
   private comparer = (left: Value, right: Value, result: CompareResult): ComparisonStatus => {
@@ -139,7 +140,7 @@ export default class Compare {
 
   // Public methods
   constructor(options?: MinimalConfigOptions) {
-    this.processOptions(options ?? Compare.defaultOptions);
+    this.compareFunction = this.processOptions(options ?? Compare.defaultOptions);
     this.comparisonResult = {};
   }
 
@@ -208,9 +209,7 @@ export default class Compare {
     return this.configOptions.compare;
   }
 
-  // TODO: figure out how to make this accessible to stock methods
-  // but not public
-  public setSubResult(result: CompareResult) {
+  private setSubResult(result: CompareResult) {
     this.comparisonResult.subResult = result;
   }
 }

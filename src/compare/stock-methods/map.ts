@@ -5,6 +5,8 @@ import { valueToValueResult } from "../util";
 
 import { type Compare } from "../..";
 
+import type { StockSubResultSetter } from ".";
+
 export const sizeOnly = (left: MapObject, right: MapObject): ComparisonStatus => {
   return left.size === right.size;
 }
@@ -14,7 +16,7 @@ export const strict = (left: MapObject, right: MapObject): ComparisonStatus => {
   return left === right;
 }
 
-export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare): ComparisonStatus => {
+export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare, setSubResult: StockSubResultSetter): ComparisonStatus => {
   let status: ComparisonStatus = undefined;
   const leftKeys = new Set(left.keys());
   const rightKeys = new Set(right.keys());
@@ -22,7 +24,7 @@ export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare
   const sameKeySet = commonSetElements(leftKeys, rightKeys, true) as Set<ObjectKey>;
   const sameKeys = Array.from(sameKeySet).map(key => valueToValueResult(key)) as ValueResults;
 
-  const subResult: CompareResult = {};
+  const subResult: CompareResult = {};  
 
   if (sameKeys.length > 0) {
     subResult.leftSame = sameKeys;
@@ -37,7 +39,7 @@ export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare
     status = false;
   }
 
-  compareInst.setSubResult(subResult);
+  setSubResult(subResult);
 
   return status;
 }
