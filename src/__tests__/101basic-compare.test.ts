@@ -1,39 +1,31 @@
-// These tests that are for validations and functinos of
-// compare options provided through the top-level function
+// These tests are for basic operations of the compare function
 
-import Compare from '../compare';
 import { type MinimalConfigOptions } from '../lib/option';
 import { type Value } from '../lib/types';
-import { compareTestLabel } from './util';
+import { verifyCompare, compareTestLabel } from './util';
 
 describe('compare - basic operations', () => {
-  const testMatch = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
+  const testMatch = (testName: string, left: Value, right: Value, options: MinimalConfigOptions) => {
     test(compareTestLabel(testName, options), () => {
-      const c = new Compare(options);
-      expect(c.compare(left, right).result).toStrictEqual({
-        leftSame: [expect.objectContaining({value: left})],
-        rightSame: [expect.objectContaining({value: right})]
-      });
+      verifyCompare(left, right, options, true);
     });
   };
   
-  const testMismatch = (testName: string, left: Value, right: Value, options?: MinimalConfigOptions) => {
+  const testMismatch = (testName: string, left: Value, right: Value, options: MinimalConfigOptions) => {
     test(compareTestLabel(testName, options), () => {
-      const c = new Compare(options);
-      expect(c.compare(left, right).result).toStrictEqual({
-        left: [expect.objectContaining({value: left})],
-        right: [expect.objectContaining({value: right})]
-      });
+      verifyCompare(left, right, options, false);
     });
   };
 
-  testMatch('exact matching strings', 'test-string1', 'test-string1');
-  testMatch('exact matching numbers', 1, 1);
-  testMatch('exact matching booleans', true, true);
+  const exactOptions: MinimalConfigOptions = { compare: 'Exact' };
 
-  testMismatch('mismatching strings', 'test-string1', 'test-string2');
-  testMismatch('mismatching numbers', 1, 2);
-  testMismatch('mismatching booleans', true, false);
+  testMatch('exact matching strings', 'test-string1', 'test-string1', exactOptions);
+  testMatch('exact matching numbers', 1, 1, exactOptions);
+  testMatch('exact matching booleans', true, true, exactOptions);
+
+  testMismatch('mismatching strings', 'test-string1', 'test-string2', exactOptions);
+  testMismatch('mismatching numbers', 1, 2, exactOptions);
+  testMismatch('mismatching booleans', true, false, exactOptions);
 
   testMatch('abstract matching scalars 1', 0, false, { compare: 'General' });
   testMatch('abstract matching scalars 2', '', 0, { compare: 'General' });
@@ -41,7 +33,6 @@ describe('compare - basic operations', () => {
   testMatch('scalar type only', 1, 91, { compare: { compareScalar: 'typeOnly' } });
   testMatch('array type only', [1, 2, 3], ['abc'], { compare: { compareArray: 'typeOnly' } });
 
-
-  testMismatch('scalars and composites - always mismatch', 'mismatch-me', ['mismatch-me']);
-  testMismatch('mismatching scalar types', 1, '1');
+  testMismatch('scalars and composites - always mismatch', 'mismatch-me', ['mismatch-me'], exactOptions);
+  testMismatch('mismatching scalar types', 1, '1', exactOptions);
 });

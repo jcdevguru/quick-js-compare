@@ -1,32 +1,34 @@
-// These tests that are for validations and functinos of
+// These tests that are for validations and functions of
 // compare options provided through the top-level function
 
 import { type MinimalConfigOptions } from '../lib/option';
-import { scalarCollection, compareTestLabel } from './util';
+import { verifyCompare, compareTestLabel } from './util';
 
 describe('set comparisons', () => {
   const options: MinimalConfigOptions = { compare: { compareSet: 'strict' } };
   test(compareTestLabel('mismatching set of integers (strict)', options), () => {
-    scalarCollection(
+    verifyCompare(
       new Set([1, 2, 3]), 
       new Set([1, 2, 4]), 
+      options,
+      false,
       {
         sameValues: [1, 2],
         leftValues: [3],
         rightValues: [4]
-      },
-      options
+      }
     );
   });
   
   test(compareTestLabel('matching set of integers (valuesOnly)', options), () => {
-    scalarCollection(
+    verifyCompare(
       new Set([1, 2, 3]), 
       new Set([1, 2, 3]), 
+      options,
+      true,
       {
         sameValues: [1, 2, 3]
-      },
-      options
+      }
     );
   });
 });
@@ -41,28 +43,30 @@ describe('map comparisons', () => {
 
   const options: MinimalConfigOptions = { compare: { compareMap: 'keysOnly' } };
   test(compareTestLabel('mismatching maps', options), () => {
-    scalarCollection(
+    verifyCompare(
       leftMap, 
       rightMap, 
+      options,
+      false,
       {
         sameValues: ['a', 'b'],
         leftValues: ['c'],
         rightValues: ['d']
-      },
-      options
+      }
     );
   });
 
   const matchingMap1 = new Map([['a', 1], ['b', 2]]);
   const matchingMap2 = new Map([['a', 10], ['b', 12]]);
   test(compareTestLabel('matching maps', options), () => {
-    scalarCollection(
+    verifyCompare(
       matchingMap1, 
       matchingMap2, 
+      options,
+      true,
       {
         sameValues: ['a', 'b']
-      },
-      options
+      }
     );
   });
 });
