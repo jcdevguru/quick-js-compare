@@ -1,4 +1,4 @@
-import { defineUnionForType } from './util';
+import { defineUnionForType } from '@lib/util';
 
 // Utility types
 // An array-like type (tuple) that must contain exactly N elements

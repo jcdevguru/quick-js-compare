@@ -1,7 +1,7 @@
-import type { MinimalConfigOptions } from '../../lib/option';
-import type { Value, Scalar } from '../../lib/types';
-import Compare from '../../compare';
-import type { CompareResult, ComparisonStatus } from '../../compare/types';
+import type { MinimalConfigOptions } from '@lib/option';
+import type { Value, Scalar } from '@lib/types';
+import Compare from '@compare';
+import type { CompareResult, ComparisonStatus } from '@compare/types';
 
 export type TestValues = Partial<{
   sameValues: Scalar[];

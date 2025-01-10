@@ -1,14 +1,14 @@
-import type Compare from '..';
+import type Compare from '@compare';
 
-import { commonSetElements } from '../../lib/util';
+import { commonSetElements } from '@lib/util';
 
 import type {
   SetObject
-} from '../../lib/types';
+} from '@lib/types';
 
-import type { CompareResult, ComparisonStatus, ValueResults } from '../types';
+import type { CompareResult, ComparisonStatus, ValueResults } from '@compare/types';
 
-import { valueToValueResult } from '../util';
+import { valueToValueResult } from '@compare/util';
 import { type StockSubResultSetter } from '.';
 
 export const strict = (left: SetObject, right: SetObject, compareInst: Compare, setSubResult: StockSubResultSetter): ComparisonStatus => {

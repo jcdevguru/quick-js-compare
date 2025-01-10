@@ -1,10 +1,5 @@
-import type {
-  Value,
-  NonEmptyArray,
-  ObjectKey,
-} from '../../lib/types';
-
-import type Compare from '../../compare';
+import type Compare from '@compare';
+import type { Value, NonEmptyArray, ObjectKey } from '@lib/types';
 
 export type ComparisonStatus = boolean | undefined;
 

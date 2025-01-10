@@ -14,7 +14,7 @@ import {
   isCompareMethodConfig,
 } from './types/config';
 
-import { compareTokenToStockMethodMap } from './stock-methods';
+import { compareTokenToStockMethodMap } from '@compare/stock-methods';
 
 const ExactCompareConfig: CompareConfigOptions = {
   compareScalar: 'strict',

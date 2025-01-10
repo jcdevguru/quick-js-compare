@@ -1,5 +1,4 @@
-
-import { OptionError } from '../lib/error';
+import { OptionError } from '@lib/error';
 import {
   type RenderOption,
   type RenderConfig,

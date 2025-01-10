@@ -1,16 +1,15 @@
+import { OptionError } from '@lib/error';
+import type { AtLeastOne } from '@lib/types';
+import { validateMinimalObject, validateObject } from '@lib/util';
 
-import { OptionError } from './error';
-import type { AtLeastOne } from './types';
-import { validateMinimalObject, validateObject } from './util';
-
-import { validateRenderOption, validateRenderConfig } from '../render/option';
-import type { RenderOption } from '../render/types';
+import { validateRenderOption, validateRenderConfig } from '@render/option';
+import type { RenderOption } from '@render/types';
 import {
   type CompareConfig,
   type CompareOptions,
   validateCompareOptions,
   validateCompareConfig,
-} from '../compare/types/config';
+} from '@compare/types/config';
 
 export interface ConfigOptions {
   compare: CompareOptions

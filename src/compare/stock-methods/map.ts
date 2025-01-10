@@ -1,11 +1,9 @@
-import type { MapObject, ObjectKey } from "../../lib/types";
-import type { CompareResult, ComparisonStatus, ValueResults } from "../types";
-import { commonSetElements } from '../../lib/util';
-import { valueToValueResult } from "../util";
-
-import { type Compare } from "../..";
-
-import type { StockSubResultSetter } from ".";
+import type { MapObject, ObjectKey } from '@lib/types';
+import type { CompareResult, ComparisonStatus, ValueResults } from '@compare/types';
+import { commonSetElements } from '@lib/util';
+import { valueToValueResult } from '@compare/util';
+import type Compare from '@compare';
+import type { StockSubResultSetter } from '.';
 
 export const sizeOnly = (left: MapObject, right: MapObject): ComparisonStatus => {
   return left.size === right.size;

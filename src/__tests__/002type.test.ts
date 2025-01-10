@@ -1,4 +1,3 @@
-
 import {
   type Value,
   type ArrayObject,
@@ -11,7 +10,7 @@ import {
   isKeyedObject,
   isScalar,
   isOrderedObject,
-} from '../lib/types';
+} from '@lib/types';
 
 // These tests are for compile-time type relationships
 // This helps us make sure we have consistency between type guards and actual types

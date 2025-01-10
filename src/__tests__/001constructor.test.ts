@@ -1,9 +1,9 @@
 // These tests tha are for validations and functinos of
 // compare options provided through the top-level function
 
-import Compare from '../compare';
-import type { MinimalConfigOptions } from '../lib/option';
-import { OptionError } from '../lib/error';
+import Compare from '@compare';
+import type { MinimalConfigOptions } from '@lib/option';
+import { OptionError } from '@lib/error';
 
 describe('successful construction', () => {
   const testConstructor = (testName: string, options?: unknown) => {

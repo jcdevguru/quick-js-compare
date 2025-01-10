@@ -1,34 +1,33 @@
+import type Compare from '@compare';
 import {
   type Value,
   type ArrayObject,
   type MapObject,
   actualType,
   isScalarType,
-} from '../../lib/types';
+} from '@lib/types';
 
 import type {
-  CompareFunction,
   CompareResult,
-  ComparisonStatus
-} from '../types';
+  CompareFunction,
+  ComparisonStatus,
+} from '@compare/types';
 
 import type {
   CompareMethodConfig,
   CompareMethodConfigKey,
-  StockCompareConfig
-} from '../types/config';
+  StockCompareConfig,
+} from '@compare/types/config';
+
+import { compareObject } from './object';
+import * as SetMethods from './set';
+import * as ArrayMethods from './array';
+import * as MapMethods from './map';
 
 export type StockSubResultSetter = (result: CompareResult) => void;
 export interface StockCompareFunction<T extends Value = Value> {
   (left: T, right: T, compareInstance: Compare, setSubResult: StockSubResultSetter): ComparisonStatus;
 }
-import type Compare from '..';
-
-import { compareObject } from './object';
-
-import * as SetMethods from './set';
-import * as ArrayMethods from './array';
-import * as MapMethods from './map';
 
 const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
 // Method 'exact' might never be called due to strict equality check in Compare.comparer

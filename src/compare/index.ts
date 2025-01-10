@@ -5,23 +5,22 @@ import {
   isSupportedType,
   isCompositeType,
   isReference,
-} from '../lib/types';
+} from '@lib/types';
 
 import {
   type MinimalConfigOptions,
   type Config,
   validateMinimalConfigOptions,
-} from '../lib/option';
+} from '@lib/option';
 
 import {
   compareConfigToMethodConfig,
   defaultCompareConfigOptions,
   optionAliasToConfigOptions
-} from './option';
+} from '@compare/option';
 
-import { createStockCompareFunction } from './stock-methods';
-
-import { OptionError } from '../lib/error';
+import { createStockCompareFunction } from '@compare/stock-methods';
+import { OptionError } from '@lib/error';
 
 import {
   type CompareResult,

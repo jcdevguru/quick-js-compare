@@ -1,18 +1,17 @@
-import type { ArrayObject, AtLeastOne, Composite, MapObject, Scalar, SetObject } from '../../lib/types';
-import { OptionError } from '../../lib/error';
-
+import type { ArrayObject, AtLeastOne, Composite, MapObject, Scalar, SetObject } from '@lib/types';
+import { OptionError } from '@lib/error';
 import {
   validateMinimalObject,
   defineUnionForType,
   validateObject,
-} from '../../lib/util';  
+} from '@lib/util';  
 
 import { 
   type CompareFunction,
   isCompareFunction,
 } from '.';
 
-import { type StockCompareFunction } from '../stock-methods';
+import { type StockCompareFunction } from '@compare/stock-methods';
 
 const cmpOptionAliasUnion = defineUnionForType('Exact', 'Equivalent', 'General', 'Structure');
 export type CompareOptionAlias = typeof cmpOptionAliasUnion.type[number];

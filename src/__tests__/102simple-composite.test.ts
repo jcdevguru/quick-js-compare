@@ -1,8 +1,8 @@
 // These tests that are for validations and functions of
 // compare options provided through the top-level function
 
-import { type MinimalConfigOptions } from '../lib/option';
-import { verifyCompare, compareTestLabel } from './util';
+import { type MinimalConfigOptions } from '@lib/option';
+import { verifyCompare, compareTestLabel } from '@test/util';
 
 describe('set comparisons', () => {
   const options: MinimalConfigOptions = { compare: { compareSet: 'strict' } };

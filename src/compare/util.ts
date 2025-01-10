@@ -1,14 +1,14 @@
 import {
   type Value,
   actualType,
-} from '../lib/types';
+} from '@lib/types';
 
 import type {
   ValueResult,
   CompareResult,
   ValueResultProps,
   ComparisonKey,
-} from './types';
+} from '@compare/types';
 
 export const resultHasDifferences = (result: CompareResult): boolean =>
   Boolean(result.leftOnly) || Boolean(result.rightOnly) || Boolean(result.left) && Boolean(result.right);

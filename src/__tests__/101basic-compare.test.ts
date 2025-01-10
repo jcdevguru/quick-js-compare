@@ -1,8 +1,8 @@
 // These tests are for basic operations of the compare function
 
-import { type MinimalConfigOptions } from '../lib/option';
-import { type Value } from '../lib/types';
-import { verifyCompare, compareTestLabel } from './util';
+import { type MinimalConfigOptions } from '@lib/option';
+import { type Value } from '@lib/types';
+import { verifyCompare, compareTestLabel } from '@test/util';
 
 describe('compare - basic operations', () => {
   const testMatch = (testName: string, left: Value, right: Value, options: MinimalConfigOptions) => {

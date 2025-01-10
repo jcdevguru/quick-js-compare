@@ -1,24 +1,24 @@
-import type Compare from '..';
+import type Compare from '@compare';
 
 import {
   type Value,
   actualType,
   isKeyedObjectType,
   isOrderedObjectType,
-} from '../../lib/types';
+} from '@lib/types';
 
 import {
   type ComparisonStatus,
   type CompareFunction,
   isCompareFunction,
-} from '../types';
+} from '@compare/types';
 
 import {
   type CompareCompositeToken,
   isMinimalCompareConfigOptions,
   isCompareConfigToken,
   isCompareMethodConfig,
-} from '../types/config';
+} from '@compare/types/config';
 
 
 // Because object comparison is supported for values of different types,
