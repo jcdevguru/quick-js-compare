@@ -96,7 +96,7 @@ export default class Compare {
       throw new Error('Internal error: unhandled compare option');
     }
 
-    return createStockCompareFunction(result => this.setSubResult(result));
+    return createStockCompareFunction(result => this.updateSubResult(result));
   }
 
   private comparer = (left: Value, right: Value, result: CompareResult): ComparisonStatus => {
@@ -208,7 +208,7 @@ export default class Compare {
     return this.configOptions.compare;
   }
 
-  private setSubResult(result: CompareResult) {
-    this.comparisonResult.subResult = result;
+  private updateSubResult(result: CompareResult) {
+    this.comparisonResult.subResult = mergeCompareResults(this.comparisonResult.subResult || {}, result);
   }
 }

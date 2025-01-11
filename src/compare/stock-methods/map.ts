@@ -14,7 +14,7 @@ export const strict = (left: MapObject, right: MapObject): ComparisonStatus => {
   return left === right;
 }
 
-export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare, setSubResult: StockSubResultSetter): ComparisonStatus => {
+export const keysOnly = (left: MapObject, right: MapObject, instance: Compare, updateSubResult: StockSubResultSetter): ComparisonStatus => {
   let status: ComparisonStatus = undefined;
   const leftKeys = new Set(left.keys());
   const rightKeys = new Set(right.keys());
@@ -37,7 +37,7 @@ export const keysOnly = (left: MapObject, right: MapObject, compareInst: Compare
     status = false;
   }
 
-  setSubResult(subResult);
+  updateSubResult(subResult);
 
   return status;
 }

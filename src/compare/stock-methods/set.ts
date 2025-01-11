@@ -30,7 +30,7 @@ export const strict = (left: SetObject, right: SetObject, instance: Compare, upd
     subResult.rightSame = same;
   }
 
-  setSubResult(subResult);
+  updateSubResult(subResult);
 
   return comparisonStatus;
 }
