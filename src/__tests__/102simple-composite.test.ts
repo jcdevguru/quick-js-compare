@@ -42,7 +42,7 @@ describe('map comparisons', () => {
   ]);
 
   const options: MinimalConfigOptions = { compare: { compareMap: 'keysOnly' } };
-  test(compareTestLabel('mismatching maps', options), () => {
+  test(compareTestLabel('mismatching maps (keysOnly)', options), () => {
     verifyCompare(
       leftMap, 
       rightMap, 
@@ -58,7 +58,7 @@ describe('map comparisons', () => {
 
   const matchingMap1 = new Map([['a', 1], ['b', 2]]);
   const matchingMap2 = new Map([['a', 10], ['b', 12]]);
-  test(compareTestLabel('matching maps', options), () => {
+  test(compareTestLabel('matching maps (keysOnly)', options), () => {
     verifyCompare(
       matchingMap1, 
       matchingMap2, 

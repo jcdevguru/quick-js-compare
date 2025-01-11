@@ -1,5 +1,6 @@
 import { mergeCompareResults, valueToValueResult } from '@compare/util';
 import type { CompareResult, ValueResults } from '@compare/types';
+import { expectValueInArray } from './util';
 import type { Value } from '@lib/types';
 
 // TODO: Add separate test file for valueToValueResult that runs before this one
@@ -41,15 +42,20 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.left).toHaveLength(testValues.target.left.length + testValues.source.left.length);
-    expect(targetResult.right).toHaveLength(testValues.target.right.length + testValues.source.right.length);
     expect(targetResult.left?.map(r => r.value)).toEqual([...testValues.target.left, ...testValues.source.left]);
     expect(targetResult.right?.map(r => r.value)).toEqual([...testValues.target.right, ...testValues.source.right]);
   });
 
   test('merges nested subResults', () => {
+    const sourceValues = {
+      left: [1]
+    }
+    const targetValues = { 
+      right: ['a']
+    };
+
     const targetResult: CompareResult = {
-      left: createValueResults([1]),
+      left: createValueResults(sourceValues.left),
       subResult: {
         left: createValueResults(testValues.nested.target.left),
         right: createValueResults(testValues.nested.target.right)
@@ -57,7 +63,7 @@ describe('mergeCompareResults', () => {
     };
 
     const sourceResult: CompareResult = {
-      right: createValueResults(['a']),
+      right: createValueResults(targetValues.right),
       subResult: {
         left: createValueResults(testValues.nested.source.left),
         right: createValueResults(testValues.nested.source.right)
@@ -66,11 +72,9 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.left?.map(r => r.value)).toEqual([1]);
-    expect(targetResult.right?.map(r => r.value)).toEqual(['a']);
-    expect(targetResult.subResult?.left?.map(r => r.value))
-      .toEqual([...testValues.nested.target.left, ...testValues.nested.source.left]);
-    expect(targetResult.subResult?.right?.map(r => r.value))
+    expect(targetResult.left).toEqual(expectValueInArray(sourceValues.left));
+    expect(targetResult.right).toEqual(expectValueInArray(targetValues.right));
+    expect(targetResult.subResult!.right?.map(r => r.value))
       .toEqual([...testValues.nested.target.right, ...testValues.nested.source.right]);
   });
 
@@ -90,8 +94,8 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.left?.map(r => r.value)).toEqual(single.left);
-    expect(targetResult.right?.map(r => r.value)).toEqual(single.right);
+    expect(targetResult.left).toEqual(expectValueInArray(single.left));
+    expect(targetResult.right).toEqual(expectValueInArray(single.right));
   });
 
   test('creates subResult if missing in target', () => {
@@ -116,7 +120,8 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.subResult?.left?.map(r => r.value)).toEqual(values.subResult.left);
-    expect(targetResult.subResult?.right?.map(r => r.value)).toEqual(values.subResult.right);
+    expect(targetResult.left).toEqual(expectValueInArray(values.initial));
+    expect(targetResult.subResult?.left).toEqual(expectValueInArray(values.subResult.left));
+    expect(targetResult.subResult?.right).toEqual(expectValueInArray(values.subResult.right));
   });
 }); 
