@@ -20,11 +20,11 @@ export const compareTestLabel = (testName: string, options?: MinimalConfigOption
   return `${testName} (compare options: ${optionString})`;
 };
 
-export const expectValue = (value: Value) => 
+export const expectValueInObject = (value: Value) => 
   expect.objectContaining({ value });
 
-export const expectValueArray = (values: Scalar[]) => 
-  expect.arrayContaining(values.map(expectValue));
+export const expectValueInArray = (values: Scalar[]) => 
+  expect.arrayContaining(values.map(expectValueInObject));
 
 export const verifyCompare = (
   left: Value, 
@@ -40,23 +40,23 @@ export const verifyCompare = (
   
   switch (expectedStatus) {
     case true:
-      expectedResult.leftSame = [expectValue(left)];
-      expectedResult.rightSame = [expectValue(right)];
+      expectedResult.leftSame = [expectValueInObject(left)];
+      expectedResult.rightSame = [expectValueInObject(right)];
       break;
 
     case false: {
-      expectedResult.left = [expectValue(left)];
-      expectedResult.right = [expectValue(right)];
+      expectedResult.left = [expectValueInObject(left)];
+      expectedResult.right = [expectValueInObject(right)];
       break;
     }
   }
   if (subResultValues) {
     expectedResult.subResult = {
-      ...(subResultValues.leftValues && { left: expectValueArray(subResultValues.leftValues) }),
-      ...(subResultValues.rightValues && { right: expectValueArray(subResultValues.rightValues) }),
+      ...(subResultValues.leftValues && { left: expectValueInArray(subResultValues.leftValues) }),
+      ...(subResultValues.rightValues && { right: expectValueInArray(subResultValues.rightValues) }),
       ...(subResultValues.sameValues && {
-        leftSame: expectValueArray(subResultValues.sameValues),
-        rightSame: expectValueArray(subResultValues.sameValues)
+        leftSame: expectValueInArray(subResultValues.sameValues),
+        rightSame: expectValueInArray(subResultValues.sameValues)
       })
     }
   };
