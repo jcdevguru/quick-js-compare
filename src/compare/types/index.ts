@@ -6,7 +6,7 @@ export type ComparisonStatus = boolean | undefined;
 export type CompareFunction<T extends Value = Value> = (
   left: T,
   right: T,
-  compareInstance: Compare
+  instance: Compare
 ) => ComparisonStatus;
 
 export const isCompareFunction = (v: unknown): v is CompareFunction =>

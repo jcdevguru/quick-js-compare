@@ -3,7 +3,7 @@ import type { AtLeastOne } from '@lib/types';
 import { validateMinimalObject } from '@lib/util';
 import type Compare from '@compare';
 export interface RenderFunction {
-  (result: CompareResult, compareInstance: Compare): unknown;
+  (result: CompareResult, instance: Compare): unknown;
 }
 
 // Types for render option object

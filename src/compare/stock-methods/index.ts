@@ -26,7 +26,7 @@ import * as MapMethods from './map';
 
 export type StockSubResultSetter = (result: CompareResult) => void;
 export interface StockCompareFunction<T extends Value = Value> {
-  (left: T, right: T, compareInstance: Compare, setSubResult: StockSubResultSetter): ComparisonStatus;
+  (left: T, right: T, instance: Compare, updateSubResult: StockSubResultSetter): ComparisonStatus;
 }
 
 const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
@@ -117,8 +117,8 @@ const selectComparisonMethod = (left: Value, right: Value, config: CompareMethod
   return selectedMethod;
 };
 
-export const createStockCompareFunction = (setSubResult: StockSubResultSetter): CompareFunction => 
-  (left: Value, right: Value, compareInst: Compare): ComparisonStatus => {
-    const method = selectComparisonMethod(left, right, compareInst.compareConfig as CompareMethodConfig);
-    return method(left, right, compareInst, setSubResult);
+export const createStockCompareFunction = (updateSubResult: StockSubResultSetter): CompareFunction => 
+  (left: Value, right: Value, instance: Compare): ComparisonStatus => {
+    const method = selectComparisonMethod(left, right, instance.compareConfig as CompareMethodConfig);
+    return method(left, right, instance, updateSubResult);
   };

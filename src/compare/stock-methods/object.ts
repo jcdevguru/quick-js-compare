@@ -76,23 +76,23 @@ const objectTokenToMethodMap: Partial<Record<CompareCompositeToken, CompareFunct
 export const compareObject = (
   left: Value,
   right: Value,
-  compareInstance: Compare
+  instance: Compare
 ): ComparisonStatus => {
-  const compareOptions = compareInstance.compareOptions;
-  const compareConfig = compareInstance.compareConfig;
+  const compareOptions = instance.compareOptions;
+  const compareConfig = instance.compareConfig;
   if (isMinimalCompareConfigOptions(compareOptions)) {
     // Because these stock methods are invoked via helper tokens only, this condition check
     // should not be necessary.
     if (isCompareConfigToken(compareOptions.compareObject)) {
       const compareToken = distillComparisonType(left, right, compareOptions.compareObject);
       if (isCompareFunction(objectTokenToMethodMap[compareToken])) {
-        return objectTokenToMethodMap[compareToken](left, right, compareInstance);
+        return objectTokenToMethodMap[compareToken](left, right, instance);
       } else {
         throw new Error(`Unsupported condition: stock method defined incorrectly for compare option token ${compareToken}`);
       }
     } else if (isCompareMethodConfig(compareConfig)) {
       // Can happen for custom compare functions specific to standard object
-      return compareConfig.compareObjectMethod(left, right, compareInstance);
+      return compareConfig.compareObjectMethod(left, right, instance);
     } else {
       throw new Error('Unsupported condition: unexpected compare option');
     }
