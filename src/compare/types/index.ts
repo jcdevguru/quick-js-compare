@@ -14,21 +14,18 @@ export const isCompareFunction = (v: unknown): v is CompareFunction =>
 
 export type ValueResults = NonEmptyArray<ValueResult>;
 
-export interface Comparison {
-  leftOnly: ValueResults,
-  left: ValueResults,
-  leftSame: ValueResults,
-  rightSame: ValueResults,
-  right: ValueResults,
-  rightOnly: ValueResults,
-};
+export const comparisonKeys = ['leftOnly', 'left', 'leftSame', 'rightSame', 'right', 'rightOnly'] as const;
+export type ComparisonKey = typeof comparisonKeys[number];
+export type Comparison = Record<ComparisonKey, ValueResults>;
+
+export const isComparisonKey = (key: string): key is ComparisonKey =>
+  comparisonKeys.includes(key as ComparisonKey);
 
 // Returned from .compare()
 export type CompareResult = Partial<Comparison> & {
   subResult?: CompareResult,
 };
 
-export type ComparisonKey = keyof Comparison;
 export type CompareResultKey = keyof CompareResult;
 
 export type ValueResultProps = {
