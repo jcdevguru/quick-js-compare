@@ -1,12 +1,12 @@
 import type { MinimalConfigOptions } from '@lib/option';
-import type { Value, Scalar } from '@lib/types';
+import type { Value } from '@lib/types';
 import Compare from '@compare';
 import type { CompareResult, ComparisonStatus } from '@compare/types';
 
 export type TestValues = Partial<{
-  sameValues: Scalar[];
-  leftValues: Scalar[];
-  rightValues: Scalar[];
+  sameValues: Array<Value>;
+  leftValues: Array<Value>;
+  rightValues: Array<Value>;
 }>;
 
 export const compareTestLabel = (testName: string, options?: MinimalConfigOptions) => {
@@ -23,7 +23,7 @@ export const compareTestLabel = (testName: string, options?: MinimalConfigOption
 export const expectValueInObject = (value: Value) => 
   expect.objectContaining({ value });
 
-export const expectValueInArray = (values: Scalar[]) => 
+export const expectValueInArray = (values: Array<Value>) => 
   expect.arrayContaining(values.map(expectValueInObject));
 
 export const verifyCompare = (
