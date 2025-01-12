@@ -1,5 +1,5 @@
 import type Compare from '@compare';
-import type { Value, NonEmptyArray, ObjectKey } from '@lib/types';
+import type { Value, ObjectKey } from '@lib/types';
 
 export type ComparisonStatus = boolean | undefined;
 
@@ -12,7 +12,7 @@ export type CompareFunction<T extends Value = Value> = (
 export const isCompareFunction = (v: unknown): v is CompareFunction =>
   typeof v === 'function' && v.length >= 2;
 
-export type ValueResults = NonEmptyArray<ValueResult>;
+export type ValueResults = Array<ValueResult>;
 
 export const comparisonKeys = ['leftOnly', 'left', 'leftSame', 'rightSame', 'right', 'rightOnly'] as const;
 export type ComparisonKey = typeof comparisonKeys[number];
