@@ -64,8 +64,8 @@ export default class Compare {
     right: new WeakSet<Reference>(),
   };
 
-  private comparisonResult: CompareResult;
-  private workingResult: CompareResult | undefined;
+  private comparisonResult: CompareResult | undefined;
+  private workingResult: CompareResult = {};
 
   private compareFunction: CompareFunction;
 
@@ -99,7 +99,7 @@ export default class Compare {
     return createStockCompareFunction(result => this.updateSubResult(result));
   }
 
-  private comparer = (left: Value, right: Value, result: CompareResult): ComparisonStatus => {
+  private comparer = (left: Value, right: Value): ComparisonStatus => {
     let status: ComparisonStatus = undefined;
 
     const leftType = actualType(left);
@@ -127,11 +127,11 @@ export default class Compare {
     const rightResults: ValueResults = [valueToValueResult(right)];
 
     if (status) {
-      result.leftSame = leftResults;
-      result.rightSame = rightResults;
+      this.workingResult.leftSame = leftResults;
+      this.workingResult.rightSame = rightResults;
     } else {
-      result.left = leftResults;
-      result.right = rightResults;
+      this.workingResult.left = leftResults;
+      this.workingResult.right = rightResults;
     }
 
     return status;
@@ -140,20 +140,17 @@ export default class Compare {
   // Public methods
   constructor(options?: MinimalConfigOptions) {
     this.compareFunction = this.processOptions(options ?? Compare.defaultOptions);
-    this.comparisonResult = {};
   }
 
   public compare(left: Value, right: Value): Compare {
-    const result: CompareResult = {};
-    const status = this.comparer(left, right, result);
-    if (!this.workingResult) {
-      this.comparisonResult = { ...this.comparisonResult, ...result };
+    if (!this.comparisonResult) {
+      this.comparisonResult = this.workingResult;
     } else {
-      if (status !== undefined) {
-        result.subResult = this.workingResult;
-      }
-      this.workingResult = result;
+      this.workingResult.subResult = {};
+      this.workingResult = this.workingResult.subResult;
     }
+
+    this.comparer(left, right);
 
     return this;
   }
@@ -169,7 +166,7 @@ export default class Compare {
   public recompare(options: MinimalConfigOptions): Compare {
     this.processOptions(options);
 
-    const { leftSame, rightSame, ...rest } = this.comparisonResult;
+    const { leftSame, rightSame, ...rest } = this.comparisonResult || {};
 
     if (!leftSame || !rightSame) {
       return this;
@@ -189,7 +186,7 @@ export default class Compare {
   } 
 
   public get result(): Readonly<CompareResult> {
-    return this.comparisonResult;
+    return this.comparisonResult || {};
   }
 
   public get config(): Readonly<Config> {
@@ -209,6 +206,14 @@ export default class Compare {
   }
 
   private updateSubResult(result: CompareResult) {
+    if (!this.comparisonResult) {
+      throw new Error('Internal error: no comparison result');
+    }
+
     this.comparisonResult.subResult = mergeCompareResults(this.comparisonResult.subResult || {}, result);
+  }
+
+  public get subResult(): Readonly<CompareResult> | undefined {
+    return this.result.subResult;
   }
 }
