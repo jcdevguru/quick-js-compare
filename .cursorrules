@@ -1,62 +1,75 @@
-# .cursorrules
+# Cursor Rules
 
-# General TypeScript Code Style
-typescript:
-  - "Use interfaces over types for consistency and extendability."
-  - "Avoid using 'any'; strive for strong typing wherever possible."
-  - "Declare variable types explicitly (avoid implicit 'any')."
-  - "Enable strict mode in tsconfig.json."
+## Directions for Cursor
 
-# Naming conventions
-naming:
-  classes: "Use PascalCase for classes and interfaces."
-  variables: "Use camelCase for variable and function names."
-  files: "Use kebab-case for filenames."
-  folders: "Use lowercase with dashes for directories."
+- Look for special instructions here.
+- Updates to this section override any instructions previously written in this section.
 
-# Structure and Organization
-structuring:
-  files: 
-    - "Group related content: components, interfaces, helper functions, and tests."
-    - "Ensure each file has a clear purpose (e.g., Utilities, Comparison Logic)."
-  exports:
-    - "Favor named exports for functions and constants."
+## Project: quick-js-compare
 
-# Performance and Optimization
-performance:
-  - "Optimize function performance by dynamically generating them based on options."
-  - "Leverage modularization to avoid redundancy."
-  - "Utilize tree-shaking to ensure unused code is not included in the final bundle."
+### Purpose
+Provide a simple means of comparing values in JavaScript.
 
-# Error Handling and Validation
-error_handling:
-  - "Use early returns for error conditions to prevent deeply nested logic."
-  - "Implement comprehensive error logging and user-friendly error messages."
+### Administration
+- **Name:** quick-js-compare
+- **Purpose:** provide a simple means of comparing
+- **Type:** utility library
+- **Source control**: git
+- **Distribution**: GitHub, npm
+- **Documentation**: README.md file at root of project
 
-# Testing
-testing:
-  - "Use Jest for all testing requirements."
-  - "Follow Arrange-Act-Assert pattern for writing tests."
-  - "Ensure coverage for all public functions, focusing on the main object comparison logic."
+### General TypeScript Code Style
+- Use interfaces over types for consistency and extendability
+- Avoid using 'any'; strive for strong typing wherever possible
+- Declare variable types explicitly (avoid implicit 'any')
+- Enable strict mode in tsconfig.json
 
-# Specific Instructions for Comparison Logic
-comparison_logic:
-  - "Design main Comparison class to manage comparison logic dynamically."
+### Naming Conventions
+- **Classes:** Use PascalCase for classes and interfaces
+- **Variables:** Use camelCase for variable and function names
+- **Files:** Use kebab-case for filenames
+- **Folders:** Use lowercase with dashes for directories
 
-# Configuration and Options Management
-configurations:
-  - "Base dynamic function generation on configuration options specified in README.md."
+## Structure and Organization
 
-# Documentation
-documentation:
-  - "Comment your code extensively, especially the dynamically generated parts."
-  - "Ensure all public methods include JSDoc comments detailing their purpose and parameters."
+### Source files
 
-# Continuous Integration
-ci:
-  - "Integrate with CI/CD to automate testing and ensure code quality."
-  - "Utilize linter rules to maintain consistent code style across the team."
+- Source files are under top-level folder 'src'
+- Group related content in folders
+- Ensure each file has a clear purpose (e.g., Utilities, Comparison Logic)
 
-# GUI/CLI
-cli:
-  - "Consider adding a command-line interface for configuration management."
+### Exports
+- Favor named exports for functions and constants
+
+### Performance and Optimization
+- Leverage modularization to avoid redundancy
+- Use tree-shaking to ensure unused code is not included in the final bundle
+
+### Error Handling and Validation
+- Use early returns for error conditions to prevent deeply nested logic
+- Implement comprehensive error logging and user-friendly error messages
+
+### Testing
+- Use Jest for all testing requirements
+- Though technically supported everywhere, tests should be placed under folder src/__tests__
+- Tests are maintained under logical and physical arrangements specified in src/__tests__/README.md.
+- Shared methods should be used for tests where possible and are kept under directory src/__tests__/util
+- Follow Arrange-Act-Assert pattern for writing tests
+- Ensure coverage for all public functions, focusing on the main object comparison logic
+
+### Specific Instructions for Comparison Logic
+- Design main comparison class to manage comparison logic dynamically
+
+### Configuration and Options Management
+- Base dynamic function generation on configuration options specified in README.md
+
+### Documentation
+- Comment your code extensively, especially the dynamically generated parts
+- Ensure all public methods include JSDoc comments detailing their purpose and parameters
+
+### Continuous Integration
+- Integrate with CI/CD to automate testing and ensure code quality
+- Utilize linter rules to maintain consistent code style across the team
+
+### GUI/CLI
+- Consider adding a command-line interface for configuration management
