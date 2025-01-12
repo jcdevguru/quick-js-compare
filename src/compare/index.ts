@@ -156,9 +156,21 @@ export default class Compare {
   }
 
   public addCompare(left: Value, right: Value): Compare {
+    if (!this.comparisonResult) {
+      return this.compare(left, right);
+    }
+
     const c = new Compare(this.configOptions);
     const resultToAdd = c.compare(left, right).result;
-    mergeCompareResults(this.comparisonResult, resultToAdd);
+    this.comparisonResult = mergeCompareResults(this.comparisonResult, resultToAdd);
+
+    return this;
+  }
+
+  public addSubCompare(left: Value, right: Value): Compare {
+    const c = new Compare(this.configOptions);
+    const resultToAdd = c.compare(left, right).result;
+    this.updateSubResult(resultToAdd);
 
     return this;
   }
