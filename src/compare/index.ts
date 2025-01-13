@@ -186,6 +186,8 @@ export default class Compare {
 
     // Reset
     this.comparisonResult = rest;
+    this.workingResult = this.comparisonResult;
+    this.comparisonResult.subResult = undefined;
 
     this.refSets.left = new WeakSet<Reference>();
     this.refSets.right = new WeakSet<Reference>();
@@ -198,7 +200,11 @@ export default class Compare {
   } 
 
   public get result(): Readonly<CompareResult> {
-    return this.comparisonResult || {};
+    if (!this.comparisonResult) {
+      throw new Error('usage error: no result available');
+    }
+
+    return this.comparisonResult;
   }
 
   public get config(): Readonly<Config> {
