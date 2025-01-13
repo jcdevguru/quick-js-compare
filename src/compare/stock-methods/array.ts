@@ -1,14 +1,23 @@
-import { actualType, type ArrayObject } from '@lib/types';
-import type { CompareResult, ComparisonStatus, ValueResults } from '@compare/types';
+
 import type Compare from '@compare';
-import { valueToValueResult } from '@compare/util';
+
+import { 
+  type ArrayObject, 
+  actualType,
+} from '@lib/types';
+
+import type {
+  CompareResult, ComparisonStatus
+} from '@compare/types';
+
+import {
+  valueToArrayValueResult,
+  sliceValuesToValueResults,
+} from './util';
 
 export const sizeOnly = (left: ArrayObject, right: ArrayObject): ComparisonStatus => {
   return left.length === right.length;
 }
-
-const sliceValuesToValueResults = (values: ArrayObject, start: number): ValueResults => 
-  values.slice(start).map((value, i) => valueToValueResult(value, { index: start + i }));
 
 export const strict = (
   left: ArrayObject, right: ArrayObject,
@@ -21,14 +30,14 @@ export const strict = (
   if (minLength === 0) {
     if (left.length > 0) {
       updateSubResult({
-        left: left.map((value, i) => valueToValueResult(value, { index: i })),
+        left: left.map((value, i) => valueToArrayValueResult(value, i)),
         right: [],
       });
       status = false;
     } else if (right.length > 0) {
       updateSubResult({
         left: [],
-        right: right.map((value, i) => valueToValueResult(value, { index: i })),
+        right: right.map((value, i) => valueToArrayValueResult(value, i)),
       });
       status = false;
     } else {
@@ -46,16 +55,16 @@ export const strict = (
     
     if (leftValue === rightValue) {
       updateSubResult({
-        leftSame: [valueToValueResult(leftValue, { index: i })],
-        rightSame: [valueToValueResult(rightValue, { index: i })],
+        leftSame: [valueToArrayValueResult(leftValue, i)],
+        rightSame: [valueToArrayValueResult(rightValue, i)],
       });
       continue;
     }
 
     if (actualType(leftValue) !== actualType(rightValue)) {
       updateSubResult({
-        left: [valueToValueResult(leftValue, { index: i })],
-        right: [valueToValueResult(rightValue, { index: i })],
+        left: [valueToArrayValueResult(leftValue, i)],
+        right: [valueToArrayValueResult(rightValue, i)],
       });
       continue;
     }
