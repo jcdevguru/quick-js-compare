@@ -1,6 +1,6 @@
 import { mergeCompareResults, valueToValueResult } from '@compare/util';
 import type { CompareResult, ValueResults } from '@compare/types';
-import { expectValueInArray } from './util';
+import { expectValueInResultArray } from './util';
 import type { Value } from '@lib/types';
 
 // TODO: Add separate test file for valueToValueResult that runs before this one
@@ -72,8 +72,8 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.left).toEqual(expectValueInArray(sourceValues.left));
-    expect(targetResult.right).toEqual(expectValueInArray(targetValues.right));
+    expect(targetResult.left).toEqual(expectValueInResultArray(sourceValues.left));
+    expect(targetResult.right).toEqual(expectValueInResultArray(targetValues.right));
     expect(targetResult.subResult!.right?.map(r => r.value))
       .toEqual([...testValues.nested.target.right, ...testValues.nested.source.right]);
   });
@@ -94,8 +94,8 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.left).toEqual(expectValueInArray(single.left));
-    expect(targetResult.right).toEqual(expectValueInArray(single.right));
+    expect(targetResult.left).toEqual(expectValueInResultArray(single.left));
+    expect(targetResult.right).toEqual(expectValueInResultArray(single.right));
   });
 
   test('creates subResult if missing in target', () => {
@@ -120,8 +120,8 @@ describe('mergeCompareResults', () => {
 
     mergeCompareResults(targetResult, sourceResult);
 
-    expect(targetResult.left).toEqual(expectValueInArray(values.initial));
-    expect(targetResult.subResult?.left).toEqual(expectValueInArray(values.subResult.left));
-    expect(targetResult.subResult?.right).toEqual(expectValueInArray(values.subResult.right));
+    expect(targetResult.left).toEqual(expectValueInResultArray(values.initial));
+    expect(targetResult.subResult?.left).toEqual(expectValueInResultArray(values.subResult.left));
+    expect(targetResult.subResult?.right).toEqual(expectValueInResultArray(values.subResult.right));
   });
-}); 
+});

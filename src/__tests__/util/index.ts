@@ -4,9 +4,10 @@ import Compare from '@compare';
 import type { CompareResult, ComparisonStatus } from '@compare/types';
 
 export type TestValues = Partial<{
-  sameValues: Array<Value>;
-  leftValues: Array<Value>;
-  rightValues: Array<Value>;
+  same: Array<Value>;
+  left: Array<Value>;
+  right: Array<Value>;
+  subResult?: TestValues;
 }>;
 
 export const compareTestLabel = (testName: string, options?: MinimalConfigOptions) => {
@@ -20,18 +21,39 @@ export const compareTestLabel = (testName: string, options?: MinimalConfigOption
   return `${testName} (compare options: ${optionString})`;
 };
 
-export const expectValueInObject = (value: Value) => 
+export const expectValueInResultObject = (value: Value) => 
   expect.objectContaining({ value });
 
-export const expectValueInArray = (values: Array<Value>) => 
-  expect.arrayContaining(values.map(expectValueInObject));
+export const expectValueInResultArray = (values: Array<Value>) => 
+  expect.arrayContaining(values.map(expectValueInResultObject));
+
+export const expectValueInResult = (value: Value) => 
+  Array.isArray(value) ? expectValueInResultArray(value) : expectValueInResultObject(value);
+
+const processSubResult = (expectedSubResult: TestValues) => {
+  const expectedResult: CompareResult = {};
+  if (expectedSubResult.same) {
+    expectedResult.leftSame = expectValueInResult(expectedSubResult.same);
+    expectedResult.rightSame = expectValueInResult(expectedSubResult.same);
+  }
+  if (expectedSubResult.left) {
+    expectedResult.left = expectValueInResultArray(expectedSubResult.left);
+  }
+  if (expectedSubResult.right) {
+    expectedResult.right = expectValueInResultArray(expectedSubResult.right);
+  }
+  if (expectedSubResult.subResult) {
+    expectedResult.subResult = processSubResult(expectedSubResult.subResult);
+  }
+  return expectedResult;
+}
 
 export const verifyCompare = (
   left: Value, 
   right: Value, 
   options: MinimalConfigOptions,
   expectedStatus: ComparisonStatus,
-  subResultValues?: TestValues
+  expectedSubResult?: TestValues
 ) => {
   const c = new Compare(options);
   const result = c.compare(left, right).result;
@@ -40,26 +62,19 @@ export const verifyCompare = (
   
   switch (expectedStatus) {
     case true:
-      expectedResult.leftSame = [expectValueInObject(left)];
-      expectedResult.rightSame = [expectValueInObject(right)];
+      expectedResult.leftSame = [expectValueInResultObject(left)];
+      expectedResult.rightSame = [expectValueInResultObject(right)];
       break;
 
     case false: {
-      expectedResult.left = [expectValueInObject(left)];
-      expectedResult.right = [expectValueInObject(right)];
+      expectedResult.left = [expectValueInResultObject(left)];
+      expectedResult.right = [expectValueInResultObject(right)];
       break;
     }
   }
-  if (subResultValues) {
-    expectedResult.subResult = {
-      ...(subResultValues.leftValues && { left: expectValueInArray(subResultValues.leftValues) }),
-      ...(subResultValues.rightValues && { right: expectValueInArray(subResultValues.rightValues) }),
-      ...(subResultValues.sameValues && {
-        leftSame: expectValueInArray(subResultValues.sameValues),
-        rightSame: expectValueInArray(subResultValues.sameValues)
-      })
-    }
-  };
+  if (expectedSubResult) {
+    expectedResult.subResult = processSubResult(expectedSubResult);
+  }
 
   expect(result).toEqual(expectedResult);
 };

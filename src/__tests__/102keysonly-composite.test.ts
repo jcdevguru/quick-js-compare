@@ -13,9 +13,9 @@ describe('set comparisons', () => {
       options,
       false,
       {
-        sameValues: [1, 2],
-        leftValues: [3],
-        rightValues: [4]
+        same: [1, 2],
+        left: [3],
+        right: [4]
       }
     );
   });
@@ -27,7 +27,7 @@ describe('set comparisons', () => {
       options,
       true,
       {
-        sameValues: [1, 2, 3]
+        same: [1, 2, 3]
       }
     );
   });
@@ -49,9 +49,9 @@ describe('map comparisons', () => {
       options,
       false,
       {
-        sameValues: ['a', 'b'],
-        leftValues: ['c'],
-        rightValues: ['d']
+        same: ['a', 'b'],
+        left: ['c'],
+        right: ['d']
       }
     );
   });
@@ -65,7 +65,7 @@ describe('map comparisons', () => {
       options,
       true,
       {
-        sameValues: ['a', 'b']
+        same: ['a', 'b']
       }
     );
   });

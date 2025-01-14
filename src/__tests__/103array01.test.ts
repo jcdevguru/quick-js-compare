@@ -1,5 +1,5 @@
 import type { MinimalConfigOptions } from '@lib/option';
-import type { ArrayObject } from '@lib/types';
+import type { ArrayObject, Value } from '@lib/types';
 import { verifyCompare, compareTestLabel } from '@test/util';
 
 describe('array comparisons (strict)', () => {
@@ -7,7 +7,7 @@ describe('array comparisons (strict)', () => {
 
   test(compareTestLabel('empty arrays', options), () => {
     verifyCompare([], [], options, true, {
-      sameValues: []
+      same: []
     });
   });
 
@@ -15,8 +15,8 @@ describe('array comparisons (strict)', () => {
     const left: ArrayObject = [];
     const right: ArrayObject = [1, 2, 3];
     verifyCompare(left, right, options, false, {
-      leftValues: left,
-      rightValues: right
+      left: left,
+      right: right
     });
   });
 
@@ -24,7 +24,7 @@ describe('array comparisons (strict)', () => {
     const left: ArrayObject = [1, 2, 3];
     const right: ArrayObject = [...left];
     verifyCompare(left, right, options, true, {
-      sameValues: left
+      same: left
     });
   });
 
@@ -34,9 +34,9 @@ describe('array comparisons (strict)', () => {
     const right: Array<number|string> = [...testValues];
     right[1] = `${right[1]}`;
     verifyCompare(left, right, options, false, {
-      sameValues: [testValues[0], testValues[2]],
-      leftValues: [left[1]],
-      rightValues: [right[1]]
+      same: [testValues[0], testValues[2]],
+      left: [left[1]],
+      right: [right[1]]
     });
   });
 
@@ -45,9 +45,9 @@ describe('array comparisons (strict)', () => {
     const left = [...testValues, 4];
     const right = [...testValues];
     verifyCompare(left, right, options, false, {
-      sameValues: testValues,
-      leftValues: [left[3]],
-      rightValues: []
+      same: testValues,
+      left: [left[3]],
+      right: []
     });
   });
 
@@ -57,9 +57,21 @@ describe('array comparisons (strict)', () => {
     const right = [...testValues];
     right[1] = 5;
     verifyCompare(left, right, options, false, {
-      sameValues: [testValues[0], testValues[2]],
-      leftValues: [left[1]],
-      rightValues: [right[1]]
+      same: [testValues[0], testValues[2]],
+      left: [left[1]],
+      right: [right[1]]
+    });
+  });
+
+  test.skip(compareTestLabel('arrays with nested arrays', options), () => {
+    const nestedArray: ArrayObject = [2, 3];
+    const left: ArrayObject = [nestedArray, 4];
+    const right: ArrayObject = [nestedArray, 4];
+    verifyCompare(left, right, options, true, {
+      same: left,
+      subResult: {
+        same: left[1] as Value[],
+      }
     });
   });
 }); 
