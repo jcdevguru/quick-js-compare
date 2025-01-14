@@ -4,6 +4,7 @@ import type Compare from '@compare';
 import { 
   type ArrayObject, 
   actualType,
+  isScalar,
 } from '@lib/types';
 
 import type {
@@ -53,7 +54,7 @@ export const strict = (
     const leftValue = left[i];
     const rightValue = right[i];
     
-    if (leftValue === rightValue) {
+    if (leftValue === rightValue && isScalar(leftValue)) {
       updateSubResult({
         leftSame: [valueToArrayValueResult(leftValue, i)],
         rightSame: [valueToArrayValueResult(rightValue, i)],
