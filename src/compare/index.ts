@@ -111,10 +111,7 @@ export default class Compare {
       if (isCompositeType(leftType) !== isCompositeType(rightType)) {
         status = false;
       } else if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
-        status = left === right || undefined;
-        if (!status) {
-          status = this.compareFunction(left, right, this);
-        }
+        status = this.compareFunction(left, right, this);
       }
     }
 
@@ -143,14 +140,19 @@ export default class Compare {
   }
 
   public compare(left: Value, right: Value): Compare {
+    const parentResult = this.workingResult;
     if (!this.comparisonResult) {
       this.comparisonResult = this.workingResult;
     } else {
-      this.workingResult.subResult = {};
+      if (!this.workingResult.subResult) {
+        this.workingResult.subResult = {};
+      }
       this.workingResult = this.workingResult.subResult;
     }
 
     this.comparer(left, right);
+
+    this.workingResult = parentResult;
 
     return this;
   }
