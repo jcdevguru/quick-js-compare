@@ -7,20 +7,13 @@ import {
   isReference,
 } from '@lib/types';
 
+import { OptionError } from '@lib/error';
+
 import {
   type MinimalConfigOptions,
   type Config,
   validateMinimalConfigOptions,
 } from '@lib/option';
-
-import {
-  compareConfigToMethodConfig,
-  defaultCompareConfigOptions,
-  optionAliasToConfigOptions
-} from '@compare/option';
-
-import { createStockCompareFunction } from '@compare/stock-methods';
-import { OptionError } from '@lib/error';
 
 import {
   type ComparisonResult,
@@ -33,10 +26,19 @@ import {
 import {
   type CompareConfig,
   type CompareOptions,
+  type CompareMethodConfig,
   isMinimalCompareConfigOptions,
   isCompareOptionAlias,
   isCompareConfigOptions,
 } from './types/config';
+
+import {
+  compareConfigToMethodConfig,
+  defaultCompareConfigOptions,
+  optionAliasToConfigOptions
+} from '@compare/option';
+
+import { stockComparer } from '@compare/stock-methods';
 
 import {
   valueToValueResult,
@@ -72,6 +74,13 @@ export default class Compare {
   private configOptions!: MinimalConfigOptions;
   private configuration!: Config;
 
+  // Convert any passed options to configuration
+  // If options are a compare function, return it
+  // Otherwise:
+  // - If options are a compare option alias or minimal config options, 
+  //   convert them to full compare config options
+  // - Convert the compare config options to a method config
+  // - Return a function based on stock methods
   private processOptions(options: MinimalConfigOptions): CompareFunction {
     if (!validateMinimalConfigOptions(options)) {
       throw new OptionError('Invalid options');
@@ -95,9 +104,12 @@ export default class Compare {
       // If it does, it's an internal error
       throw new Error('Internal error: unhandled compare option');
     }
-
-    return createStockCompareFunction(result => this.updateSubResult(result));
-  }
+    
+    // Now configuration is complete, based on options passed in and
+    // stock methods as default.  Use the main stock comparison method
+    // to compare values.
+    return stockComparer;
+  };
 
   private comparer = (left: Value, right: Value): ComparisonStatus => {
     let status: ComparisonStatus = undefined;
@@ -225,15 +237,4 @@ export default class Compare {
     return this.configOptions.compare;
   }
 
-  private updateSubResult(result: CompareResult) {
-    if (!this.comparisonResult) {
-      throw new Error('Internal error: no comparison result');
-    }
-
-    this.comparisonResult.subResult = mergeCompareResults(this.comparisonResult.subResult || {}, result);
-  }
-
-  public get subResult(): Readonly<CompareResult> | undefined {
-    return this.result.subResult;
-  }
 }

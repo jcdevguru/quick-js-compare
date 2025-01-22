@@ -24,11 +24,6 @@ import * as SetMethods from './set';
 import * as ArrayMethods from './array';
 import * as MapMethods from './map';
 
-export type StockSubResultSetter = (result: CompareResult) => void;
-export interface StockCompareFunction<T extends Value = Value> {
-  (left: T, right: T, instance: Compare, updateSubResult: StockSubResultSetter): ComparisonStatus;
-}
-
 const matchTypes = (left: unknown, right: unknown): boolean => actualType(left) === actualType(right);
 // Method 'exact' might never be called due to strict equality check in Compare.comparer
 const exact = (left: Value, right: Value) => left === right;
@@ -102,23 +97,24 @@ export const compareTokenToStockMethodMap: StockCompareConfig = {
 // - If types don't match, or no specific compare method for the type exists,
 //   we use the default compare method for objects
 
-const selectComparisonMethod = (left: Value, right: Value, config: CompareMethodConfig): StockCompareFunction => {
+export const stockComparer = (left: Value, right: Value, instance: Compare): ComparisonStatus => {
+  let stockMethod: CompareFunction;
+  const config = instance.compareConfig as CompareMethodConfig;
   const leftType = actualType(left);
-  let selectedMethod: CompareFunction | undefined;
 
   if (isScalarType(leftType)) {
-    selectedMethod = config.compareScalarMethod;
+    stockMethod = config.compareScalarMethod;
   } else if (leftType === actualType(right)) {
-    selectedMethod = config[`compare${leftType}Method` as CompareMethodConfigKey];
+    stockMethod = config[`compare${leftType}Method` as CompareMethodConfigKey];
   } else {
-    selectedMethod = config.compareObjectMethod;
+    stockMethod = config.compareObjectMethod;
   }
   
-  return selectedMethod;
+  return stockMethod(left, right, instance);
 };
 
-export const createStockCompareFunction = (updateSubResult: StockSubResultSetter): CompareFunction => 
+export const createStockCompareFunction = (updateSubResult: DetailSetter): CompareFunction => 
   (left: Value, right: Value, instance: Compare): ComparisonStatus => {
-    const method = selectComparisonMethod(left, right, instance.compareConfig as CompareMethodConfig);
+    const method = stockComparer(left, right, instance.compareConfig as CompareMethodConfig);
     return method(left, right, instance, updateSubResult);
   };
