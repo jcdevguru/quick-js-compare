@@ -6,7 +6,7 @@ import type {
   SetObject
 } from '@lib/types';
 
-import type { CompareResult, ComparisonStatus, ValueResults } from '@compare/types';
+import type { ComparisonResult, ComparisonStatus, ValueResults } from '@compare/types';
 
 import { valueToValueResult } from '@compare/util';
 import { type StockSubResultSetter } from '.';

@@ -1,7 +1,7 @@
 import type { MinimalConfigOptions } from '@lib/option';
 import type { Value } from '@lib/types';
 import Compare from '@compare';
-import type { CompareResult, ComparisonStatus } from '@compare/types';
+import type { ComparisonResult, ComparisonStatus } from '@compare/types';
 
 export type TestValues = Partial<{
   same: Array<Value>;
@@ -31,7 +31,7 @@ export const expectValueInResult = (value: Value) =>
   Array.isArray(value) ? expectValueInResultArray(value) : expectValueInResultObject(value);
 
 const processSubResult = (expectedSubResult: TestValues) => {
-  const expectedResult: CompareResult = {};
+  const expectedResult: ComparisonResult = {};
   if (expectedSubResult.same) {
     expectedResult.leftSame = expectValueInResult(expectedSubResult.same);
     expectedResult.rightSame = expectValueInResult(expectedSubResult.same);
@@ -58,7 +58,7 @@ export const verifyCompare = (
   const c = new Compare(options);
   const result = c.compare(left, right).result;
 
-  const expectedResult: CompareResult = {};
+  const expectedResult: ComparisonResult = {};
   
   switch (expectedStatus) {
     case true:

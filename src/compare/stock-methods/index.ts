@@ -8,7 +8,7 @@ import {
 } from '@lib/types';
 
 import type {
-  CompareResult,
+  ComparisonResult,
   CompareFunction,
   ComparisonStatus,
 } from '@compare/types';

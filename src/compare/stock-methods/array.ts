@@ -8,7 +8,7 @@ import {
 } from '@lib/types';
 
 import type {
-  CompareResult, ComparisonStatus
+  ComparisonResult, ComparisonStatus
 } from '@compare/types';
 
 import {
@@ -23,7 +23,7 @@ export const sizeOnly = (left: ArrayObject, right: ArrayObject): ComparisonStatu
 export const strict = (
   left: ArrayObject, right: ArrayObject,
   instance: Compare,
-  updateSubResult: (result: CompareResult) => void
+  updateSubResult: (result: ComparisonResult) => void
 ): ComparisonStatus => {
   const minLength = Math.min(left.length, right.length);
   let status: ComparisonStatus = true;

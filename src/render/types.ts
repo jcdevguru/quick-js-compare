@@ -1,9 +1,9 @@
-import type { CompareResult } from '@compare/types';
+import type { ComparisonResult } from '@compare/types';
 import type { AtLeastOne } from '@lib/types';
 import { validateMinimalObject } from '@lib/util';
 import type Compare from '@compare';
 export interface RenderFunction {
-  (result: CompareResult, instance: Compare): unknown;
+  (result: ComparisonResult, instance: Compare): unknown;
 }
 
 // Types for render option object

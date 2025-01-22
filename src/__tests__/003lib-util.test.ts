@@ -1,5 +1,5 @@
 import { mergeCompareResults, valueToValueResult } from '@compare/util';
-import type { CompareResult, ValueResults } from '@compare/types';
+import type { ComparisonResult, ValueResults } from '@compare/types';
 import { expectValueInResultArray } from './util';
 import type { Value } from '@lib/types';
 
@@ -30,12 +30,12 @@ describe('mergeCompareResults', () => {
   };
 
   test('merges top-level results', () => {
-    const targetResult: CompareResult = {
+    const targetResult: ComparisonResult = {
       left: createValueResults(testValues.target.left),
       right: createValueResults(testValues.target.right)
     };
     
-    const sourceResult: CompareResult = {
+    const sourceResult: ComparisonResult = {
       left: createValueResults(testValues.source.left),
       right: createValueResults(testValues.source.right)
     };
@@ -54,7 +54,7 @@ describe('mergeCompareResults', () => {
       right: ['a']
     };
 
-    const targetResult: CompareResult = {
+    const targetResult: ComparisonResult = {
       left: createValueResults(sourceValues.left),
       subResult: {
         left: createValueResults(testValues.nested.target.left),
@@ -62,7 +62,7 @@ describe('mergeCompareResults', () => {
       }
     };
 
-    const sourceResult: CompareResult = {
+    const sourceResult: ComparisonResult = {
       right: createValueResults(targetValues.right),
       subResult: {
         left: createValueResults(testValues.nested.source.left),
@@ -84,11 +84,11 @@ describe('mergeCompareResults', () => {
       right: ['a']
     };
 
-    const targetResult: CompareResult = {
+    const targetResult: ComparisonResult = {
       left: createValueResults(single.left)
     };
 
-    const sourceResult: CompareResult = {
+    const sourceResult: ComparisonResult = {
       right: createValueResults(single.right)
     };
 
@@ -107,11 +107,11 @@ describe('mergeCompareResults', () => {
       }
     };
 
-    const targetResult: CompareResult = {
+    const targetResult: ComparisonResult = {
       left: createValueResults(values.initial)
     };
 
-    const sourceResult: CompareResult = {
+    const sourceResult: ComparisonResult = {
       subResult: {
         left: createValueResults(values.subResult.left),
         right: createValueResults(values.subResult.right)

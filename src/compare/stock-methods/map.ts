@@ -1,5 +1,5 @@
 import type { MapObject, ObjectKey } from '@lib/types';
-import type { CompareResult, ComparisonStatus, ValueResults } from '@compare/types';
+import type { ComparisonResult, ComparisonStatus, ValueResults } from '@compare/types';
 import { commonSetElements } from '@lib/util';
 import { valueToValueResult } from '@compare/util';
 import type Compare from '@compare';
@@ -22,7 +22,7 @@ export const keysOnly = (left: MapObject, right: MapObject, instance: Compare, u
   const sameKeySet = commonSetElements(leftKeys, rightKeys, true) as Set<ObjectKey>;
   const sameKeys = Array.from(sameKeySet).map(key => valueToValueResult(key)) as ValueResults;
 
-  const subResult: CompareResult = {};  
+  const subResult: ComparisonResult = {};  
 
   if (sameKeys.length > 0) {
     subResult.leftSame = sameKeys;

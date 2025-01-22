@@ -23,7 +23,7 @@ import { createStockCompareFunction } from '@compare/stock-methods';
 import { OptionError } from '@lib/error';
 
 import {
-  type CompareResult,
+  type ComparisonResult,
   type CompareFunction,
   type ComparisonStatus,
   type ValueResults,
@@ -64,8 +64,8 @@ export default class Compare {
     right: new WeakSet<Reference>(),
   };
 
-  private comparisonResult: CompareResult | undefined;
-  private workingResult: CompareResult = {};
+  private comparisonResult: ComparisonResult | undefined;
+  private workingResult: ComparisonResult = {};
 
   private compareFunction: CompareFunction;
 
@@ -201,7 +201,7 @@ export default class Compare {
     return this;
   } 
 
-  public get result(): Readonly<CompareResult> {
+  public get result(): Readonly<ComparisonResult> {
     if (!this.comparisonResult) {
       throw new Error('usage error: no result available');
     }
