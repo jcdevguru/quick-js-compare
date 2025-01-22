@@ -18,6 +18,21 @@ export type NonEmptyArray<T> = [T, ...T[]];
 export const isNonEmptyArray = <T>(v: unknown): v is NonEmptyArray<T> => 
   Array.isArray(v) && v.length > 0;
 
+// Generic type for empty object
+export type EmptyObject = Record<string, never>;
+
+export const isEmptyObject = (v: unknown): v is EmptyObject => {
+  if (v && typeof v === 'object') {
+    for (const key in v) {
+      if (Object.prototype.hasOwnProperty.call(v, key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+};
+
 // -------------------------------------------------------------------------------------------------
 // Types we support for comparison and rendering
 
