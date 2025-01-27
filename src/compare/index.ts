@@ -19,14 +19,13 @@ import {
   type ComparisonResult,
   type CompareFunction,
   type ComparisonStatus,
-  type ValueResults,
+  type ComparisonDetails,
   isCompareFunction,
 } from './types';
 
 import {
   type CompareConfig,
   type CompareOptions,
-  type CompareMethodConfig,
   isMinimalCompareConfigOptions,
   isCompareOptionAlias,
   isCompareConfigOptions,
@@ -39,11 +38,6 @@ import {
 } from '@compare/option';
 
 import { stockComparer } from '@compare/stock-methods';
-
-import {
-  valueToValueResult,
-  mergeCompareResults,
-} from './util';
 
 const nonCircular = (value: Value, refSet: WeakSet<Reference>): boolean => {
   let rc = true;
@@ -66,15 +60,13 @@ export default class Compare {
     right: new WeakSet<Reference>(),
   };
 
-  private comparisonResult: ComparisonResult | undefined;
-  private workingResult: ComparisonResult = {};
-
   private compareFunction: CompareFunction;
 
   private configOptions!: MinimalConfigOptions;
   private configuration!: Config;
 
-  // Convert any passed options to configuration
+  private workingResult: ComparisonResult = {};
+  // Convert any passed options to configuration  
   // If options are a compare function, return it
   // Otherwise:
   // - If options are a compare option alias or minimal config options, 
@@ -111,8 +103,9 @@ export default class Compare {
     return stockComparer;
   };
 
-  private comparer = (left: Value, right: Value): ComparisonStatus => {
+  private comparer = (left: Value, right: Value): ComparisonResult => {
     let status: ComparisonStatus = undefined;
+    let exactMatch: boolean = false;
 
     const leftType = actualType(left);
     const rightType = actualType(right);
@@ -120,30 +113,33 @@ export default class Compare {
     // types of operands must be supported
     // and circular references must be detected and ignored
     if (isSupportedType(leftType) && isSupportedType(rightType)) {
-      if (isCompositeType(leftType) !== isCompositeType(rightType)) {
-        status = false;
-      } else if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
-        status = this.compareFunction(left, right, this);
+      exactMatch = left === right;
+      if (!exactMatch) {
+        if (isCompositeType(leftType) !== isCompositeType(rightType)) {
+          status = false;
+        } else if (nonCircular(left, this.refSets.left) && nonCircular(right, this.refSets.right)) {
+          // compare function expected to call setComparisonDetails as needed
+          status = this.compareFunction(left, right, this);
+        }
+      } else {
+        status = true;
       }
     }
 
-    if (status === undefined) {
-      // If we don't have a status, we don't have a result
-      return status;
+    let result: ComparisonResult | undefined;
+    switch (status) {
+      case undefined: 
+        result = {};
+        break;
+      case true: 
+        result = exactMatch ? { same: left } : { leftSame: left, rightSame: right };
+        break;
+      case false:
+      default:
+        result = { left, right };
     }
 
-    const leftResults: ValueResults = [valueToValueResult(left)];
-    const rightResults: ValueResults = [valueToValueResult(right)];
-
-    if (status) {
-      this.workingResult.leftSame = leftResults;
-      this.workingResult.rightSame = rightResults;
-    } else {
-      this.workingResult.left = leftResults;
-      this.workingResult.right = rightResults;
-    }
-
-    return status;
+    return result;
   }
 
   // Public methods
@@ -152,39 +148,27 @@ export default class Compare {
   }
 
   public compare(left: Value, right: Value): Compare {
-    const parentResult = this.workingResult;
-    if (!this.comparisonResult) {
-      this.comparisonResult = this.workingResult;
-    } else {
-      if (!this.workingResult.subResult) {
-        this.workingResult.subResult = {};
-      }
-      this.workingResult = this.workingResult.subResult;
-    }
-
     this.comparer(left, right);
-
-    this.workingResult = parentResult;
-
     return this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public addCompare(left: Value, right: Value): Compare {
-    if (!this.comparisonResult) {
-      return this.compare(left, right);
-    }
+    // if (!this.comparisonResult) {
+    //   return this.compare(left, right);
+    // }
 
-    const c = new Compare(this.configOptions);
-    const resultToAdd = c.compare(left, right).result;
-    this.comparisonResult = mergeCompareResults(this.comparisonResult, resultToAdd);
+    // const c = new Compare(this.configOptions);
+    // const resultToAdd = c.compare(left, right).result;
+    // this.comparisonResult = mergeCompareResults(this.comparisonResult, resultToAdd);
 
     return this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public addSubCompare(left: Value, right: Value): Compare {
-    const c = new Compare(this.configOptions);
-    const resultToAdd = c.compare(left, right).result;
-    this.updateSubResult(resultToAdd);
+    // const c = new Compare(this.configOptions);
+    // const resultToAdd = c.compare(left, right).result;
 
     return this;
   }
@@ -192,34 +176,15 @@ export default class Compare {
   public recompare(options: MinimalConfigOptions): Compare {
     this.processOptions(options);
 
-    const { leftSame, rightSame, ...rest } = this.comparisonResult || {};
-
-    if (!leftSame || !rightSame) {
-      return this;
-    }
-
-    // Reset
-    this.comparisonResult = rest;
-    this.workingResult = this.comparisonResult;
-    this.comparisonResult.subResult = undefined;
-
     this.refSets.left = new WeakSet<Reference>();
     this.refSets.right = new WeakSet<Reference>();
 
-    for (let i = 0; i < leftSame.length; i++) {
-      this.addCompare(leftSame[i].value, rightSame[i].value);
-    }
+    // for (let i = 0; i < leftSame.length; i++) {
+    //   this.addCompare(leftSame[i].value, rightSame[i].value);
+    // }
   
     return this;
   } 
-
-  public get result(): Readonly<ComparisonResult> {
-    if (!this.comparisonResult) {
-      throw new Error('usage error: no result available');
-    }
-
-    return this.comparisonResult;
-  }
 
   public get config(): Readonly<Config> {
     return this.configuration;
@@ -227,6 +192,10 @@ export default class Compare {
 
   public get compareConfig(): CompareConfig {
     return this.configuration.compare;
+  }
+
+  public setComparisonDetails(comparisonDetails: ComparisonDetails) {
+    this.workingResult.details = comparisonDetails;
   }
 
   public get options(): Readonly<MinimalConfigOptions> {

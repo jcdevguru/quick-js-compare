@@ -1,11 +1,11 @@
 export type KeyPrefix = 'L' | 'R';
-export type ValueKey = string;
+export type MapKey = string;
 
-export class ValueKeyManager {
+export class MapKeyManager {
   private static levelDelim = '$';
   private static indexDelim = '_';
 
-  private levelIndexes: number[] = [];
+  private levelIndexes: number[] = [0];
   private currentLevel: number = 0;
   private pfx: KeyPrefix;
 
@@ -15,24 +15,38 @@ export class ValueKeyManager {
 
   public pushLevel(): number {
     this.currentLevel += 1;
-    if (this.levelIndexes.length < this.currentLevel) {
+    if (this.levelIndexes.length <= this.currentLevel) {
       this.levelIndexes.push(0);
     }
     return this.currentLevel;
   }
 
   public popLevel(): number {
-    this.currentLevel -= 1;
+    if (this.currentLevel > 0) {
+      this.currentLevel -= 1;
+    }
     return this.currentLevel; 
   }
 
-  public incLevelIndex(): number {
+  public incIndex(): number {
     this.levelIndexes[this.currentLevel] += 1;
     return this.levelIndexes[this.currentLevel];
   }
   
+  private composeKey(keyBody: string) : string {
+    return `${this.pfx}${MapKeyManager.levelDelim}${keyBody}`;
+  }
+
+  private composeKeyBody(stopIndex: number): string {
+    return `${this.levelIndexes.slice(1, stopIndex).join(MapKeyManager.indexDelim)}`;
+  }
+
   public getKey(): string {
-    return `${this.pfx}${ValueKeyManager.levelDelim}${this.levelIndexes.slice(0, this.currentLevel).join(ValueKeyManager.indexDelim)}`;
+    return this.composeKey(this.composeKeyBody(this.currentLevel+1));
+  }
+
+  public getParentKey(): string {
+    return this.composeKey(this.composeKeyBody(this.currentLevel));
   }
 
   public pushKey(): string {
@@ -46,18 +60,15 @@ export class ValueKeyManager {
   }
 
   public nextKey(): string {
-    this.incLevelIndex();
+    this.incIndex();
     return this.getKey();
   }
 
-  public getCurrentLevelIndex(): number {
+  public getCurrentIndex(): number {
     return this.levelIndexes[this.currentLevel];
   }
 
   public getCurrentLevel(): number {
-    return this.getCurrentLevelIndex();
+    return this.currentLevel;
   }
 }
-
-export const LeftValueKey = () => new ValueKeyManager('L');
-export const RightValueKey = () => new ValueKeyManager('R');

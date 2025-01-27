@@ -8,7 +8,6 @@ import {
 } from '@lib/types';
 
 import type {
-  ComparisonResult,
   CompareFunction,
   ComparisonStatus,
 } from '@compare/types';
@@ -112,9 +111,3 @@ export const stockComparer = (left: Value, right: Value, instance: Compare): Com
   
   return stockMethod(left, right, instance);
 };
-
-export const createStockCompareFunction = (updateSubResult: DetailSetter): CompareFunction => 
-  (left: Value, right: Value, instance: Compare): ComparisonStatus => {
-    const method = stockComparer(left, right, instance.compareConfig as CompareMethodConfig);
-    return method(left, right, instance, updateSubResult);
-  };

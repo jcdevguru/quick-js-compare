@@ -15,6 +15,19 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>
 // Generic type for non-empty array
 export type NonEmptyArray<T> = [T, ...T[]];
 
+export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+export type Either<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+
+// Recursive type for multiple XOR
+export type Xor<T extends unknown[]> = T extends [infer First, infer Second, ...infer Rest]
+  ? Rest extends []
+    ? Either<First, Second>
+    : Either<First, Xor<[Second, ...Rest]>>
+  : never;
+
+// Example usage:
+// type ThreeWayXor = XorMultiple<[{a: string}, {b: number}, {c: boolean}]>;
+
 export const isNonEmptyArray = <T>(v: unknown): v is NonEmptyArray<T> => 
   Array.isArray(v) && v.length > 0;
 

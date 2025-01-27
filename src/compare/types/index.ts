@@ -1,15 +1,19 @@
 import type Compare from '@compare';
-import { type Value, type ObjectKey, type AtLeastOne, type EmptyObject, isEmptyObject } from '@lib/types';
+import {
+  type Value,
+  type ObjectKey,
+  type AtLeastOne,
+  type EmptyObject,
+  type Xor,
+  isEmptyObject
+} from '@lib/types';
 
 export type ComparisonStatus = boolean | undefined;
-
-export type ComparisonDetailSetter = () => ComparisonDetails;
 
 export type CompareFunction<T extends Value = Value> = (
   left: T,
   right: T,
-  instance: Compare,
-  detailSetter?: ComparisonDetailSetter
+  instance: Compare
 ) => ComparisonStatus;
 
 export const isCompareFunction = (v: unknown): v is CompareFunction =>
@@ -19,14 +23,22 @@ export type ValueResults = Array<ValueResult>;
 
 export const comparisonKeys = ['left', 'leftSame', 'rightSame', 'right', 'same'] as const;
 export const comparisonDetailKeys = ['leftOnly', ...comparisonKeys, 'rightOnly'] as const;
+export const comparisonValueKeys = comparisonDetailKeys;
 export const comparisonResultKeys = [...comparisonKeys, 'details'] as const;
 
+let comparisonKeySet: Set<ComparisonKey>;
 let comparisonResultKeySet: Set<ComparisonResultKey>;
 let comparisonDetailKeySet: Set<ComparisonDetailKey>;
 
 export type ComparisonKey = typeof comparisonKeys[number];
 export type ComparisonDetailKey = typeof comparisonDetailKeys[number];
 export type ComparisonResultKey = typeof comparisonResultKeys[number];
+export type ComparisonValueKey = typeof comparisonValueKeys[number];
+
+export const isComparisonKey = (key: unknown): key is ComparisonKey => {
+  comparisonKeySet = comparisonKeySet ?? new Set<ComparisonKey>(comparisonKeys);
+  return comparisonKeySet.has(key as ComparisonKey);
+};
 
 export const isComparisonDetailKey = (key: unknown): key is ComparisonDetailKey => {
   comparisonDetailKeySet = comparisonDetailKeySet ?? new Set<ComparisonDetailKey>(comparisonDetailKeys);
@@ -34,7 +46,7 @@ export const isComparisonDetailKey = (key: unknown): key is ComparisonDetailKey 
 };
 
 export const isComparisonResultKey = (key: unknown): key is ComparisonResultKey => {
-  comparisonDetailKeySet = comparisonDetailKeySet ?? new Set<ComparisonDetailKey>(comparisonDetailKeys);
+  comparisonResultKeySet = comparisonResultKeySet ?? new Set<ComparisonResultKey>(comparisonResultKeys);
   return comparisonResultKeySet.has(key as ComparisonResultKey);
 };
 
@@ -48,39 +60,37 @@ export type ValueResult = {
   value: Value,
 } & ValueResultProps;
 
-type ComparisonBase = { 
-  left: ValueResult,
-  right: ValueResult
-} | {
-  same: ValueResult
-} | {
-  leftSame: ValueResult,
-  rightSame: ValueResult
-};
-
 type IComparisonDetail = AtLeastOne<{
-  leftOnly: ValueResults,
-  rightOnly: ValueResults
+  leftOnly: Array<Value>,
+  rightOnly: Array<Value>
 }>;
 
 interface IComparisonEquivalentDetail extends Omit<IComparisonDetail, never> {
-  leftSame: ValueResults,
-  rightSame: ValueResults
+  leftSame: Array<Value>,
+  rightSame: Array<Value>
 }
 
 interface IComparisonDifferingDetail extends Omit<IComparisonDetail, never> {
-  left: ValueResults,
-  right: ValueResults
+  left: Array<Value>,
+  right: Array<Value>
 }
 
 interface IComparisonSameDetail extends Omit<IComparisonDetail, never> {
-  same: ValueResults
+  same: Array<Value>
 }
 
-type ComparisonDetails = IComparisonDetail | IComparisonEquivalentDetail | IComparisonSameDetail | IComparisonDifferingDetail;
+export type ComparisonDetails = IComparisonDetail | IComparisonEquivalentDetail | IComparisonSameDetail | IComparisonDifferingDetail;
 
 export type ComparisonResult = EmptyObject | 
-  (ComparisonBase & { details?: ComparisonDetails });
+  (Xor<[{ 
+      left: Value,
+      right: Value
+    }, {
+      same: Value
+    }, {
+      leftSame: Value,
+      rightSame: Value
+    }]>  & { details?: ComparisonDetails });
 
 export const isValueResult = (v: unknown): v is ValueResult => 
   typeof v === 'object' && v !== null && 
