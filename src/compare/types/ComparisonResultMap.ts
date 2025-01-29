@@ -1,8 +1,10 @@
 import { isEmptyObject } from '@lib/types';
 import {
+  type ComparisonDetails,
   type ComparisonResult,
   type ComparisonValueKey,
   type ValueResult,
+  comparisonDetailKeys,
   comparisonKeys,
 } from '.';
 
@@ -80,7 +82,7 @@ export class ComparisonResultMap {
     this.rightParentMapKey = this.rightKeyManager.getKey(); // R$
   }
 
-  public incrementResultLevel() {
+  public pushResultLevel() {
     if (!this.currentResult) {
       throw new Error('Internal error: current result is null');
     }
@@ -90,37 +92,79 @@ export class ComparisonResultMap {
     this.currentResult = null;
   }
 
+  public popResultLevel() {
+    if (this.resultLevel === 0) {
+      throw new Error('Internal error: result level is 0');
+    }
+    this.resultLevel--;
+    this.leftKeyManager.popLevel();
+    this.rightKeyManager.popLevel();
+    this.currentResult = this.resultList[this.resultLevel];
+  }
+
   public updateResult(key: MapKey, resultMap: Partial<ResultMap>) {
-    this.currentResult = mergeResultToCompositeMap(this.currentResult || {}, key, resultMap);
-    if (this.resultLevel === this.resultList.length) {
+    if (!this.currentResult) {
+      // just starting
+      this.currentResult = {};
       this.resultList.push(this.currentResult);
     }
+    this.currentResult = mergeResultToCompositeMap(this.currentResult, key, resultMap);
   }
 
   public addResult(comparisonResult: ComparisonResult) {
     if (isEmptyObject(comparisonResult)) {
       return;
     }
-    comparisonKeys.forEach((key) => {
-      if (!(key in comparisonResult)) {
-        return;
+    // Cycle through 'same', 'leftSame', 'rightSame', ...
+    for (const comparisonResultKey of comparisonKeys) {
+      if (!(comparisonResultKey in comparisonResult)) {
+        continue;
       }
 
-      const resultKey = ComparisonResultMap.resultKeyMap[key];
-      if (!resultKey) {
-        throw new Error(`Internal error: result key not found for ${key}`);
-      }
-      const valueKeys = ComparisonResultMap.valueKeyMap[key];
-      if (!valueKeys) {
-        throw new Error(`Internal error: value key not found for ${key}`);
-      }
-      const valueResult = valueToValueResult(comparisonResult[key]);
-      valueKeys.forEach((valueKey) => {
-        const mapKey = this.valueKeyManagerMap[valueKey].nextKey();
+      const comparedValue = comparisonResult[comparisonResultKey];
+      
+      // e.g., 'left' -> 'd', 'same' -> 's'
+      const mappedResultKey = ComparisonResultMap.resultKeyMap[comparisonResultKey];
+
+      // e.g., 'left' -> ['L'], 'same' -> ['L', 'R']
+      const leftRightKeys = ComparisonResultMap.valueKeyMap[comparisonResultKey];
+
+      const valueResult = valueToValueResult(comparedValue);
+      for (const leftRightKey of leftRightKeys) {
+        const mapKey = this.valueKeyManagerMap[leftRightKey].nextKey();
         this.valueResultDictionary[mapKey] = valueResult;
-        this.updateResult(this.valueKeyManagerMap[valueKey].getParentKey(), { [resultKey]: [mapKey] });
-      });
-    });
+        this.updateResult(this.valueKeyManagerMap[leftRightKey].getParentKey(), { [mappedResultKey]: [mapKey] });
+      };
+    }
+  }
+
+  public addResultDetail(comparisonDetails: ComparisonDetails) {
+    // Cycle through 'leftOnly', 'rightOnly', 'same', 'leftSame', 'rightSame', ...
+    for (const comparisonDetailKey of comparisonDetailKeys) {
+      if (!(comparisonDetailKey in comparisonDetails)) {
+        continue;
+      }
+
+      const comparedValues = comparisonDetails[comparisonDetailKey as keyof ComparisonDetails];
+      if (!comparedValues) {
+        continue;
+      }
+
+      // e.g., 'left' -> 'd', 'same' -> 's'   
+      const mappedResultKey = ComparisonResultMap.resultKeyMap[comparisonDetailKey];
+
+      // e.g., 'left' -> ['L'], 'same' -> ['L', 'R']
+      const leftRightKeys = ComparisonResultMap.valueKeyMap[comparisonDetailKey];
+
+      const valueResults = comparedValues.map(v => valueToValueResult(v));
+      for (const leftRightKey of leftRightKeys) {
+        for (const valueResult of valueResults) {
+          const mapKey = this.valueKeyManagerMap[leftRightKey].nextKey();
+          this.valueResultDictionary[mapKey] = valueResult;
+          this.updateResult(this.valueKeyManagerMap[leftRightKey].getParentKey(), { [mappedResultKey]: [mapKey] });
+        }
+      }
+    }
   }
 
   get resultMaps() {
