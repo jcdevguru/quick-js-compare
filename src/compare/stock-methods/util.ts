@@ -1,8 +1,3 @@
-  import type {
-    ValueResult,
-    ValueResults
-  } from "@compare/types";
-  
   import {
     type ArrayObject, 
     type Composite, 
@@ -12,8 +7,6 @@
     type Value,
     actualType
 } from "../../lib/types";
-
-import { valueToValueResult } from "@compare/util";
 
 type TypeHandler = Partial<{
   values: (v: Composite) => Iterable<Value>;
@@ -58,10 +51,3 @@ export const keys = (v: Composite): Iterable<Value> => {
   
   return handler(v);
 }
-
-export const valueToArrayValueResult = (value: Value, index: number): ValueResult => 
-  valueToValueResult(value, { index });
-
-export const sliceValuesToValueResults = (values: ArrayObject, start: number): ValueResults => 
-  values.slice(start).map((value, i) => valueToArrayValueResult(value, start + i));
-
