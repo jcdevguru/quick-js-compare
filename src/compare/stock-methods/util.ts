@@ -24,7 +24,7 @@ const typeHandlers: Record<string, TypeHandler> = {
   Array: {
     values: (v) => v as ArrayObject,
   },
-  RecordObject: {
+  Object: {
     keys: (v) => Object.keys(v as RecordObject),
     values: (v) => Object.values(v as RecordObject),
   },

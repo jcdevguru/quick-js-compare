@@ -86,15 +86,13 @@ export type SupportedType = ScalarType | CompositeType;
 // Note 't' in argument should be return from 'actualType()', not value of 'typeof'
 
 export const actualType = (v: unknown): string => {
-  let t = typeof v as string;
+  const t = typeof v as string;
   if (t === 'object') {
     if (!v) {
       return 'null';
     }
     const n = v?.constructor.name;
-    if (n === 'Object') {
-      t = 'RecordObject';
-    } else if (isSupportedType(n)) {
+    if (isSupportedType(n)) {
       return n;
     }
   }
