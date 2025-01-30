@@ -60,29 +60,36 @@ export type ValueResult = {
   value: Value,
 } & ValueResultProps;
 
-type IComparisonDetail = AtLeastOne<{
-  leftOnly: Array<Value>,
-  rightOnly: Array<Value>
-}>;
-
-interface IComparisonEquivalentDetail extends Omit<IComparisonDetail, never> {
-  leftSame: Array<Value>,
-  rightSame: Array<Value>
-}
-
-interface IComparisonDifferingDetail extends Omit<IComparisonDetail, never> {
+type DetailDiffering = {
   left: Array<Value>,
   right: Array<Value>
 }
 
-interface IComparisonSameDetail extends Omit<IComparisonDetail, never> {
-  same: Array<Value>
+type DetailSame = Xor<[
+  { same: Array<Value> },
+  {
+    leftSame: Array<Value>
+    rightSame: Array<Value>
+    same?: Array<Value>
+  }
+]>;
+
+type DetailOnly = {
+  leftOnly: Array<Value>
+  rightOnly: Array<Value>
 }
 
-export type ComparisonDetails = IComparisonDetail | IComparisonEquivalentDetail | IComparisonSameDetail | IComparisonDifferingDetail;
+export type ComparisonDetails = Xor<[
+  Xor<[
+    DetailSame,
+    DetailDiffering,
+    DetailSame & DetailDiffering
+  ]> & Partial<DetailOnly>,
+  AtLeastOne<DetailOnly>
+]>;
 
-export type ComparisonResult = EmptyObject | 
-  (Xor<[{ 
+export type ComparisonResult = EmptyObject | (
+  Xor<[{ 
       left: Value,
       right: Value
     }, {
@@ -90,7 +97,8 @@ export type ComparisonResult = EmptyObject |
     }, {
       leftSame: Value,
       rightSame: Value
-    }]>  & { details?: ComparisonDetails });
+    }]> & { details?: ComparisonDetails }
+  );
 
 export const isValueResult = (v: unknown): v is ValueResult => 
   typeof v === 'object' && v !== null && 
