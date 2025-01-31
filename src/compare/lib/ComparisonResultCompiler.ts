@@ -6,7 +6,7 @@ import {
   type ValueResult,
   comparisonDetailKeys,
   comparisonKeys,
-} from '.';
+} from '@compare/types';
 
 import {
   type KeyPrefix,
@@ -14,7 +14,7 @@ import {
   MapKeyManager,
 } from './MapKey';
 
-import { valueToValueResult } from '@compare/util';
+import { valueToValueResult } from '@compare/lib/util';
 
 const resultKeys = ['d', 's', 'o'] as const;
 export type ResultKey = typeof resultKeys[number];
@@ -23,23 +23,29 @@ export type ResultMap = Partial<{
   [key in ResultKey]: Array<MapKey>;
 }>;
 
-export type CompositeMap = Record<MapKey, ResultMap>;
+export type ResultMapByParent = Record<MapKey, ResultMap>;
+export type ValueResultDictionary = Record<MapKey, ValueResult>;
+
+export type CompiledResults = {
+  resultMaps: Array<ResultMapByParent>;
+  valueResultDictionary: ValueResultDictionary;
+};
 
 const mergeToResultMap = (destResultMap: ResultMap, srcResultMap: ResultMap): ResultMap => 
   resultKeys.reduce((acc, key) => ({
     ...acc, [key]: [...(destResultMap[key] || []), ...(srcResultMap[key] || [])]
   }), destResultMap || {});
 
-const mergeResultToCompositeMap = (destCompositeMap: CompositeMap, key: MapKey, srcResultMap: ResultMap): CompositeMap => ({
+const mergeResultToCompositeMap = (destCompositeMap: ResultMapByParent, key: MapKey, srcResultMap: ResultMap): ResultMapByParent => ({
   ...destCompositeMap,
   [key]: mergeToResultMap(destCompositeMap[key], srcResultMap)
 });
 
-export class ComparisonResultMap {
-  private resultList: Array<CompositeMap>;
-  private valueResultDictionary: Record<MapKey, ValueResult>;
+export class ComparisonResultCompiler {
+  private resultMaps: Array<ResultMapByParent>;
+  private valueResultDictionary: ValueResultDictionary;
 
-  private currentResult: CompositeMap | null = null;
+  private currentResult: ResultMapByParent | null = null;
   private resultLevel: number = 0;
   private valueKeyManagerMap: Record<KeyPrefix, MapKeyManager>;
 
@@ -70,7 +76,7 @@ export class ComparisonResultMap {
   };
 
   constructor() {
-    this.resultList = [];
+    this.resultMaps = [];
     this.valueResultDictionary = {};
     this.leftKeyManager = new MapKeyManager('L');
     this.rightKeyManager = new MapKeyManager('R');
@@ -99,14 +105,14 @@ export class ComparisonResultMap {
     this.resultLevel--;
     this.leftKeyManager.popLevel();
     this.rightKeyManager.popLevel();
-    this.currentResult = this.resultList[this.resultLevel];
+    this.currentResult = this.resultMaps[this.resultLevel];
   }
 
   public updateResult(key: MapKey, resultMap: Partial<ResultMap>) {
     if (!this.currentResult) {
       // just starting
       this.currentResult = {};
-      this.resultList.push(this.currentResult);
+      this.resultMaps.push(this.currentResult);
     }
     this.currentResult = mergeResultToCompositeMap(this.currentResult, key, resultMap);
   }
@@ -124,10 +130,10 @@ export class ComparisonResultMap {
       const comparedValue = comparisonResult[comparisonResultKey];
       
       // e.g., 'left' -> 'd', 'same' -> 's'
-      const mappedResultKey = ComparisonResultMap.resultKeyMap[comparisonResultKey];
+      const mappedResultKey = ComparisonResultCompiler.resultKeyMap[comparisonResultKey];
 
       // e.g., 'left' -> ['L'], 'same' -> ['L', 'R']
-      const leftRightKeys = ComparisonResultMap.valueKeyMap[comparisonResultKey];
+      const leftRightKeys = ComparisonResultCompiler.valueKeyMap[comparisonResultKey];
 
       const valueResult = valueToValueResult(comparedValue);
       for (const leftRightKey of leftRightKeys) {
@@ -151,10 +157,10 @@ export class ComparisonResultMap {
       }
 
       // e.g., 'left' -> 'd', 'same' -> 's'   
-      const mappedResultKey = ComparisonResultMap.resultKeyMap[comparisonDetailKey];
+      const mappedResultKey = ComparisonResultCompiler.resultKeyMap[comparisonDetailKey];
 
       // e.g., 'left' -> ['L'], 'same' -> ['L', 'R']
-      const leftRightKeys = ComparisonResultMap.valueKeyMap[comparisonDetailKey];
+      const leftRightKeys = ComparisonResultCompiler.valueKeyMap[comparisonDetailKey];
 
       const valueResults = comparedValues.map(v => valueToValueResult(v));
       for (const leftRightKey of leftRightKeys) {
@@ -167,7 +173,10 @@ export class ComparisonResultMap {
     }
   }
 
-  get resultMaps() {
-    return this.resultList;
+  get result() : CompiledResults {
+    return { 
+      resultMaps: this.resultMaps,
+      valueResultDictionary: this.valueResultDictionary
+    };
   }
 }
