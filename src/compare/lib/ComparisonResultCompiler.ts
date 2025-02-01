@@ -17,7 +17,13 @@ import {
 import { valueToValueResult } from '@compare/lib/util';
 
 const resultKeys = ['d', 's', 'o'] as const;
+let resultKeySet = new Set(resultKeys);
 export type ResultKey = typeof resultKeys[number];
+
+const isResultKey = (key: unknown): key is ResultKey => {
+  resultKeySet = resultKeySet || new Set(resultKeys);
+  return resultKeySet.has(key as ResultKey);
+};
 
 export type ResultMap = Partial<{
   [key in ResultKey]: Array<MapKey>;
@@ -31,15 +37,21 @@ export type CompiledResults = {
   valueResultDictionary: ValueResultDictionary;
 };
 
-const mergeToResultMap = (destResultMap: ResultMap, srcResultMap: ResultMap): ResultMap => 
-  resultKeys.reduce((acc, key) => ({
-    ...acc, [key]: [...(destResultMap[key] || []), ...(srcResultMap[key] || [])]
-  }), destResultMap || {});
+const mergeToResultMap = (destResultMap: ResultMap, srcResultMap: ResultMap): ResultMap => {
+  for (const key in srcResultMap) {
+    if (!isResultKey(key) || !Array.isArray(srcResultMap[key])) {
+      continue;
+    }
+    const srcResults = srcResultMap[key];
+    destResultMap[key] = [...(destResultMap[key] || []), ...srcResults]
+  }
+  return destResultMap;
+};
 
-const mergeResultToCompositeMap = (destCompositeMap: ResultMapByParent, key: MapKey, srcResultMap: ResultMap): ResultMapByParent => ({
-  ...destCompositeMap,
-  [key]: mergeToResultMap(destCompositeMap[key], srcResultMap)
-});
+const mergeResultToCompositeMap = (destCompositeMap: ResultMapByParent, key: MapKey, srcResultMap: ResultMap): ResultMapByParent => {
+  destCompositeMap[key] = mergeToResultMap(destCompositeMap[key] || {}, srcResultMap);
+  return destCompositeMap;
+};
 
 export class ComparisonResultCompiler {
   private resultMaps: Array<ResultMapByParent>;
@@ -114,7 +126,7 @@ export class ComparisonResultCompiler {
       this.currentResult = {};
       this.resultMaps.push(this.currentResult);
     }
-    this.currentResult = mergeResultToCompositeMap(this.currentResult, key, resultMap);
+    mergeResultToCompositeMap(this.currentResult, key, resultMap);
   }
 
   public addResult(comparisonResult: ComparisonResult) {

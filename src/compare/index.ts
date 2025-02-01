@@ -21,7 +21,7 @@ import {
   type ComparisonStatus,
   type ComparisonDetails,
   isCompareFunction,
-} from './types';
+} from '@compare/types';
 
 import {
   type CompareConfig,
@@ -29,13 +29,18 @@ import {
   isMinimalCompareConfigOptions,
   isCompareOptionAlias,
   isCompareConfigOptions,
-} from './types/config';
+} from '@compare/types/config';
 
 import {
   compareConfigToMethodConfig,
   defaultCompareConfigOptions,
   optionAliasToConfigOptions
 } from '@compare/option';
+
+import {
+  ComparisonResultCompiler,
+  type CompiledResults
+} from '@compare/lib/ComparisonResultCompiler';
 
 import { stockComparer } from '@compare/stock-methods';
 
@@ -66,6 +71,8 @@ export default class Compare {
   private configuration!: Config;
 
   private workingResult: ComparisonResult = {};
+  private resultCompiler = new ComparisonResultCompiler();
+
   // Convert any passed options to configuration  
   // If options are a compare function, return it
   // Otherwise:
@@ -148,7 +155,19 @@ export default class Compare {
   }
 
   public compare(left: Value, right: Value): Compare {
-    this.comparer(left, right);
+    const comparisonIsNested = this.resultCompiler.result.resultMaps.length > 0;
+
+    if (comparisonIsNested) {
+      this.resultCompiler.pushResultLevel();
+    }
+
+    const result = this.comparer(left, right);
+    this.resultCompiler.addResult(result);
+
+    if (comparisonIsNested) {
+      this.resultCompiler.popResultLevel();
+    }
+
     return this;
   }
 
@@ -206,4 +225,7 @@ export default class Compare {
     return this.configOptions.compare;
   }
 
+  public get result(): Readonly<CompiledResults> {
+    return this.resultCompiler.result;
+  }
 }

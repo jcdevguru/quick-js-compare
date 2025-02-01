@@ -6,7 +6,7 @@ import { verifyCompare, compareTestLabel } from '@test/util';
 describe('compare - basic operations', () => {
   const exactOptions: MinimalConfigOptions = { compare: 'Exact' };
 
-  test(compareTestLabel('exact matching strings', exactOptions), () => {
+  test.only(compareTestLabel('exact matching strings', exactOptions), () => {
     verifyCompare('test-string1', 'test-string1', exactOptions, true);
   });
 

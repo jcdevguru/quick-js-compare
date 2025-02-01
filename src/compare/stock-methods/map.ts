@@ -1,7 +1,9 @@
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { MapObject, ObjectKey } from '@lib/types';
 import type { ComparisonResult, ComparisonStatus, ValueResults } from '@compare/types';
 import { commonSetElements } from '@lib/util';
-import { valueToValueResult } from '@compare/util';
+import { valueToValueResult } from '@compare/lib/util';
 import type Compare from '@compare';
 
 export const sizeOnly = (left: MapObject, right: MapObject): ComparisonStatus => {
@@ -21,20 +23,20 @@ export const keysOnly = (left: MapObject, right: MapObject, instance: Compare): 
   const sameKeySet = commonSetElements(leftKeys, rightKeys, true) as Set<ObjectKey>;
   const sameKeys = Array.from(sameKeySet).map(key => valueToValueResult(key)) as ValueResults;
 
-  const subResult: ComparisonResult = {};  
+  // const subResult: ComparisonResult = {};  
 
-  if (sameKeys.length > 0) {
-    subResult.leftSame = sameKeys;
-    subResult.rightSame = sameKeys;
-  }
+  // if (sameKeys.length > 0) {
+  //   subResult.leftSame = sameKeys;
+  //   subResult.rightSame = sameKeys;
+  // }
 
-  if (leftKeys.size === rightKeys.size && !leftKeys.size) {
-    status = true;
-  } else {
-    subResult.left = Array.from(leftKeys).map(key => valueToValueResult(key)) as ValueResults;
-    subResult.right = Array.from(rightKeys).map(key => valueToValueResult(key)) as ValueResults;
-    status = false;
-  }
+  // if (leftKeys.size === rightKeys.size && !leftKeys.size) {
+  //   status = true;
+  // } else {
+  //   subResult.left = Array.from(leftKeys).map(key => valueToValueResult(key)) as ValueResults;
+  //   subResult.right = Array.from(rightKeys).map(key => valueToValueResult(key)) as ValueResults;
+  //   status = false;
+  // }
 
   return status;
 }

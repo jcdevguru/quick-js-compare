@@ -8,12 +8,14 @@ import type {
 
 import type { ComparisonStatus, ValueResults } from '@compare/types';
 
-import { valueToValueResult } from '@compare/util';
+import { valueToValueResult } from '@compare/lib/util';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const strict = (left: SetObject, right: SetObject, instance: Compare): ComparisonStatus => {
   const sameSet = commonSetElements(left, right);
   const leftDiff = Array.from(left).filter(value => !sameSet.has(value)).map(v => valueToValueResult(v)) as ValueResults;
   const rightDiff = Array.from(right).filter(value => !sameSet.has(value)).map(v => valueToValueResult(v)) as ValueResults;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const same = Array.from(sameSet).map(v => valueToValueResult(v)) as ValueResults;
   const comparisonStatus = !leftDiff.length && !rightDiff.length;
 
